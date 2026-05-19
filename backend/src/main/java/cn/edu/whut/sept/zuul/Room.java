@@ -43,6 +43,10 @@ public class Room
     {
         return exits.get(direction);
     }
+
+    public Set<String> getExits() {
+        return exits.keySet();
+    }
 }
 
 
