@@ -81,7 +81,8 @@ export default {
         'outside': { x: 330, y: 200 },
         'pub': { x: 80, y: 200 },
         'lab': { x: 330, y: 380 },
-        'office': { x: 580, y: 380 }
+        'office': { x: 580, y: 380 },
+        'portal': { x: 330, y: 50 }
       }
     };
   },

@@ -30,3 +30,8 @@ export function getHelp() {
 export function look() {
   return axios.get(`${API_BASE_URL}/look`);
 }
+
+// 返回上一个房间（back命令）
+export function goBack() {
+  return axios.post(`${API_BASE_URL}/back`);
+}

@@ -31,6 +31,7 @@
       <!-- 功能按钮 -->
       <div class="buttons">
         <button @click="look" class="btn-look">🔍 查看</button>
+        <button @click="goBack" class="btn-back">↩️ 返回</button>
         <button @click="getHelp" class="btn-help">❓ 帮助</button>
       </div>
     </div>
@@ -42,7 +43,7 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { getMap, getGameStatus, move, look } from '@/api/game';
+import { getMap, getGameStatus, move, look, goBack } from '@/api/game';
 import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
 import GameStatus from '@/components/GameStatus.vue';
@@ -102,7 +103,12 @@ export default {
     async move(direction) {
       try {
         const response = await move(direction);
-        this.displayMessage = response.data.message;
+        // 检查是否发生了传送
+        if (response.data.teleported) {
+          this.displayMessage = `⚠️ 你被传送门传送到了 ${response.data.description}！`;
+        } else {
+          this.displayMessage = response.data.message;
+        }
         this.currentRoomName = response.data.description;
         this.currentRoomId = response.data.roomId;
         this.longDescription = response.data.longDescription;
@@ -110,7 +116,7 @@ export default {
         // 移动后清空物品列表，只有点击查看时才加载
         this.items = [];
         this.showItems = false;
-        this.isError = false;
+        this.isError = response.data.teleported;
       } catch (error) {
         this.displayMessage = '移动错误：' + (error.response?.data?.message || error.message);
         this.isError = true;
@@ -129,6 +135,22 @@ export default {
         this.isError = false;
       } catch (error) {
         this.displayMessage = '查看错误：' + error.message;
+        this.isError = true;
+      }
+    },
+    async goBack() {
+      try {
+        const response = await goBack();
+        this.displayMessage = response.data.message;
+        this.currentRoomName = response.data.description;
+        this.currentRoomId = response.data.roomId;
+        this.longDescription = response.data.longDescription;
+        this.exits = Array.from(response.data.exits);
+        this.items = [];
+        this.showItems = false;
+        this.isError = !response.data.success;
+      } catch (error) {
+        this.displayMessage = '返回错误：' + error.message;
         this.isError = true;
       }
     },
@@ -204,6 +226,14 @@ h1 {
 
 .btn-look:hover {
   background: #388E3C;
+}
+
+.btn-back {
+  background: #9C27B0;
+}
+
+.btn-back:hover {
+  background: #7B1FA2;
 }
 
 .btn-help {

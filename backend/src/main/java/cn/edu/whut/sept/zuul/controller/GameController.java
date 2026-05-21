@@ -61,7 +61,8 @@ public class GameController {
             result.put("roomId", currentRoom.getId());
             result.put("items", getRoomItems(currentRoom));
         } else {
-            currentRoom = nextRoom;
+            game.setCurrentRoom(nextRoom);
+            currentRoom = game.getCurrentRoom();
             result.put("success", true);
             result.put("message", "你走向了" + getZhDirection(direction));
             result.put("description", currentRoom.getZhName());
@@ -70,6 +71,12 @@ public class GameController {
             result.put("exits", currentRoom.getExits());
             result.put("roomId", currentRoom.getId());
             result.put("items", getRoomItems(currentRoom));
+            // 检查是否发生了传送
+            if (game.isJustTeleported()) {
+                result.put("teleported", true);
+                result.put("teleportedFrom", game.getTeleportedFrom());
+                game.resetTeleported();  // 重置传送状态
+            }
         }
 
         return result;
@@ -87,6 +94,39 @@ public class GameController {
         result.put("exits", currentRoom.getExits());
         result.put("roomId", currentRoom.getId());
         result.put("items", getRoomItems(currentRoom));
+        return result;
+    }
+
+    /**
+     * 返回上一个房间（back命令）.
+     */
+    @PostMapping("/back")
+    public Map<String, Object> back() {
+        Map<String, Object> result = new HashMap<>();
+
+        Room backRoom = game.getBackRoom();
+
+        if (backRoom == null) {
+            result.put("success", false);
+            result.put("message", "你无法再回退了，已经在起始点！");
+            result.put("description", currentRoom.getZhName());
+            result.put("descriptionEn", currentRoom.getShortDescription());
+            result.put("longDescription", getZhLongDescription(currentRoom));
+            result.put("exits", currentRoom.getExits());
+            result.put("roomId", currentRoom.getId());
+            result.put("items", getRoomItems(currentRoom));
+        } else {
+            currentRoom = backRoom;
+            result.put("success", true);
+            result.put("message", "你回到了上一个房间");
+            result.put("description", currentRoom.getZhName());
+            result.put("descriptionEn", currentRoom.getShortDescription());
+            result.put("longDescription", getZhLongDescription(currentRoom));
+            result.put("exits", currentRoom.getExits());
+            result.put("roomId", currentRoom.getId());
+            result.put("items", getRoomItems(currentRoom));
+        }
+
         return result;
     }
 

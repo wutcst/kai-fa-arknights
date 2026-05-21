@@ -57,6 +57,7 @@ public class Room
             case "pub": return "校园酒吧";
             case "lab": return "计算机实验室";
             case "office": return "办公室";
+            case "portal": return "传送门";
             default: return id;
         }
     }
