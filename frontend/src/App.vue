@@ -36,7 +36,11 @@
 </template>
 
 <script>
-import { getMap, getGameStatus, move, getHelp } from '@/api/game';
+/**
+ * 游戏主应用组件.
+ * 整合地图、控制和状态显示组件.
+ */
+import { getMap, getGameStatus, move } from '@/api/game';
 import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
 import GameStatus from '@/components/GameStatus.vue';
@@ -103,15 +107,8 @@ export default {
         this.isError = true;
       }
     },
-    async getHelp() {
-      try {
-        const response = await getHelp();
-        this.displayMessage = response.data.message;
-        this.isError = false;
-      } catch (error) {
-        this.displayMessage = '错误：' + error.message;
-        this.isError = true;
-      }
+    getHelp() {
+      window.open('/help.html', '_blank', 'width=600,height=500');
     }
   }
 };

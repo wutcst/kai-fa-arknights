@@ -4,6 +4,9 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 房间数据传输对象.
+ */
 public class RoomDTO {
     private String name;
     private String description;

@@ -3,12 +3,16 @@ package cn.edu.whut.sept.zuul.model;
 import java.util.Set;
 import java.util.HashMap;
 
+/**
+ * 房间实体类.
+ * 表示游戏中的一个地点.
+ */
 public class Room
 {
     private String description;
     private String id;
     private String zhName;
-    private HashMap<String, Room> exits;        // stores exits of this room.
+    private HashMap<String, Room> exits;        // 房间出口
 
     public Room(String description, String id)
     {
@@ -18,6 +22,9 @@ public class Room
         exits = new HashMap<>();
     }
 
+    /**
+     * 根据房间ID获取中文名称.
+     */
     private String getZhNameById(String id) {
         switch(id) {
             case "outside": return "校门口";

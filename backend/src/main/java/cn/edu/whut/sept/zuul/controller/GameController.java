@@ -8,12 +8,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * 游戏 REST API 控制器.
+ * 提供游戏状态、地图、移动等接口.
+ */
 @RestController
 @RequestMapping("/api/game")
 @CrossOrigin(origins = "*")
 public class GameController {
 
-    private Game game;
+    private final Game game;
     private Room currentRoom;
 
     public GameController() {
@@ -21,6 +25,9 @@ public class GameController {
         currentRoom = game.getCurrentRoom();
     }
 
+    /**
+     * 获取当前游戏状态.
+     */
     @GetMapping("/status")
     public Map<String, Object> getStatus() {
         Map<String, Object> result = new HashMap<>();
@@ -32,6 +39,9 @@ public class GameController {
         return result;
     }
 
+    /**
+     * 移动角色到指定方向.
+     */
     @PostMapping("/move")
     public Map<String, Object> move(@RequestBody Map<String, String> request) {
         String direction = request.get("direction");
@@ -61,6 +71,9 @@ public class GameController {
         return result;
     }
 
+    /**
+     * 获取地图数据（所有房间及连接关系）.
+     */
     @GetMapping("/map")
     public Map<String, Object> getMap() {
         Map<String, Object> result = new HashMap<>();
@@ -91,6 +104,9 @@ public class GameController {
         return result;
     }
 
+    /**
+     * 获取帮助信息.
+     */
     @GetMapping("/help")
     public Map<String, Object> getHelp() {
         Map<String, Object> result = new HashMap<>();

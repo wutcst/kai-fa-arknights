@@ -55,6 +55,10 @@
 </template>
 
 <script>
+/**
+ * 游戏地图可视化组件.
+ * 使用 SVG 展示房间及连接关系.
+ */
 export default {
   name: 'GameMap',
   props: {

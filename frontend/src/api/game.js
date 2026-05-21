@@ -1,3 +1,7 @@
+/**
+ * 游戏 API 服务层.
+ * 封装与后端交互的接口.
+ */
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8080/api/game';

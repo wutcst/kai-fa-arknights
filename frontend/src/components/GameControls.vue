@@ -38,6 +38,10 @@
 </template>
 
 <script>
+/**
+ * 游戏方向控制组件.
+ * 提供移动按钮.
+ */
 export default {
   name: 'GameControls',
   props: {

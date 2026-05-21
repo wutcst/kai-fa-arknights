@@ -19,6 +19,10 @@
 </template>
 
 <script>
+/**
+ * 游戏状态显示组件.
+ * 展示当前房间信息、描述和出口.
+ */
 export default {
   name: 'GameStatus',
   props: {

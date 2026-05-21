@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>游戏帮助</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #4CAF50;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h2 {
+      color: #333;
+      margin-top: 25px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #4CAF50;
+    }
+    .instruction {
+      background: #e8f5e9;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+      line-height: 1.8;
+    }
+    .direction {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .direction:last-child { border-bottom: none; }
+    .dir-en {
+      color: #666;
+      font-size: 14px;
+    }
+    .dir-zh {
+      color: #4CAF50;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .tip {
+      background: #fff3e0;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 25px;
+      line-height: 1.6;
+    }
+    .tip strong { color: #ff9800; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📖 游戏帮助</h1>
+
+    <h2>🎮 游戏说明</h2>
+    <div class="instruction">
+      这是一款文字冒险游戏。你需要通过选择不同的方向在各个房间中探索。
+      点击地图上的方向按钮或在下方选择方向来移动角色。
+    </div>
+
+    <h2>🧭 可用方向</h2>
+    <div class="direction-list">
+      <div class="direction">
+        <span class="dir-en">north</span>
+        <span class="dir-zh">北方</span>
+      </div>
+      <div class="direction">
+        <span class="dir-en">south</span>
+        <span class="dir-zh">南方</span>
+      </div>
+      <div class="direction">
+        <span class="dir-en">east</span>
+        <span class="dir-zh">东方</span>
+      </div>
+      <div class="direction">
+        <span class="dir-en">west</span>
+        <span class="dir-zh">西方</span>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>💡 提示：</strong> 地图上绿色高亮的房间是你当前所在的位置。
+      点击方向按钮即可移动到相邻的房间。
+    </div>
+  </div>
+</body>
+</html>
