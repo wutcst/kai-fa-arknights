@@ -1,6 +1,7 @@
 package cn.edu.whut.sept.zuul.controller;
 
 import cn.edu.whut.sept.zuul.model.Room;
+import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.service.Game;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -36,6 +37,7 @@ public class GameController {
         result.put("longDescription", getZhLongDescription(currentRoom));
         result.put("exits", currentRoom.getExits());
         result.put("roomId", currentRoom.getId());
+        result.put("items", getRoomItems(currentRoom));
         return result;
     }
 
@@ -57,6 +59,7 @@ public class GameController {
             result.put("longDescription", getZhLongDescription(currentRoom));
             result.put("exits", currentRoom.getExits());
             result.put("roomId", currentRoom.getId());
+            result.put("items", getRoomItems(currentRoom));
         } else {
             currentRoom = nextRoom;
             result.put("success", true);
@@ -66,8 +69,24 @@ public class GameController {
             result.put("longDescription", getZhLongDescription(currentRoom));
             result.put("exits", currentRoom.getExits());
             result.put("roomId", currentRoom.getId());
+            result.put("items", getRoomItems(currentRoom));
         }
 
+        return result;
+    }
+
+    /**
+     * 查看当前房间信息（look命令）.
+     */
+    @GetMapping("/look")
+    public Map<String, Object> look() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("description", currentRoom.getZhName());
+        result.put("descriptionEn", currentRoom.getShortDescription());
+        result.put("longDescription", getZhLongDescription(currentRoom));
+        result.put("exits", currentRoom.getExits());
+        result.put("roomId", currentRoom.getId());
+        result.put("items", getRoomItems(currentRoom));
         return result;
     }
 
@@ -116,12 +135,7 @@ public class GameController {
     }
 
     private String getZhLongDescription(Room room) {
-        String zhName = room.getZhName();
-        String exits = "出口: ";
-        for (String exit : room.getExits()) {
-            exits += getZhDirection(exit) + " ";
-        }
-        return "你在 " + zhName + "。\n" + exits;
+        return "你在 " + room.getZhName() + "。";
     }
 
     private String getZhDirection(String dir) {
@@ -132,5 +146,22 @@ public class GameController {
             case "west": return "西方";
             default: return dir;
         }
+    }
+
+    /**
+     * 获取房间内的物品列表.
+     */
+    private List<Map<String, Object>> getRoomItems(Room room) {
+        List<Map<String, Object>> items = new ArrayList<>();
+        for (Item item : room.getItems()) {
+            Map<String, Object> itemInfo = new HashMap<>();
+            itemInfo.put("id", item.getId());
+            itemInfo.put("name", item.getName());
+            itemInfo.put("description", item.getDescription());
+            itemInfo.put("weight", item.getWeight());
+            itemInfo.put("value", item.getValue());
+            items.add(itemInfo);
+        }
+        return items;
     }
 }

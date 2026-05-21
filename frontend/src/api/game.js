@@ -25,3 +25,8 @@ export function move(direction) {
 export function getHelp() {
   return axios.get(`${API_BASE_URL}/help`);
 }
+
+// 查看当前房间信息（look命令）
+export function look() {
+  return axios.get(`${API_BASE_URL}/look`);
+}

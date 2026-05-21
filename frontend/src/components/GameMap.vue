@@ -18,8 +18,10 @@
         v-for="room in rooms"
         :key="room.id"
         :transform="`translate(${getRoomPosition(room.id).x}, ${getRoomPosition(room.id).y})`"
-        :class="['room', { active: room.id === currentRoomId }]"
       >
+        <g
+          :class="['room', { active: room.id === currentRoomId }]"
+        >
         <rect
           x="0"
           y="0"
@@ -49,6 +51,7 @@
         >
           {{ room.id }}
         </text>
+        </g>
       </g>
     </svg>
   </div>

@@ -17,6 +17,7 @@
         :currentRoomName="currentRoomName"
         :description="longDescription"
         :exits="exits"
+        :items="showItems ? items : undefined"
         :message="displayMessage"
         :isError="isError"
       />
@@ -27,9 +28,10 @@
         @move="move"
       />
 
-      <!-- 帮助按钮 -->
-      <div class="help">
-        <button @click="getHelp">帮助</button>
+      <!-- 功能按钮 -->
+      <div class="buttons">
+        <button @click="look" class="btn-look">🔍 查看</button>
+        <button @click="getHelp" class="btn-help">❓ 帮助</button>
       </div>
     </div>
   </div>
@@ -40,7 +42,7 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { getMap, getGameStatus, move } from '@/api/game';
+import { getMap, getGameStatus, move, look } from '@/api/game';
 import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
 import GameStatus from '@/components/GameStatus.vue';
@@ -60,6 +62,8 @@ export default {
       currentRoomId: '',
       longDescription: '',
       exits: [],
+      items: [],
+      showItems: false,  // 是否显示物品列表
       rooms: [],
       isError: false
     };
@@ -86,6 +90,8 @@ export default {
         this.currentRoomId = response.data.roomId;
         this.longDescription = response.data.longDescription;
         this.exits = Array.from(response.data.exits);
+        // 不加载物品列表，只有点击查看时才加载
+        this.items = [];
         this.displayMessage = '';
         this.isError = false;
       } catch (error) {
@@ -101,9 +107,28 @@ export default {
         this.currentRoomId = response.data.roomId;
         this.longDescription = response.data.longDescription;
         this.exits = Array.from(response.data.exits);
+        // 移动后清空物品列表，只有点击查看时才加载
+        this.items = [];
+        this.showItems = false;
         this.isError = false;
       } catch (error) {
         this.displayMessage = '移动错误：' + (error.response?.data?.message || error.message);
+        this.isError = true;
+      }
+    },
+    async look() {
+      try {
+        const response = await look();
+        this.currentRoomName = response.data.description;
+        this.currentRoomId = response.data.roomId;
+        this.longDescription = response.data.longDescription;
+        this.exits = Array.from(response.data.exits);
+        this.items = response.data.items || [];
+        this.showItems = true;  // 查看时显示物品列表
+        this.displayMessage = '';
+        this.isError = false;
+      } catch (error) {
+        this.displayMessage = '查看错误：' + error.message;
         this.isError = true;
       }
     },
@@ -156,14 +181,16 @@ h1 {
   color: #c62828;
 }
 
-.help {
+.buttons {
   margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
 }
 
-.help button {
+.buttons button {
   padding: 10px 25px;
   font-size: 14px;
-  background: #2196F3;
   color: white;
   border: none;
   border-radius: 20px;
@@ -171,7 +198,19 @@ h1 {
   transition: background 0.2s;
 }
 
-.help button:hover {
+.btn-look {
+  background: #4CAF50;
+}
+
+.btn-look:hover {
+  background: #388E3C;
+}
+
+.btn-help {
+  background: #2196F3;
+}
+
+.btn-help:hover {
   background: #1976D2;
 }
 </style>

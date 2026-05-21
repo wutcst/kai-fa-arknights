@@ -2,6 +2,8 @@ package cn.edu.whut.sept.zuul.model;
 
 import java.util.Set;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 房间实体类.
@@ -13,6 +15,7 @@ public class Room
     private String id;
     private String zhName;
     private HashMap<String, Room> exits;        // 房间出口
+    private List<Item> items;                   // 房间内的物品
 
     public Room(String description, String id)
     {
@@ -20,6 +23,28 @@ public class Room
         this.id = id;
         this.zhName = getZhNameById(id);
         exits = new HashMap<>();
+        items = new ArrayList<>();
+    }
+
+    /**
+     * 向房间添加物品.
+     */
+    public void addItem(Item item) {
+        items.add(item);
+    }
+
+    /**
+     * 从房间移除物品.
+     */
+    public void removeItem(String itemId) {
+        items.removeIf(item -> item.getId().equals(itemId));
+    }
+
+    /**
+     * 获取房间内的物品列表.
+     */
+    public List<Item> getItems() {
+        return items;
     }
 
     /**
