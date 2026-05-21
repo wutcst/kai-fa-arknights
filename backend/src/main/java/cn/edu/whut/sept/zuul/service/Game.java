@@ -11,17 +11,25 @@
  * @author  Michael Kölling and David J. Barnes
  * @version 1.0
  */
-package cn.edu.whut.sept.zuul;
+package cn.edu.whut.sept.zuul.service;
+
+import cn.edu.whut.sept.zuul.model.Room;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Game
 {
-    private Parser parser;
     private Room currentRoom;
+    private Map<String, Room> rooms;
 
     public Game()
     {
+        rooms = new HashMap<>();
         createRooms();
-        parser = new Parser();
+    }
+
+    public Map<String, Room> getRooms() {
+        return rooms;
     }
 
     private void createRooms()
@@ -29,11 +37,11 @@ public class Game
         Room outside, theater, pub, lab, office;
 
         // create the rooms
-        outside = new Room("outside the main entrance of the university");
-        theater = new Room("in a lecture theater");
-        pub = new Room("in the campus pub");
-        lab = new Room("in a computing lab");
-        office = new Room("in the computing admin office");
+        outside = new Room("outside the main entrance of the university", "outside");
+        theater = new Room("in a lecture theater", "theater");
+        pub = new Room("in the campus pub", "pub");
+        lab = new Room("in a computing lab", "lab");
+        office = new Room("in the computing admin office", "office");
 
         // initialise room exits
         outside.setExit("east", theater);
@@ -49,37 +57,14 @@ public class Game
 
         office.setExit("west", lab);
 
+        // save all rooms
+        rooms.put("outside", outside);
+        rooms.put("theater", theater);
+        rooms.put("pub", pub);
+        rooms.put("lab", lab);
+        rooms.put("office", office);
+
         currentRoom = outside;  // start game outside
-    }
-
-    public void play()
-    {
-        printWelcome();
-
-        // Enter the main command loop.  Here we repeatedly read commands and
-        // execute them until the game is over.
-
-        boolean finished = false;
-        while (! finished) {
-            Command command = parser.getCommand();
-            if(command == null) {
-                System.out.println("I don't understand...");
-            } else {
-                finished = command.execute(this);
-            }
-        }
-
-        System.out.println("Thank you for playing.  Good bye.");
-    }
-
-    private void printWelcome()
-    {
-        System.out.println();
-        System.out.println("Welcome to the World of Zuul!");
-        System.out.println("World of Zuul is a new, incredibly boring adventure game.");
-        System.out.println("Type 'help' if you need help.");
-        System.out.println();
-        System.out.println(currentRoom.getLongDescription());
     }
 
     public Room getCurrentRoom() {

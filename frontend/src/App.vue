@@ -1,72 +1,116 @@
 <template>
   <div id="app">
-    <h1>World of Zuul</h1>
+    <h1>🌍 文字冒险世界</h1>
+
     <div class="game-container">
-      <div class="message">{{ message }}</div>
-      <div class="room-info">
-        <h2>{{ currentRoom }}</h2>
-        <p>{{ longDescription }}</p>
-      </div>
-      <div class="exits">
-        <span>Exits: </span>
-        <button v-for="exit in exits" :key="exit" @click="move(exit)">
-          {{ exit }}
-        </button>
-      </div>
+      <!-- 消息提示 -->
+      <div class="message" :class="{ error: isError }">{{ message }}</div>
+
+      <!-- 地图可视化组件 -->
+      <GameMap
+        :rooms="rooms"
+        :currentRoomId="currentRoomId"
+      />
+
+      <!-- 状态显示组件 -->
+      <GameStatus
+        :currentRoomName="currentRoomName"
+        :description="longDescription"
+        :exits="exits"
+        :message="displayMessage"
+        :isError="isError"
+      />
+
+      <!-- 方向控制组件 -->
+      <GameControls
+        :exits="exits"
+        @move="move"
+      />
+
+      <!-- 帮助按钮 -->
       <div class="help">
-        <button @click="getHelp">Help</button>
+        <button @click="getHelp">帮助</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api/game';
+import { getMap, getGameStatus, move, getHelp } from '@/api/game';
+import GameMap from '@/components/GameMap.vue';
+import GameControls from '@/components/GameControls.vue';
+import GameStatus from '@/components/GameStatus.vue';
 
 export default {
   name: 'App',
+  components: {
+    GameMap,
+    GameControls,
+    GameStatus
+  },
   data() {
     return {
-      message: 'Welcome to the World of Zuul!',
-      currentRoom: '',
+      message: '欢迎来到文字冒险世界！',
+      displayMessage: '',
+      currentRoomName: '',
+      currentRoomId: '',
       longDescription: '',
-      exits: []
+      exits: [],
+      rooms: [],
+      isError: false
     };
   },
   mounted() {
-    this.fetchStatus();
+    this.fetchMap();
   },
   methods: {
+    async fetchMap() {
+      try {
+        const response = await getMap();
+        this.rooms = response.data.rooms;
+        this.currentRoomId = response.data.currentRoomId;
+        this.fetchStatus();
+      } catch (error) {
+        this.message = '错误：无法连接到服务器，请确保后端正在运行！';
+        this.isError = true;
+      }
+    },
     async fetchStatus() {
       try {
-        const response = await axios.get(`${API_URL}/status`);
-        this.currentRoom = response.data.description;
+        const response = await getGameStatus();
+        this.currentRoomName = response.data.description;
+        this.currentRoomId = response.data.roomId;
         this.longDescription = response.data.longDescription;
         this.exits = Array.from(response.data.exits);
-        this.message = '';
+        this.displayMessage = '';
+        this.isError = false;
       } catch (error) {
-        this.message = 'Error: Cannot connect to server. Is backend running?';
+        this.displayMessage = '错误：' + error.message;
+        this.isError = true;
       }
     },
     async move(direction) {
       try {
-        const response = await axios.post(`${API_URL}/move`, { direction });
-        this.message = response.data.message;
-        this.currentRoom = response.data.description;
+        const response = await move(direction);
+        this.displayMessage = response.data.message;
+        this.currentRoomName = response.data.description;
+        this.currentRoomId = response.data.roomId;
         this.longDescription = response.data.longDescription;
         this.exits = Array.from(response.data.exits);
+        this.isError = false;
       } catch (error) {
-        this.message = 'Error moving: ' + error.message;
+        this.displayMessage = '移动错误：' + (error.response?.data?.message || error.message);
+        this.isError = true;
       }
     },
     async getHelp() {
       try {
-        const response = await axios.get(`${API_URL}/help`);
-        this.message = response.data.message;
+        const response = await getHelp();
+        this.displayMessage = response.data.message;
+        this.isError = false;
       } catch (error) {
-        this.message = 'Error: ' + error.message;
+        this.displayMessage = '错误：' + error.message;
+        this.isError = true;
       }
     }
   }
@@ -74,65 +118,63 @@ export default {
 </script>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
-  max-width: 600px;
-  margin: 60px auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+h1 {
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .game-container {
-  border: 2px solid #42b983;
-  border-radius: 10px;
-  padding: 20px;
-  background-color: #f5f5f5;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
 .message {
-  color: #e74c3c;
-  font-weight: bold;
-  min-height: 24px;
-  margin-bottom: 10px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  background: #e8f5e9;
+  color: #2e7d32;
 }
 
-.room-info {
-  margin: 20px 0;
+.message.error {
+  background: #ffebee;
+  color: #c62828;
 }
 
-.exits {
-  margin: 20px 0;
-}
-
-.exits button {
-  margin: 5px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  border-radius: 4px;
-}
-
-.exits button:hover {
-  background-color: #3aa876;
+.help {
+  margin-top: 20px;
 }
 
 .help button {
-  padding: 8px 16px;
+  padding: 10px 25px;
   font-size: 14px;
-  cursor: pointer;
-  background-color: #3498db;
+  background: #2196F3;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .help button:hover {
-  background-color: #2980b9;
+  background: #1976D2;
 }
 </style>
