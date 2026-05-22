@@ -63,35 +63,41 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin: 20px 0;
+  gap: 6px;
+  background: rgba(44, 62, 80, 0.9);
+  padding: 12px 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
 .control-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .direction-btn {
-  padding: 12px 20px;
-  font-size: 16px;
-  border: 2px solid #4CAF50;
-  background: white;
-  color: #333;
+  padding: 10px 16px;
+  font-size: 14px;
+  border: 2px solid #2ecc71;
+  background: rgba(255,255,255,0.1);
+  color: white;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  min-width: 80px;
+  min-width: 65px;
+  font-weight: bold;
 }
 
 .direction-btn:hover:not(:disabled) {
-  background: #4CAF50;
+  background: #2ecc71;
   color: white;
+  transform: scale(1.05);
 }
 
 .direction-btn:disabled {
-  border-color: #ddd;
-  color: #ccc;
+  border-color: #555;
+  color: #666;
   cursor: not-allowed;
+  background: rgba(255,255,255,0.05);
 }
 </style>

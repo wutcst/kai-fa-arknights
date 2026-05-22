@@ -113,7 +113,9 @@ public class Game
                                   rooms.get("pub"), rooms.get("lab"), rooms.get("office")};
             Random random = new Random();
             this.currentRoom = targetRooms[random.nextInt(targetRooms.length)];
-            // 传送后不清除历史记录，而是以新位置为起点继续记录
+            // 传送后清空历史记录，以新位置为起点
+            roomHistory.clear();
+            roomHistory.add(this.currentRoom);
         } else {
             // 普通房间移动，添加到历史记录
             if (!justTeleported) {

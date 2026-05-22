@@ -18,11 +18,6 @@
       </div>
     </div>
 
-    <div class="exits" v-if="exits.length > 0">
-      <p>可用出口: <span v-for="(exit, index) in exits" :key="exit">
-        {{ getZhDirection(exit) }}{{ index < exits.length - 1 ? ' ' : '' }}
-      </span></p>
-    </div>
     <div class="error" v-if="message && isError">
       {{ message }}
     </div>
@@ -52,17 +47,6 @@ export default {
     },
     message: String,
     isError: Boolean
-  },
-  methods: {
-    getZhDirection(dir) {
-      const dirMap = {
-        'north': '北方',
-        'south': '南方',
-        'east': '东方',
-        'west': '西方'
-      };
-      return dirMap[dir] || dir;
-    }
   }
 };
 </script>
@@ -146,11 +130,6 @@ export default {
   margin: 20px 0;
   color: #999;
   font-style: italic;
-}
-
-.exits {
-  margin-top: 15px;
-  color: #888;
 }
 
 .error {

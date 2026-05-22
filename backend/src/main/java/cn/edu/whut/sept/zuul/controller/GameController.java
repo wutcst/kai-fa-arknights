@@ -175,7 +175,7 @@ public class GameController {
     }
 
     private String getZhLongDescription(Room room) {
-        return "你在 " + room.getZhName() + "。";
+        return "";
     }
 
     private String getZhDirection(String dir) {

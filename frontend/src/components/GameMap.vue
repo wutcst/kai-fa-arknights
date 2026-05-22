@@ -1,6 +1,6 @@
 <template>
   <div class="game-map">
-    <svg width="800" height="600" viewBox="0 0 800 600" class="map-svg">
+    <svg viewBox="0 0 1000 700" class="map-svg">
       <!-- 连接线 -->
       <line
         v-for="conn in connections"
@@ -25,29 +25,29 @@
         <rect
           x="0"
           y="0"
-          width="140"
-          height="70"
-          rx="10"
+          width="110"
+          height="55"
+          rx="8"
           :fill="room.id === currentRoomId ? '#4CAF50' : '#f5f5f5'"
           :stroke="room.id === currentRoomId ? '#388E3C' : '#ddd'"
           stroke-width="3"
         />
         <text
-          x="70"
-          y="28"
+          x="55"
+          y="22"
           text-anchor="middle"
           :fill="room.id === currentRoomId ? 'white' : '#333'"
-          font-size="14"
+          font-size="12"
           font-weight="bold"
         >
           {{ room.name }}
         </text>
         <text
-          x="70"
-          y="52"
+          x="55"
+          y="40"
           text-anchor="middle"
           :fill="room.id === currentRoomId ? '#e8f5e9' : '#666'"
-          font-size="12"
+          font-size="10"
         >
           {{ room.id }}
         </text>
@@ -77,12 +77,12 @@ export default {
   data() {
     return {
       roomPositions: {
-        'theater': { x: 580, y: 200 },
-        'outside': { x: 330, y: 200 },
-        'pub': { x: 80, y: 200 },
-        'lab': { x: 330, y: 380 },
-        'office': { x: 580, y: 380 },
-        'portal': { x: 330, y: 50 }
+        'theater': { x: 750, y: 250 },
+        'outside': { x: 500, y: 250 },
+        'pub': { x: 250, y: 250 },
+        'lab': { x: 500, y: 480 },
+        'office': { x: 750, y: 480 },
+        'portal': { x: 500, y: 60 }
       }
     };
   },
@@ -127,13 +127,18 @@ export default {
 .game-map {
   display: flex;
   justify-content: center;
-  padding: 20px;
+  align-items: center;
+  padding: 5px;
+  width: 100%;
 }
 
 .map-svg {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
   background: #fafafa;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .room {
