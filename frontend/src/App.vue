@@ -70,7 +70,7 @@
 
         <!-- 键盘提示 -->
         <div class="keyboard-hint">
-          <span>使用方向键移动</span>
+          <span>方向键移动 | Backspace/ESC 返回</span>
         </div>
       </div>
     </div>
@@ -134,6 +134,13 @@ export default {
         event.preventDefault();
       }
       if (this.isMoving) return;
+
+      // Backspace 或 Esc 返回
+      if (event.key === 'Backspace' || event.key === 'Escape') {
+        this.goBack();
+        return;
+      }
+
       if (this.$refs.roomView) {
         this.$refs.roomView.tryMoveByKey(event);
       }
