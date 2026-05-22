@@ -1,6 +1,6 @@
 <template>
   <div class="game-map">
-    <svg viewBox="0 0 1000 700" class="map-svg">
+    <svg viewBox="0 0 1100 950" class="map-svg">
       <!-- 连接线 -->
       <line
         v-for="conn in connections"
@@ -25,29 +25,29 @@
         <rect
           x="0"
           y="0"
-          width="110"
-          height="55"
+          width="120"
+          height="60"
           rx="8"
           :fill="room.id === currentRoomId ? '#4CAF50' : '#f5f5f5'"
           :stroke="room.id === currentRoomId ? '#388E3C' : '#ddd'"
           stroke-width="3"
         />
         <text
-          x="55"
-          y="22"
+          x="60"
+          y="24"
           text-anchor="middle"
           :fill="room.id === currentRoomId ? 'white' : '#333'"
-          font-size="12"
+          font-size="13"
           font-weight="bold"
         >
           {{ room.name }}
         </text>
         <text
-          x="55"
-          y="40"
+          x="60"
+          y="44"
           text-anchor="middle"
           :fill="room.id === currentRoomId ? '#e8f5e9' : '#666'"
-          font-size="10"
+          font-size="11"
         >
           {{ room.id }}
         </text>
@@ -77,12 +77,18 @@ export default {
   data() {
     return {
       roomPositions: {
-        'theater': { x: 750, y: 250 },
-        'outside': { x: 500, y: 250 },
-        'pub': { x: 250, y: 250 },
-        'lab': { x: 500, y: 480 },
-        'office': { x: 750, y: 480 },
-        'portal': { x: 500, y: 60 }
+        'portal': { x: 500, y: 50 },
+        'outside': { x: 500, y: 200 },
+        'theater': { x: 800, y: 200 },
+        'library': { x: 800, y: 50 },
+        'pub': { x: 200, y: 200 },
+        'gym': { x: 200, y: 350 },
+        'lab': { x: 500, y: 400 },
+        'office': { x: 800, y: 400 },
+        'cafeteria': { x: 200, y: 500 },
+        'garden': { x: 500, y: 600 },
+        'bookstore': { x: 50, y: 600 },
+        'dormitory': { x: 500, y: 800 }
       }
     };
   },
@@ -110,10 +116,10 @@ export default {
 
           conns.push({
             key: key,
-            x1: pos.x + 70,
-            y1: pos.y + 35,
-            x2: targetPos.x + 70,
-            y2: targetPos.y + 35
+            x1: pos.x + 60,
+            y1: pos.y + 30,
+            x2: targetPos.x + 60,
+            y2: targetPos.y + 30
           });
         }
       }

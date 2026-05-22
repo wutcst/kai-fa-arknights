@@ -92,6 +92,12 @@ public class Room
             case "lab": return "计算机实验室";
             case "office": return "办公室";
             case "portal": return "传送门";
+            case "library": return "图书馆";
+            case "cafeteria": return "食堂";
+            case "gym": return "体育馆";
+            case "garden": return "花园";
+            case "dormitory": return "宿舍楼";
+            case "bookstore": return "书店";
             default: return id;
         }
     }

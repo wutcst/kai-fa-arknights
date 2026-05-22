@@ -116,7 +116,7 @@
 
         <!-- 键盘提示 -->
         <div class="keyboard-hint">
-          <span>方向键移动 | L查看 | H帮助 | Backspace/ESC返回</span>
+          <span>方向键移动 | L查看 | M地图 | H帮助 | Backspace/ESC返回</span>
         </div>
       </div>
     </div>
@@ -200,6 +200,12 @@ export default {
       // H 键帮助
       if (event.key === 'h' || event.key === 'H') {
         this.getHelp();
+        return;
+      }
+
+      // M 键切换地图
+      if (event.key === 'm' || event.key === 'M') {
+        this.showMap = !this.showMap;
         return;
       }
 
@@ -721,10 +727,10 @@ h1 {
   background: white;
   border-radius: 10px;
   padding: 20px;
-  width: 90vw;
-  height: 80vh;
-  max-width: 1200px;
-  max-height: 800px;
+  width: 95vw;
+  height: 90vh;
+  max-width: 1300px;
+  max-height: 900px;
   overflow: auto;
 }
 </style>

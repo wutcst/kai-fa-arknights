@@ -48,6 +48,7 @@ public class Game
     private void createRooms()
     {
         Room outside, theater, pub, lab, office, portal;
+        Room library, gym, cafeteria, garden, bookstore, dormitory;
 
         // create the rooms
         outside = new Room("outside the main entrance of the university", "outside");
@@ -56,6 +57,12 @@ public class Game
         lab = new Room("in a computing lab", "lab");
         office = new Room("in the computing admin office", "office");
         portal = new Room("in a mysterious portal room", "portal");
+        library = new Room("in the university library", "library");
+        gym = new Room("in the campus gym", "gym");
+        cafeteria = new Room("in the campus cafeteria", "cafeteria");
+        garden = new Room("in the campus garden", "garden");
+        bookstore = new Room("in the campus bookstore", "bookstore");
+        dormitory = new Room("in the student dormitory", "dormitory");
 
         // initialise room exits
         outside.setExit("east", theater);
@@ -64,13 +71,31 @@ public class Game
         outside.setExit("north", portal);
 
         theater.setExit("west", outside);
+        theater.setExit("north", library);
+
+        library.setExit("south", theater);
 
         pub.setExit("east", outside);
+        pub.setExit("south", gym);
+
+        gym.setExit("north", pub);
+        gym.setExit("south", cafeteria);
+
+        cafeteria.setExit("north", gym);
 
         lab.setExit("north", outside);
         lab.setExit("east", office);
+        lab.setExit("south", garden);
 
         office.setExit("west", lab);
+
+        garden.setExit("north", lab);
+        garden.setExit("west", bookstore);
+        garden.setExit("south", dormitory);
+
+        bookstore.setExit("east", garden);
+
+        dormitory.setExit("north", garden);
 
         // 传送房间只连接到校门口
         portal.setExit("south", outside);
@@ -82,6 +107,12 @@ public class Game
         rooms.put("lab", lab);
         rooms.put("office", office);
         rooms.put("portal", portal);
+        rooms.put("library", library);
+        rooms.put("gym", gym);
+        rooms.put("cafeteria", cafeteria);
+        rooms.put("garden", garden);
+        rooms.put("bookstore", bookstore);
+        rooms.put("dormitory", dormitory);
 
         // 添加物品到各个房间
         outside.addItem(new Item("stone", "石头", "一块普通的石头", 2, 5));
@@ -100,10 +131,27 @@ public class Game
         office.addItem(new Item("paper", "文件", "一份重要文件", 1, 100));
         office.addItem(new Item("pen", "钢笔", "黑色钢笔", 1, 50));
 
-        // 随机在3个房间添加魔法饼干
+        library.addItem(new Item("novel", "小说", "一本经典文学作品", 3, 80));
+        library.addItem(new Item("dictionary", "词典", "英汉双语词典", 4, 120));
+
+        gym.addItem(new Item("ball", "篮球", "一个标准篮球", 2, 100));
+        gym.addItem(new Item("towel", "毛巾", "一条运动毛巾", 1, 10));
+
+        cafeteria.addItem(new Item("rice", "米饭", "一份米饭套餐", 2, 15));
+        cafeteria.addItem(new Item("noodles", "面条", "一碗牛肉面", 2, 20));
+
+        garden.addItem(new Item("flower", "花朵", "一朵美丽的花", 1, 5));
+
+        bookstore.addItem(new Item("magazine", "杂志", "最新一期科技杂志", 1, 25));
+        bookstore.addItem(new Item("notebook", "笔记本", "精美笔记本", 1, 15));
+
+        dormitory.addItem(new Item("pillow", "枕头", "柔软的枕头", 1, 20));
+        dormitory.addItem(new Item("blanket", "毯子", "温暖的毯子", 2, 40));
+
+        // 随机在多个房间添加魔法饼干
         Random random = new Random();
-        Room[] cookieRooms = {outside, pub, lab};
-        int cookieCount = random.nextInt(3) + 2;  // 2-4块魔法饼干
+        Room[] cookieRooms = {outside, pub, lab, library, gym, cafeteria, garden, bookstore};
+        int cookieCount = random.nextInt(4) + 3;  // 3-6块魔法饼干
         for (int i = 0; i < cookieCount; i++) {
             Room r = cookieRooms[random.nextInt(cookieRooms.length)];
             r.addItem(new Item("magic_cookie", "魔法饼干", "散发神奇香气的饼干，吃了可以增加负重", 1, 0));
@@ -127,7 +175,9 @@ public class Game
             justTeleported = true;
             // 随机传送到其他房间（除了传送房间本身）
             Room[] targetRooms = {rooms.get("outside"), rooms.get("theater"),
-                                  rooms.get("pub"), rooms.get("lab"), rooms.get("office")};
+                                  rooms.get("pub"), rooms.get("lab"), rooms.get("office"),
+                                  rooms.get("library"), rooms.get("gym"), rooms.get("cafeteria"),
+                                  rooms.get("garden"), rooms.get("bookstore"), rooms.get("dormitory")};
             Random random = new Random();
             this.currentRoom = targetRooms[random.nextInt(targetRooms.length)];
             // 传送后清空历史记录，以新位置为起点
