@@ -57,20 +57,66 @@
         </div>
 
         <!-- 物品栏 -->
-        <div class="items-panel" v-if="showItems && items.length">
-          <h3>🎒 物品列表</h3>
-          <div class="item-list">
-            <div v-for="item in items" :key="item.id" class="item-card">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-desc">{{ item.description }}</span>
-              <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
+        <div class="items-panel" v-if="showItems">
+          <div class="items-header">
+            <h3>🎒 物品</h3>
+            <div class="items-tabs">
+              <button
+                :class="{ active: itemsViewMode === 'room' }"
+                @click="itemsViewMode = 'room'"
+              >房间物品</button>
+              <button
+                :class="{ active: itemsViewMode === 'inventory' }"
+                @click="switchToInventory"
+              >背包({{ playerWeight }}/{{ playerMaxWeight }})</button>
             </div>
+          </div>
+
+          <!-- 房间物品列表 -->
+          <div v-if="itemsViewMode === 'room'" class="item-list">
+            <div v-if="items.length === 0" class="empty-msg">房间里没有物品</div>
+            <div v-for="item in items" :key="item.id" class="item-card">
+              <div class="item-main">
+                <span class="item-name">{{ item.name }}</span>
+                <span class="item-desc">{{ item.description }}</span>
+              </div>
+              <div class="item-footer">
+                <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
+                <button class="btn-take" @click="handleTake(item.id)">拾取</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 背包物品列表 -->
+          <div v-if="itemsViewMode === 'inventory'" class="item-list">
+            <div v-if="inventory.length === 0" class="empty-msg">背包是空的</div>
+            <div v-for="item in inventory" :key="item.id" class="item-card">
+              <div class="item-main">
+                <span class="item-name">{{ item.name }}</span>
+                <span class="item-desc">{{ item.description }}</span>
+              </div>
+              <div class="item-footer">
+                <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
+                <button class="btn-drop" @click="handleDrop(item.id)">丢弃</button>
+              </div>
+            </div>
+            <!-- 吃饼干按钮 -->
+            <button
+              v-if="hasMagicCookie"
+              class="btn-cookie"
+              @click="handleEatCookie"
+            >🍪 吃魔法饼干（+5负重）</button>
+          </div>
+
+          <!-- 查看物品按钮 -->
+          <div class="items-actions">
+            <button class="btn-items" @click="handleShowItems">📦 查看所有物品</button>
           </div>
         </div>
 
         <!-- 键盘提示 -->
         <div class="keyboard-hint">
-          <span>方向键移动 | Backspace/ESC 返回</span>
+          <span>方向键移动 | L查看 | H帮助 | Backspace/ESC返回</span>
         </div>
       </div>
     </div>
@@ -82,7 +128,7 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { getMap, getGameStatus, move, look, goBack } from '@/api/game';
+import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie } from '@/api/game';
 import RoomView from '@/components/RoomView.vue';
 import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
@@ -102,12 +148,16 @@ export default {
       currentRoomId: '',
       longDescription: '',
       exits: [],
-      items: [],
+      items: [],           // 房间物品
+      inventory: [],       // 玩家背包
+      playerWeight: 0,
+      playerMaxWeight: 20,
       showItems: false,  // 是否显示物品列表
       rooms: [],
       isError: false,
       showMap: false,  // 是否显示地图
-      isMoving: false  // 是否正在移动中
+      isMoving: false,  // 是否正在移动中
+      itemsViewMode: 'room'  // 'room' 或 'inventory'
     };
   },
   created() {
@@ -138,6 +188,18 @@ export default {
       // Backspace 或 Esc 返回
       if (event.key === 'Backspace' || event.key === 'Escape') {
         this.goBack();
+        return;
+      }
+
+      // L 键查看
+      if (event.key === 'l' || event.key === 'L') {
+        this.look();
+        return;
+      }
+
+      // H 键帮助
+      if (event.key === 'h' || event.key === 'H') {
+        this.getHelp();
         return;
       }
 
@@ -237,6 +299,85 @@ export default {
     },
     getHelp() {
       window.open('/help.html', '_blank', 'width=600,height=500');
+    },
+    // 切换到背包标签页
+    async switchToInventory() {
+      this.itemsViewMode = 'inventory';
+      // 加载最新的背包数据
+      try {
+        const response = await getItems();
+        this.inventory = response.data.inventory || [];
+        this.playerWeight = response.data.playerWeight || 0;
+        this.playerMaxWeight = response.data.playerMaxWeight || 50;
+      } catch (error) {
+        console.error('获取背包失败:', error);
+      }
+    },
+    // 查看物品（显示房间物品）
+    async handleShowItems() {
+      try {
+        const response = await getItems();
+        this.items = response.data.items || [];
+        this.inventory = response.data.inventory || [];
+        this.playerWeight = response.data.playerWeight || 0;
+        this.playerMaxWeight = response.data.playerMaxWeight || 50;
+        this.itemsViewMode = 'room';
+        this.showItems = true;
+        this.displayMessage = response.data.message;
+      } catch (error) {
+        this.displayMessage = '查看物品失败：' + error.message;
+        this.isError = true;
+      }
+    },
+    // 拾取物品
+    async handleTake(itemId) {
+      try {
+        const response = await takeItem(itemId);
+        this.displayMessage = response.data.message;
+        this.items = response.data.items || [];
+        this.inventory = response.data.inventory || [];
+        this.playerWeight = response.data.playerWeight || 0;
+        this.playerMaxWeight = response.data.playerMaxWeight || 50;
+        this.isError = !response.data.success;
+      } catch (error) {
+        this.displayMessage = '拾取失败：' + error.message;
+        this.isError = true;
+      }
+    },
+    // 丢弃物品
+    async handleDrop(itemId) {
+      try {
+        const response = await dropItem(itemId);
+        this.displayMessage = response.data.message;
+        this.items = response.data.items || [];
+        this.inventory = response.data.inventory || [];
+        this.playerWeight = response.data.playerWeight || 0;
+        this.playerMaxWeight = response.data.playerMaxWeight || 50;
+        this.isError = !response.data.success;
+      } catch (error) {
+        this.displayMessage = '丢弃失败：' + error.message;
+        this.isError = true;
+      }
+    },
+    // 吃魔法饼干
+    async handleEatCookie() {
+      try {
+        const response = await eatCookie();
+        this.displayMessage = response.data.message;
+        this.inventory = response.data.inventory || [];
+        this.playerWeight = response.data.playerWeight || 0;
+        this.playerMaxWeight = response.data.playerMaxWeight || 50;
+        this.isError = !response.data.success;
+      } catch (error) {
+        this.displayMessage = '吃饼干失败：' + error.message;
+        this.isError = true;
+      }
+    }
+  },
+  computed: {
+    // 检查背包中是否有魔法饼干
+    hasMagicCookie() {
+      return this.inventory.some(item => item.id === 'magic_cookie');
     }
   }
 };
@@ -354,7 +495,7 @@ h1 {
 
 /* 右侧信息面板 */
 .side-panel {
-  width: 200px;
+  width: 280px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -372,29 +513,74 @@ h1 {
 .items-panel {
   background: rgba(255,255,255,0.95);
   border-radius: 12px;
-  padding: 15px;
+  padding: 18px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   text-align: left;
   flex: 1;
   overflow-y: auto;
+  min-height: 200px;
+}
+
+.items-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
 .items-panel h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
+  margin: 0;
+  font-size: 18px;
   color: #2c3e50;
+}
+
+.items-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.items-tabs button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #e0e0e0;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.items-tabs button.active {
+  background: #4CAF50;
+  color: white;
+  font-weight: bold;
+}
+
+.items-tabs button:hover:not(.active) {
+  background: #bdbdbd;
 }
 
 .item-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.empty-msg {
+  text-align: center;
+  color: #999;
+  padding: 25px;
+  font-size: 14px;
 }
 
 .item-card {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 12px;
+}
+
+.item-main {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -411,11 +597,84 @@ h1 {
   color: #7f8c8d;
 }
 
+.item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
 .item-stats {
   font-size: 13px;
   color: #e74c3c;
   font-weight: bold;
-  margin-top: 4px;
+}
+
+.btn-take, .btn-drop {
+  padding: 6px 14px;
+  font-size: 13px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-take {
+  background: #4CAF50;
+  color: white;
+}
+
+.btn-take:hover {
+  background: #388E3C;
+}
+
+.btn-drop {
+  background: #ff9800;
+  color: white;
+}
+
+.btn-drop:hover {
+  background: #f57c00;
+}
+
+.items-actions {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.btn-items {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-items:hover {
+  background: #1976D2;
+}
+
+.btn-cookie {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+.btn-cookie:hover {
+  background: linear-gradient(135deg, #FF5252, #FF7043);
 }
 
 /* 键盘提示 */

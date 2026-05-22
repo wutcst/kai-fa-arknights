@@ -86,6 +86,33 @@
     }
     .item-table .weight { color: #666; }
     .item-table .value { color: #ff9800; font-weight: bold; }
+    .shortcut {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .shortcut:last-child { border-bottom: none; }
+    .key {
+      background: #333;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .action {
+      color: #333;
+      font-size: 14px;
+    }
+    .cookie {
+      background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+      line-height: 1.8;
+    }
   </style>
 </head>
 <body>
@@ -96,6 +123,26 @@
     <div class="instruction">
       这是一款文字冒险游戏。你需要通过选择不同的方向在各个房间中探索。
       点击地图上的方向按钮或在下方选择方向来移动角色。
+    </div>
+
+    <h2>⌨️ 键盘快捷键</h2>
+    <div class="item-info">
+      <div class="shortcut">
+        <span class="key">↑ ↓ ← →</span>
+        <span class="action">移动角色</span>
+      </div>
+      <div class="shortcut">
+        <span class="key">L</span>
+        <span class="action">查看当前房间物品</span>
+      </div>
+      <div class="shortcut">
+        <span class="key">H</span>
+        <span class="action">打开帮助</span>
+      </div>
+      <div class="shortcut">
+        <span class="key">Backspace / Esc</span>
+        <span class="action">返回上一个房间</span>
+      </div>
     </div>
 
     <h2>🧭 可用方向</h2>
@@ -125,9 +172,32 @@
       <ul>
         <li><strong>名称</strong>：物品的名称</li>
         <li><strong>描述</strong>：物品的详细介绍</li>
-        <li><strong>重量</strong>：物品的重量（未来版本可能影响携带）</li>
-        <li><strong>价值</strong>：物品的价值（未来版本可能用于交易）</li>
+        <li><strong>重量</strong>：物品的重量，影响携带</li>
+        <li><strong>价值</strong>：物品的价值</li>
       </ul>
+      <strong>操作：</strong>
+      <ul>
+        <li><strong>拾取</strong>：点击物品旁的"拾取"按钮将物品加入背包</li>
+        <li><strong>丢弃</strong>：在背包中点击"丢弃"按钮将物品放回当前房间</li>
+      </ul>
+    </div>
+
+    <h2>🎽 背包与负重</h2>
+    <div class="item-info">
+      你有一个背包，可以随身携带物品。<br>
+      <ul>
+        <li>背包初始负重上限为 <strong>20</strong></li>
+        <li>所有物品的总重量不能超过负重上限</li>
+        <li>如果物品太重，拾取时会显示提示</li>
+        <li>点击"背包"标签可查看当前负重情况</li>
+      </ul>
+    </div>
+
+    <h2>🍪 魔法饼干</h2>
+    <div class="cookie">
+      在校园的某些角落隐藏着神奇的<strong>魔法饼干</strong>！<br><br>
+      找到并吃掉魔法饼干可以<strong>增加5点负重上限</strong>！<br><br>
+      当你背包中有魔法饼干时，会显示"吃魔法饼干"按钮。
     </div>
 
     <h2>🔙 返回功能</h2>

@@ -48,6 +48,40 @@ public class Room
     }
 
     /**
+     * 根据物品ID获取物品.
+     */
+    public Item getItem(String itemId) {
+        for (Item item : items) {
+            if (item.getId().equals(itemId)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取房间内物品总重量.
+     */
+    public int getTotalWeight() {
+        int total = 0;
+        for (Item item : items) {
+            total += item.getWeight();
+        }
+        return total;
+    }
+
+    /**
+     * 获取房间内物品总价值.
+     */
+    public int getTotalValue() {
+        int total = 0;
+        for (Item item : items) {
+            total += item.getValue();
+        }
+        return total;
+    }
+
+    /**
      * 根据房间ID获取中文名称.
      */
     private String getZhNameById(String id) {

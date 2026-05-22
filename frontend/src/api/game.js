@@ -35,3 +35,23 @@ export function look() {
 export function goBack() {
   return axios.post(`${API_BASE_URL}/back`);
 }
+
+// 拾取物品
+export function takeItem(itemId) {
+  return axios.post(`${API_BASE_URL}/take`, { itemId });
+}
+
+// 丢弃物品
+export function dropItem(itemId) {
+  return axios.post(`${API_BASE_URL}/drop`, { itemId });
+}
+
+// 查看所有物品
+export function getItems() {
+  return axios.get(`${API_BASE_URL}/items`);
+}
+
+// 吃魔法饼干
+export function eatCookie() {
+  return axios.post(`${API_BASE_URL}/eatcookie`);
+}

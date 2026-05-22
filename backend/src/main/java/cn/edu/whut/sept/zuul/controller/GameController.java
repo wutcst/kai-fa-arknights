@@ -2,6 +2,7 @@ package cn.edu.whut.sept.zuul.controller;
 
 import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.model.Item;
+import cn.edu.whut.sept.zuul.model.Player;
 import cn.edu.whut.sept.zuul.service.Game;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -174,6 +175,95 @@ public class GameController {
         return result;
     }
 
+    /**
+     * 拾取物品（take命令）.
+     */
+    @PostMapping("/take")
+    public Map<String, Object> take(@RequestBody Map<String, String> request) {
+        String itemId = request.get("itemId");
+        Map<String, Object> result = new HashMap<>();
+
+        String message = game.takeItem(itemId);
+        result.put("message", message);
+        result.put("description", currentRoom.getZhName());
+        result.put("descriptionEn", currentRoom.getShortDescription());
+        result.put("longDescription", getZhLongDescription(currentRoom));
+        result.put("exits", currentRoom.getExits());
+        result.put("roomId", currentRoom.getId());
+        result.put("items", getRoomItems(currentRoom));
+        result.put("inventory", getPlayerInventory());
+        result.put("playerWeight", game.getPlayer().getTotalWeight());
+        result.put("playerMaxWeight", game.getPlayer().getMaxWeight());
+
+        // 检查是否拾取成功
+        result.put("success", message.contains("拾取了"));
+        return result;
+    }
+
+    /**
+     * 丢弃物品（drop命令）.
+     */
+    @PostMapping("/drop")
+    public Map<String, Object> drop(@RequestBody Map<String, String> request) {
+        String itemId = request.get("itemId");
+        Map<String, Object> result = new HashMap<>();
+
+        String message = game.dropItem(itemId);
+        result.put("message", message);
+        result.put("description", currentRoom.getZhName());
+        result.put("descriptionEn", currentRoom.getShortDescription());
+        result.put("longDescription", getZhLongDescription(currentRoom));
+        result.put("exits", currentRoom.getExits());
+        result.put("roomId", currentRoom.getId());
+        result.put("items", getRoomItems(currentRoom));
+        result.put("inventory", getPlayerInventory());
+        result.put("playerWeight", game.getPlayer().getTotalWeight());
+        result.put("playerMaxWeight", game.getPlayer().getMaxWeight());
+
+        result.put("success", !message.contains("没有"));
+        return result;
+    }
+
+    /**
+     * 查看所有物品（items命令）.
+     */
+    @GetMapping("/items")
+    public Map<String, Object> items() {
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("message", game.getItemsInfo());
+        result.put("description", currentRoom.getZhName());
+        result.put("exits", currentRoom.getExits());
+        result.put("roomId", currentRoom.getId());
+        result.put("items", getRoomItems(currentRoom));
+        result.put("inventory", getPlayerInventory());
+        result.put("playerWeight", game.getPlayer().getTotalWeight());
+        result.put("playerMaxWeight", game.getPlayer().getMaxWeight());
+
+        return result;
+    }
+
+    /**
+     * 吃魔法饼干（eat cookie命令）.
+     */
+    @PostMapping("/eatcookie")
+    public Map<String, Object> eatCookie() {
+        Map<String, Object> result = new HashMap<>();
+
+        String message = game.eatCookie();
+        result.put("message", message);
+        result.put("description", currentRoom.getZhName());
+        result.put("exits", currentRoom.getExits());
+        result.put("roomId", currentRoom.getId());
+        result.put("items", getRoomItems(currentRoom));
+        result.put("inventory", getPlayerInventory());
+        result.put("playerWeight", game.getPlayer().getTotalWeight());
+        result.put("playerMaxWeight", game.getPlayer().getMaxWeight());
+
+        result.put("success", message.contains("吃了"));
+        return result;
+    }
+
     private String getZhLongDescription(Room room) {
         return "";
     }
@@ -194,6 +284,23 @@ public class GameController {
     private List<Map<String, Object>> getRoomItems(Room room) {
         List<Map<String, Object>> items = new ArrayList<>();
         for (Item item : room.getItems()) {
+            Map<String, Object> itemInfo = new HashMap<>();
+            itemInfo.put("id", item.getId());
+            itemInfo.put("name", item.getName());
+            itemInfo.put("description", item.getDescription());
+            itemInfo.put("weight", item.getWeight());
+            itemInfo.put("value", item.getValue());
+            items.add(itemInfo);
+        }
+        return items;
+    }
+
+    /**
+     * 获取玩家背包物品列表.
+     */
+    private List<Map<String, Object>> getPlayerInventory() {
+        List<Map<String, Object>> items = new ArrayList<>();
+        for (Item item : game.getPlayer().getInventory()) {
             Map<String, Object> itemInfo = new HashMap<>();
             itemInfo.put("id", item.getId());
             itemInfo.put("name", item.getName());
