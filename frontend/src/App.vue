@@ -1,5 +1,14 @@
 <template>
-  <div id="app" @keydown="handleKeydown" tabindex="0" ref="appContainer">
+  <div id="app" tabindex="0" ref="appContainer">
+    <!-- 未登录显示登录界面 -->
+    <Login v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
+
+    <!-- 已登录显示游戏界面 -->
+    <template v-else>
+    <div class="top-bar">
+      <span class="username">👤 {{ username }}</span>
+      <button @click="handleLogout" class="btn-logout">退出登录</button>
+    </div>
     <h1>🌍 文字冒险世界</h1>
 
     <div class="game-wrapper">
@@ -120,6 +129,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -132,16 +142,22 @@ import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems
 import RoomView from '@/components/RoomView.vue';
 import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
+import Login from '@/components/Login.vue';
 
 export default {
   name: 'App',
   components: {
     RoomView,
     GameMap,
-    GameControls
+    GameControls,
+    Login
   },
   data() {
     return {
+      // 登录状态
+      isLoggedIn: false,
+      username: '',
+      // 游戏状态
       message: '欢迎来到文字冒险世界！',
       displayMessage: '',
       currentRoomName: '',
@@ -167,51 +183,71 @@ export default {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
       }
+      
+      // 如果焦点在输入框中，不处理游戏快捷键
+      const activeElement = document.activeElement;
+      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+        return;
+      }
+      
+      // 只有在已登录状态下才处理游戏快捷键
+      if (!this.isLoggedIn) return;
+      
+      // 防止重复处理
       if (this.isMoving) return;
+      
+      // Backspace 或 Esc 返回
+      if (e.key === 'Backspace' || e.key === 'Escape') {
+        e.preventDefault();
+        this.goBack();
+        return;
+      }
+      
+      // L 键查看
+      if (e.key === 'l' || e.key === 'L') {
+        this.look();
+        return;
+      }
+      
+      // H 键帮助
+      if (e.key === 'h' || e.key === 'H') {
+        this.getHelp();
+        return;
+      }
+      
+      // M 键切换地图
+      if (e.key === 'm' || e.key === 'M') {
+        this.showMap = !this.showMap;
+        return;
+      }
+      
+      // 方向键移动
       if (this.$refs.roomView) {
         this.$refs.roomView.tryMoveByKey(e);
       }
     }, true);
   },
   mounted() {
-    this.fetchMap();
+    // 检查登录状态
+    const savedUsername = localStorage.getItem('username');
+    if (savedUsername) {
+      this.username = savedUsername;
+      this.isLoggedIn = true;
+      this.fetchMap();
+    }
   },
   methods: {
-    // 处理键盘事件 - 控制 RoomView 中的小人移动
-    handleKeydown(event) {
-      // 阻止方向键默认滚动页面行为
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-        event.preventDefault();
-      }
-      if (this.isMoving) return;
-
-      // Backspace 或 Esc 返回
-      if (event.key === 'Backspace' || event.key === 'Escape') {
-        this.goBack();
-        return;
-      }
-
-      // L 键查看
-      if (event.key === 'l' || event.key === 'L') {
-        this.look();
-        return;
-      }
-
-      // H 键帮助
-      if (event.key === 'h' || event.key === 'H') {
-        this.getHelp();
-        return;
-      }
-
-      // M 键切换地图
-      if (event.key === 'm' || event.key === 'M') {
-        this.showMap = !this.showMap;
-        return;
-      }
-
-      if (this.$refs.roomView) {
-        this.$refs.roomView.tryMoveByKey(event);
-      }
+    // 登录成功处理
+    handleLoginSuccess(username) {
+      this.username = username;
+      this.isLoggedIn = true;
+      this.fetchMap();
+    },
+    // 退出登录
+    handleLogout() {
+      this.isLoggedIn = false;
+      this.username = '';
+      localStorage.removeItem('username');
     },
     async fetchMap() {
       try {
@@ -411,6 +447,38 @@ h1 {
   margin: 0;
   padding: 8px;
   font-size: 22px;
+}
+
+/* 顶部栏 */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.2);
+}
+
+.username {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.btn-logout {
+  padding: 8px 16px;
+  background: rgba(231, 76, 60, 0.8);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background: #e74c3c;
+  transform: scale(1.05);
 }
 
 /* 整体布局 */
