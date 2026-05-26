@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS game_saves (
     player_weight INT DEFAULT 0,
     player_max_weight INT DEFAULT 20,
     room_history JSON,               -- 移动历史序列化
+    room_items JSON,                 -- 房间物品状态序列化
     saved_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY uk_user_id (user_id)

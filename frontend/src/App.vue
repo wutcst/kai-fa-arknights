@@ -90,65 +90,24 @@
     </div>
 
     <!-- 悬浮物品面板 - 房间物品 -->
-    <div v-if="showRoomItems" class="floating-items-panel floating-room-items" @click.self="showRoomItems = false">
-      <div class="floating-items-content">
-        <div class="floating-items-header">
-          <h3>🎒 房间内的物品</h3>
-          <button class="btn-close" @click="showRoomItems = false">✕</button>
-        </div>
-        <div class="floating-item-list">
-          <div v-if="items.length === 0" class="empty-msg">房间里没有物品</div>
-          <div v-for="item in items" :key="item.id" class="floating-item-card">
-            <div class="item-main">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-desc">{{ item.description }}</span>
-            </div>
-            <div class="item-footer">
-              <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
-              <button class="btn-take" @click="handleTake(item.id)">拾取</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <RoomItemsPanel
+      :show="showRoomItems"
+      :items="items"
+      @close="showRoomItems = false"
+      @take="handleTake"
+    />
 
     <!-- 悬浮物品面板 - 背包 -->
-    <div v-if="showInventoryPanel" class="floating-items-panel floating-inventory" @click.self="showInventoryPanel = false">
-      <div class="floating-items-content">
-        <div class="floating-items-header">
-          <h3>🎒 我的背包</h3>
-          <div class="weight-bar-wrapper">
-            <div class="weight-bar">
-              <div class="weight-bar-fill" :style="{ width: weightPercent + '%' }"></div>
-            </div>
-            <span class="weight-text">{{ playerWeight }} / {{ playerMaxWeight }}</span>
-          </div>
-          <div class="value-info">
-            <span class="value-label">总价值:</span>
-            <span class="value-amount">💰 {{ totalValue }}</span>
-          </div>
-          <button class="btn-close" @click="showInventoryPanel = false">✕</button>
-        </div>
-        <div class="floating-item-list">
-          <div v-if="inventory.length === 0" class="empty-msg">背包是空的</div>
-          <div v-for="item in inventory" :key="item.id" class="floating-item-card">
-            <div class="item-main">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-desc">{{ item.description }}</span>
-            </div>
-            <div class="item-footer">
-              <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
-              <button class="btn-drop" @click="handleDrop(item.id)">丢弃</button>
-            </div>
-          </div>
-          <button
-            v-if="hasMagicCookie"
-            class="btn-cookie"
-            @click="handleEatCookie"
-          >🍪 吃魔法饼干（+5负重）</button>
-        </div>
-      </div>
-    </div>
+    <InventoryPanel
+      :show="showInventoryPanel"
+      :inventory="inventory"
+      :player-weight="playerWeight"
+      :player-max-weight="playerMaxWeight"
+      :total-value="totalValue"
+      @close="showInventoryPanel = false"
+      @drop="handleDrop"
+      @eat-cookie="handleEatCookie"
+    />
     </template>
   </div>
 </template>
@@ -164,6 +123,8 @@ import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
 import Login from '@/components/Login.vue';
 import GameStart from '@/views/GameStart.vue';
+import RoomItemsPanel from '@/components/RoomItemsPanel.vue';
+import InventoryPanel from '@/components/InventoryPanel.vue';
 
 export default {
   name: 'App',
@@ -172,7 +133,9 @@ export default {
     GameMap,
     GameControls,
     Login,
-    GameStart
+    GameStart,
+    RoomItemsPanel,
+    InventoryPanel
   },
   data() {
     return {
@@ -289,6 +252,7 @@ export default {
     handleContinueGame(gameData) {
       this.showGameStart = false;
       this.updateGameState(gameData);
+      this.fetchMap(gameData.roomId);  // 传入保存的房间ID
     },
     // 更新游戏状态
     updateGameState(gameData) {
@@ -314,12 +278,16 @@ export default {
       this.username = '';
       localStorage.removeItem('username');
     },
-    async fetchMap() {
+    async fetchMap(savedRoomId = null) {
       try {
         const response = await getMap();
         this.rooms = response.data.rooms;
-        this.currentRoomId = response.data.currentRoomId;
-        this.fetchStatus();
+        // 如果传入了保存的房间ID（继续游戏时），使用它；否则使用后端返回的
+        this.currentRoomId = savedRoomId || response.data.currentRoomId;
+        // 只有在新游戏时才调用fetchStatus，继续游戏时已有完整状态
+        if (!savedRoomId) {
+          this.fetchStatus();
+        }
       } catch (error) {
         this.message = '错误：无法连接到服务器，请确保后端正在运行！';
         this.isError = true;
@@ -481,15 +449,6 @@ export default {
     }
   },
   computed: {
-    // 检查背包中是否有魔法饼干
-    hasMagicCookie() {
-      return this.inventory.some(item => item.id === 'magic_cookie');
-    },
-    // 负重百分比
-    weightPercent() {
-      if (this.playerMaxWeight === 0) return 0;
-      return Math.min(100, (this.playerWeight / this.playerMaxWeight) * 100);
-    },
     // 背包物品总价值
     totalValue() {
       return this.inventory.reduce((sum, item) => sum + (item.value || 0), 0);

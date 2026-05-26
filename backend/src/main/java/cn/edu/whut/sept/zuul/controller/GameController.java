@@ -20,11 +20,13 @@ import java.util.ArrayList;
 public class GameController {
 
     private final Game game;
-    private Room currentRoom;
 
     public GameController(Game game) {
         this.game = game;
-        this.currentRoom = game.getCurrentRoom();
+    }
+
+    private Room getCurrentRoom() {
+        return game.getCurrentRoom();
     }
 
     /**
@@ -32,6 +34,7 @@ public class GameController {
      */
     @GetMapping("/status")
     public Map<String, Object> getStatus() {
+        Room currentRoom = getCurrentRoom();
         Map<String, Object> result = new HashMap<>();
         result.put("description", currentRoom.getZhName());
         result.put("descriptionEn", currentRoom.getShortDescription());
@@ -50,6 +53,7 @@ public class GameController {
         String direction = request.get("direction");
         Map<String, Object> result = new HashMap<>();
 
+        Room currentRoom = getCurrentRoom();
         Room nextRoom = currentRoom.getExit(direction);
 
         if (nextRoom == null) {
@@ -89,6 +93,7 @@ public class GameController {
     @GetMapping("/look")
     public Map<String, Object> look() {
         Map<String, Object> result = new HashMap<>();
+        Room currentRoom = getCurrentRoom();
         result.put("description", currentRoom.getZhName());
         result.put("descriptionEn", currentRoom.getShortDescription());
         result.put("longDescription", getZhLongDescription(currentRoom));
@@ -104,6 +109,7 @@ public class GameController {
     @PostMapping("/back")
     public Map<String, Object> back() {
         Map<String, Object> result = new HashMap<>();
+        Room currentRoom = getCurrentRoom();
 
         Room backRoom = game.getBackRoom();
 
@@ -139,6 +145,7 @@ public class GameController {
         Map<String, Object> result = new HashMap<>();
         List<Map<String, Object>> rooms = new ArrayList<>();
 
+        Room currentRoom = getCurrentRoom();
         Map<String, Room> allRooms = game.getRooms();
         for (Map.Entry<String, Room> entry : allRooms.entrySet()) {
             Room room = entry.getValue();
@@ -182,6 +189,7 @@ public class GameController {
     public Map<String, Object> take(@RequestBody Map<String, String> request) {
         String itemId = request.get("itemId");
         Map<String, Object> result = new HashMap<>();
+        Room currentRoom = getCurrentRoom();
 
         String message = game.takeItem(itemId);
         result.put("message", message);
@@ -207,6 +215,7 @@ public class GameController {
     public Map<String, Object> drop(@RequestBody Map<String, String> request) {
         String itemId = request.get("itemId");
         Map<String, Object> result = new HashMap<>();
+        Room currentRoom = getCurrentRoom();
 
         String message = game.dropItem(itemId);
         result.put("message", message);
@@ -230,6 +239,7 @@ public class GameController {
     @GetMapping("/items")
     public Map<String, Object> items() {
         Map<String, Object> result = new HashMap<>();
+        Room currentRoom = getCurrentRoom();
 
         result.put("message", game.getItemsInfo());
         result.put("description", currentRoom.getZhName());
@@ -249,6 +259,7 @@ public class GameController {
     @PostMapping("/eatcookie")
     public Map<String, Object> eatCookie() {
         Map<String, Object> result = new HashMap<>();
+        Room currentRoom = getCurrentRoom();
 
         String message = game.eatCookie();
         result.put("message", message);

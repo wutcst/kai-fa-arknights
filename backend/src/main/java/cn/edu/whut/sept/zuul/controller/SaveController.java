@@ -62,8 +62,9 @@ public class SaveController {
         Long userId = userOpt.get().getId();
         Room currentRoom = game.getCurrentRoom();
         List<Room> history = game.getRoomHistory();
+        Map<String, List<Item>> roomItems = game.getAllRoomItems();
 
-        saveService.saveGame(userId, currentRoom, game.getPlayer(), history);
+        saveService.saveGame(userId, currentRoom, game.getPlayer(), history, roomItems);
 
         return Map.of("success", true, "message", "游戏已保存");
     }
@@ -98,12 +99,15 @@ public class SaveController {
         int playerMaxWeight = (int) loadResult.get("playerMaxWeight");
         @SuppressWarnings("unchecked")
         List<Room> history = (List<Room>) loadResult.get("roomHistory");
+        @SuppressWarnings("unchecked")
+        Map<String, List<Item>> roomItems = (Map<String, List<Item>>) loadResult.get("roomItems");
 
         // 设置游戏状态
         game.setCurrentRoom(savedRoom);
         game.setPlayerInventory(inventory);
         game.setMaxWeight(playerMaxWeight);
         game.setRoomHistory(history);
+        game.setAllRoomItems(roomItems);  // 恢复房间物品状态
 
         return Map.of(
             "success", true,

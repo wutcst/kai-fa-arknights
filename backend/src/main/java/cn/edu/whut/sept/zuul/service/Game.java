@@ -47,6 +47,30 @@ public class Game {
         return player;
     }
 
+    /**
+     * 获取所有房间的当前物品状态.
+     * 返回 Map：roomId -> items list
+     */
+    public Map<String, List<Item>> getAllRoomItems() {
+        Map<String, List<Item>> roomItems = new HashMap<>();
+        for (Map.Entry<String, Room> entry : rooms.entrySet()) {
+            roomItems.put(entry.getKey(), new ArrayList<>(entry.getValue().getItems()));
+        }
+        return roomItems;
+    }
+
+    /**
+     * 设置所有房间的物品状态（从存档恢复）.
+     */
+    public void setAllRoomItems(Map<String, List<Item>> roomItems) {
+        for (Map.Entry<String, List<Item>> entry : roomItems.entrySet()) {
+            Room room = rooms.get(entry.getKey());
+            if (room != null) {
+                room.setItems(new ArrayList<>(entry.getValue()));
+            }
+        }
+    }
+
     private void createRooms()
     {
         Room outside, theater, pub, lab, office, portal;

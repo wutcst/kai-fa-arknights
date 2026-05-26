@@ -102,6 +102,13 @@ public class Room
         }
     }
 
+    /**
+     * 设置房间物品（用于从存档恢复）.
+     */
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
+
     public String getId() { return id; }
     public String getZhName() { return zhName; }
 

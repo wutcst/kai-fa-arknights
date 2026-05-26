@@ -32,6 +32,9 @@ public class GameSave {
     @Column(name = "room_history", columnDefinition = "JSON")
     private String roomHistory;  // JSON序列化
 
+    @Column(name = "room_items", columnDefinition = "JSON")
+    private String roomItems;  // 房间物品状态 JSON
+
     @Column(name = "saved_at")
     private LocalDateTime savedAt;
 
@@ -101,6 +104,14 @@ public class GameSave {
 
     public void setRoomHistory(String roomHistory) {
         this.roomHistory = roomHistory;
+    }
+
+    public String getRoomItems() {
+        return roomItems;
+    }
+
+    public void setRoomItems(String roomItems) {
+        this.roomItems = roomItems;
     }
 
     public LocalDateTime getSavedAt() {

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public class SaveService {
     /**
      * 保存游戏进度.
      */
-    public GameSave saveGame(Long userId, Room currentRoom, Player player, List<Room> roomHistory) {
+    public GameSave saveGame(Long userId, Room currentRoom, Player player, List<Room> roomHistory, Map<String, List<Item>> roomItems) {
         GameSave save = gameSaveRepository.findByUserId(userId)
                 .orElse(new GameSave());
 
@@ -77,6 +78,14 @@ public class SaveService {
             save.setRoomHistory(historyJson);
         } catch (JsonProcessingException e) {
             save.setRoomHistory("[]");
+        }
+
+        // 序列化房间物品状态
+        try {
+            String roomItemsJson = objectMapper.writeValueAsString(roomItems);
+            save.setRoomItems(roomItemsJson);
+        } catch (JsonProcessingException e) {
+            save.setRoomItems("{}");
         }
 
         return gameSaveRepository.save(save);
@@ -134,6 +143,16 @@ public class SaveService {
             history = new ArrayList<>();
         }
 
+        // 反序列化房间物品状态
+        Map<String, List<Item>> roomItems = new HashMap<>();
+        try {
+            if (save.getRoomItems() != null && !save.getRoomItems().isEmpty()) {
+                roomItems = objectMapper.readValue(save.getRoomItems(), new TypeReference<Map<String, List<Item>>>() {});
+            }
+        } catch (JsonProcessingException e) {
+            roomItems = new HashMap<>();
+        }
+
         return Map.of(
             "success", true,
             "currentRoom", savedRoom,
@@ -141,6 +160,7 @@ public class SaveService {
             "playerWeight", save.getPlayerWeight(),
             "playerMaxWeight", save.getPlayerMaxWeight(),
             "roomHistory", history,
+            "roomItems", roomItems,
             "savedAt", save.getSavedAt()
         );
     }
