@@ -23,13 +23,6 @@
             :exits="exits"
             @move="move"
           />
-
-          <!-- 浮动功能按钮 -->
-          <div class="float-buttons">
-            <button @click="look" class="btn-float">🔍 查看</button>
-            <button @click="goBack" class="btn-float">↩️ 返回</button>
-            <button @click="getHelp" class="btn-float">❓ 帮助</button>
-          </div>
         </div>
 
         <!-- 底部状态栏 -->
@@ -50,9 +43,21 @@
           />
         </div>
 
-        <!-- 地图按钮 -->
+        <!-- 操作按钮组 -->
+        <button class="map-toggle-btn btn-look" @click="look">
+          🔍 查看
+        </button>
+        <button class="map-toggle-btn" @click="showInventory">
+          🎒 背包
+        </button>
         <button class="map-toggle-btn" @click="showMap = !showMap">
           🗺️ {{ showMap ? '隐藏地图' : '显示地图' }}
+        </button>
+        <button class="map-toggle-btn" @click="getHelp">
+          ❓ 帮助
+        </button>
+        <button class="map-toggle-btn btn-back" @click="goBack">
+          ↩️ 返回
         </button>
 
         <!-- 悬浮地图 -->
@@ -65,67 +70,70 @@
           </div>
         </div>
 
-        <!-- 物品栏 -->
-        <div class="items-panel" v-if="showItems">
-          <div class="items-header">
-            <h3>🎒 物品</h3>
-            <div class="items-tabs">
-              <button
-                :class="{ active: itemsViewMode === 'room' }"
-                @click="itemsViewMode = 'room'"
-              >房间物品</button>
-              <button
-                :class="{ active: itemsViewMode === 'inventory' }"
-                @click="switchToInventory"
-              >背包({{ playerWeight }}/{{ playerMaxWeight }})</button>
-            </div>
-          </div>
-
-          <!-- 房间物品列表 -->
-          <div v-if="itemsViewMode === 'room'" class="item-list">
-            <div v-if="items.length === 0" class="empty-msg">房间里没有物品</div>
-            <div v-for="item in items" :key="item.id" class="item-card">
-              <div class="item-main">
-                <span class="item-name">{{ item.name }}</span>
-                <span class="item-desc">{{ item.description }}</span>
-              </div>
-              <div class="item-footer">
-                <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
-                <button class="btn-take" @click="handleTake(item.id)">拾取</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 背包物品列表 -->
-          <div v-if="itemsViewMode === 'inventory'" class="item-list">
-            <div v-if="inventory.length === 0" class="empty-msg">背包是空的</div>
-            <div v-for="item in inventory" :key="item.id" class="item-card">
-              <div class="item-main">
-                <span class="item-name">{{ item.name }}</span>
-                <span class="item-desc">{{ item.description }}</span>
-              </div>
-              <div class="item-footer">
-                <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
-                <button class="btn-drop" @click="handleDrop(item.id)">丢弃</button>
-              </div>
-            </div>
-            <!-- 吃饼干按钮 -->
-            <button
-              v-if="hasMagicCookie"
-              class="btn-cookie"
-              @click="handleEatCookie"
-            >🍪 吃魔法饼干（+5负重）</button>
-          </div>
-
-          <!-- 查看物品按钮 -->
-          <div class="items-actions">
-            <button class="btn-items" @click="handleShowItems">📦 查看所有物品</button>
-          </div>
-        </div>
-
         <!-- 键盘提示 -->
         <div class="keyboard-hint">
-          <span>方向键移动 | L查看 | M地图 | H帮助 | Backspace/ESC返回</span>
+          <span>方向键移动 | F房间物品 | B背包 | M地图 | H帮助 | Backspace/ESC返回</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 悬浮物品面板 - 房间物品 -->
+    <div v-if="showRoomItems" class="floating-items-panel floating-room-items" @click.self="showRoomItems = false">
+      <div class="floating-items-content">
+        <div class="floating-items-header">
+          <h3>🎒 房间内的物品</h3>
+          <button class="btn-close" @click="showRoomItems = false">✕</button>
+        </div>
+        <div class="floating-item-list">
+          <div v-if="items.length === 0" class="empty-msg">房间里没有物品</div>
+          <div v-for="item in items" :key="item.id" class="floating-item-card">
+            <div class="item-main">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-desc">{{ item.description }}</span>
+            </div>
+            <div class="item-footer">
+              <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
+              <button class="btn-take" @click="handleTake(item.id)">拾取</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 悬浮物品面板 - 背包 -->
+    <div v-if="showInventoryPanel" class="floating-items-panel floating-inventory" @click.self="showInventoryPanel = false">
+      <div class="floating-items-content">
+        <div class="floating-items-header">
+          <h3>🎒 我的背包</h3>
+          <div class="weight-bar-wrapper">
+            <div class="weight-bar">
+              <div class="weight-bar-fill" :style="{ width: weightPercent + '%' }"></div>
+            </div>
+            <span class="weight-text">{{ playerWeight }} / {{ playerMaxWeight }}</span>
+          </div>
+          <div class="value-info">
+            <span class="value-label">总价值:</span>
+            <span class="value-amount">💰 {{ totalValue }}</span>
+          </div>
+          <button class="btn-close" @click="showInventoryPanel = false">✕</button>
+        </div>
+        <div class="floating-item-list">
+          <div v-if="inventory.length === 0" class="empty-msg">背包是空的</div>
+          <div v-for="item in inventory" :key="item.id" class="floating-item-card">
+            <div class="item-main">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-desc">{{ item.description }}</span>
+            </div>
+            <div class="item-footer">
+              <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
+              <button class="btn-drop" @click="handleDrop(item.id)">丢弃</button>
+            </div>
+          </div>
+          <button
+            v-if="hasMagicCookie"
+            class="btn-cookie"
+            @click="handleEatCookie"
+          >🍪 吃魔法饼干（+5负重）</button>
         </div>
       </div>
     </div>
@@ -168,12 +176,12 @@ export default {
       inventory: [],       // 玩家背包
       playerWeight: 0,
       playerMaxWeight: 20,
-      showItems: false,  // 是否显示物品列表
+      showRoomItems: false,  // 是否显示房间物品面板
+      showInventoryPanel: false,  // 是否显示背包面板
       rooms: [],
       isError: false,
       showMap: false,  // 是否显示地图
-      isMoving: false,  // 是否正在移动中
-      itemsViewMode: 'room'  // 'room' 或 'inventory'
+      isMoving: false  // 是否正在移动中
     };
   },
   created() {
@@ -203,9 +211,15 @@ export default {
         return;
       }
       
-      // L 键查看
-      if (e.key === 'l' || e.key === 'L') {
+      // F 键查看房间物品
+      if (e.key === 'f' || e.key === 'F') {
         this.look();
+        return;
+      }
+
+      // B 键查看背包
+      if (e.key === 'b' || e.key === 'B') {
+        this.showInventory();
         return;
       }
       
@@ -292,7 +306,8 @@ export default {
         this.exits = Array.from(response.data.exits);
         // 移动后清空物品列表，只有点击查看时才加载
         this.items = [];
-        this.showItems = false;
+        this.showRoomItems = false;
+        this.showInventoryPanel = false;
         this.isError = response.data.teleported;
       } catch (error) {
         this.displayMessage = '移动错误：' + (error.response?.data?.message || error.message);
@@ -315,7 +330,8 @@ export default {
         this.longDescription = response.data.longDescription;
         this.exits = Array.from(response.data.exits);
         this.items = response.data.items || [];
-        this.showItems = true;  // 查看时显示物品列表
+        this.showRoomItems = true;  // 查看时显示房间物品面板
+        this.showInventoryPanel = false;
         this.displayMessage = '';
         this.isError = false;
       } catch (error) {
@@ -332,7 +348,8 @@ export default {
         this.longDescription = response.data.longDescription;
         this.exits = Array.from(response.data.exits);
         this.items = [];
-        this.showItems = false;
+        this.showRoomItems = false;
+        this.showInventoryPanel = false;
         this.isError = !response.data.success;
       } catch (error) {
         this.displayMessage = '返回错误：' + error.message;
@@ -342,32 +359,18 @@ export default {
     getHelp() {
       window.open('/help.html', '_blank', 'width=600,height=500');
     },
-    // 切换到背包标签页
-    async switchToInventory() {
-      this.itemsViewMode = 'inventory';
-      // 加载最新的背包数据
+    // 查看背包
+    async showInventory() {
       try {
         const response = await getItems();
         this.inventory = response.data.inventory || [];
         this.playerWeight = response.data.playerWeight || 0;
         this.playerMaxWeight = response.data.playerMaxWeight || 50;
-      } catch (error) {
-        console.error('获取背包失败:', error);
-      }
-    },
-    // 查看物品（显示房间物品）
-    async handleShowItems() {
-      try {
-        const response = await getItems();
-        this.items = response.data.items || [];
-        this.inventory = response.data.inventory || [];
-        this.playerWeight = response.data.playerWeight || 0;
-        this.playerMaxWeight = response.data.playerMaxWeight || 50;
-        this.itemsViewMode = 'room';
-        this.showItems = true;
+        this.showInventoryPanel = true;  // 显示背包悬浮面板
+        this.showRoomItems = false;
         this.displayMessage = response.data.message;
       } catch (error) {
-        this.displayMessage = '查看物品失败：' + error.message;
+        this.displayMessage = '查看背包失败：' + error.message;
         this.isError = true;
       }
     },
@@ -420,6 +423,15 @@ export default {
     // 检查背包中是否有魔法饼干
     hasMagicCookie() {
       return this.inventory.some(item => item.id === 'magic_cookie');
+    },
+    // 负重百分比
+    weightPercent() {
+      if (this.playerMaxWeight === 0) return 0;
+      return Math.min(100, (this.playerWeight / this.playerMaxWeight) * 100);
+    },
+    // 背包物品总价值
+    totalValue() {
+      return this.inventory.reduce((sum, item) => sum + (item.value || 0), 0);
     }
   }
 };
@@ -760,6 +772,209 @@ h1 {
   text-align: center;
 }
 
+/* 悬浮物品面板 */
+.floating-items-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.floating-items-content {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.floating-items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+}
+
+.floating-items-header h3 {
+  margin: 0;
+  font-size: 22px;
+  color: #333;
+}
+
+.btn-close {
+  background: #ff5252;
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: #ff1744;
+  transform: scale(1.1);
+}
+
+.floating-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.floating-item-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+}
+
+.floating-item-card .item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.floating-item-card .item-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.floating-item-card .item-desc {
+  font-size: 14px;
+  color: #666;
+}
+
+.floating-item-card .item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.floating-item-card .item-stats {
+  font-size: 13px;
+  color: #888;
+}
+
+.floating-item-card .btn-take,
+.floating-item-card .btn-drop {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.floating-item-card .btn-take {
+  background: #4CAF50;
+  color: white;
+}
+
+.floating-item-card .btn-take:hover {
+  background: #45a049;
+}
+
+.floating-item-card .btn-drop {
+  background: #ff9800;
+  color: white;
+}
+
+.floating-item-card .btn-drop:hover {
+  background: #fb8c00;
+}
+
+.btn-cookie {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 15px;
+  transition: all 0.2s;
+}
+
+.btn-cookie:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+}
+
+.weight-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.weight-bar {
+  flex: 1;
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.weight-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.weight-text {
+  font-size: 14px;
+  color: #666;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.value-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.value-label {
+  font-size: 13px;
+  color: #888;
+}
+
+.value-amount {
+  font-size: 16px;
+  font-weight: bold;
+  color: #FF9800;
+}
+
+.empty-msg {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+  font-size: 16px;
+}
+
 /* 地图按钮 */
 .map-toggle-btn {
   padding: 10px 18px;
@@ -775,6 +990,22 @@ h1 {
 
 .map-toggle-btn:hover {
   background: #455A64;
+}
+
+.map-toggle-btn.btn-back {
+  background: #9C27B0;
+}
+
+.map-toggle-btn.btn-back:hover {
+  background: #7B1FA2;
+}
+
+.map-toggle-btn.btn-look {
+  background: #4CAF50;
+}
+
+.map-toggle-btn.btn-look:hover {
+  background: #45a049;
 }
 
 /* 悬浮地图 */
