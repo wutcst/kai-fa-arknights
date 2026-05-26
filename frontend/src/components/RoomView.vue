@@ -20,8 +20,6 @@
             <div
               class="player-icon"
               :style="playerStyle"
-              :class="{ transitioning: isAnimating }"
-              @transitionend="onMoveComplete"
             >🧑</div>
           </div>
 
@@ -66,7 +64,12 @@ export default {
       isAnimating: false,
       isMoving: false,
       moveDirection: null,
-      pendingDirection: null  // 待处理的移动方向
+      pendingDirection: null,  // 待处理的移动方向
+      // 连续移动相关
+      keysPressed: new Set(),
+      moveSpeed: 0.8,  // 每帧移动百分比
+      animationFrameId: null,
+      isContinuousMove: false
     };
   },
   computed: {
@@ -74,7 +77,7 @@ export default {
       return {
         left: this.playerX + '%',
         top: this.playerY + '%',
-        transition: this.isAnimating ? 'all 0.3s ease' : 'none'
+        transition: this.isAnimating ? 'all 0.15s ease-out' : 'none'
       };
     }
   },
@@ -82,92 +85,166 @@ export default {
     this.$nextTick(() => {
       this.$refs.roomView.focus();
     });
+    // 添加全局按键监听
+    window.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('keyup', this.handleKeyUp);
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('keyup', this.handleKeyUp);
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
   },
   methods: {
     // 供外部调用的键盘处理方法
     tryMoveByKey(event) {
-      if (this.isMoving || !this.canMove) return;
+      if (this.isMoving && !this.isContinuousMove) return;
+      if (!this.canMove) return;
 
       const key = event.key;
-      let direction = null;
-      let dx = 0, dy = 0;
+      const lowerKey = key.toLowerCase();
 
       // 方向键 或 WASD
-      if (key === 'ArrowUp' || key === 'w' || key === 'W') {
-        direction = 'north';
-        dy = -20;
-      } else if (key === 'ArrowDown' || key === 's' || key === 'S') {
-        direction = 'south';
-        dy = 20;
-      } else if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
-        direction = 'west';
-        dx = -20;
-      } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
-        direction = 'east';
-        dx = 20;
-      }
-
-      if (direction) {
-        this.tryMove(direction, dx, dy);
+      if (['arrowup', 'w'].includes(lowerKey) ||
+          ['arrowdown', 's'].includes(lowerKey) ||
+          ['arrowleft', 'a'].includes(lowerKey) ||
+          ['arrowright', 'd'].includes(lowerKey)) {
+        event.preventDefault();
+        this.keysPressed.add(lowerKey);
+        if (!this.animationFrameId) {
+          this.startContinuousMove();
+        }
       }
     },
-    hasExit(direction) {
-      return this.exits.includes(direction);
-    },
-    handleKeydown(event) {
-      if (this.isMoving || !this.canMove) return;
 
-      const key = event.key;
-      let direction = null;
+    // 处理按键松开
+    handleKeyUp(event) {
+      const key = event.key.toLowerCase();
+      if (['arrowup', 'w', 'arrowdown', 's', 'arrowleft', 'a', 'arrowright', 'd'].includes(key)) {
+        this.keysPressed.delete(key);
+        if (this.keysPressed.size === 0) {
+          this.stopContinuousMove();
+        }
+      }
+    },
+
+    // 处理按键按下（内部使用）
+    handleKeyDown(event) {
+      // 只处理 RoomView 获得焦点时
+      if (document.activeElement !== this.$refs.roomView) return;
+      this.tryMoveByKey(event);
+    },
+
+    // 开始连续移动
+    startContinuousMove() {
+      this.isContinuousMove = true;
+      this.updateMovement();
+    },
+
+    // 停止连续移动
+    stopContinuousMove() {
+      this.isContinuousMove = false;
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
+    },
+
+    // 更新移动（动画循环）
+    updateMovement() {
+      if (!this.isContinuousMove || this.keysPressed.size === 0) {
+        this.stopContinuousMove();
+        return;
+      }
+
       let dx = 0, dy = 0;
 
-      // 方向键 或 WASD
-      if (key === 'ArrowUp' || key === 'w' || key === 'W') {
-        direction = 'north';
-        dy = -20;
-      } else if (key === 'ArrowDown' || key === 's' || key === 'S') {
-        direction = 'south';
-        dy = 20;
-      } else if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
-        direction = 'west';
-        dx = -20;
-      } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
-        direction = 'east';
-        dx = 20;
-      }
+      // 计算各方向增量
+      if (this.keysPressed.has('arrowup') || this.keysPressed.has('w')) dy -= this.moveSpeed;
+      if (this.keysPressed.has('arrowdown') || this.keysPressed.has('s')) dy += this.moveSpeed;
+      if (this.keysPressed.has('arrowleft') || this.keysPressed.has('a')) dx -= this.moveSpeed;
+      if (this.keysPressed.has('arrowright') || this.keysPressed.has('d')) dx += this.moveSpeed;
 
-      if (direction) {
-        this.tryMove(direction, dx, dy);
+      // 对角线移动归一化
+      if (dx !== 0 && dy !== 0) {
+        const factor = 1 / Math.sqrt(2);
+        dx *= factor;
+        dy *= factor;
       }
-    },
-    tryMove(direction, dx, dy) {
-      if (this.isAnimating) return;
 
       const newX = this.playerX + dx;
       const newY = this.playerY + dy;
 
-      // 检查是否到达边界
-      if (newX < 10 || newX > 90 || newY < 10 || newY > 90) {
-        // 到达边界，检查是否有出口
-        if (this.hasExit(direction)) {
-          // 先移动到边界位置（带动画）
-          this.isAnimating = true;
-          this.isMoving = true;
-          this.moveDirection = direction;
-          this.playerX = newX;
-          this.playerY = newY;
-          // 动画完成后触发房间切换
-          this.pendingDirection = direction;
-        } else {
-          // 无出口，碰撞效果
-          this.bounceBack();
-        }
-      } else {
-        // 正常移动（带动画）
-        this.isAnimating = true;
-        this.playerX = newX;
-        this.playerY = newY;
+      // 检查边界
+      const atBoundary = this.checkBoundaryAndMove(newX, newY, dx, dy);
+      if (atBoundary) {
+        return; // 边界触发了房间切换，停止移动循环
       }
+
+      this.animationFrameId = requestAnimationFrame(() => this.updateMovement());
+    },
+
+    // 检查边界并移动
+    checkBoundaryAndMove(newX, newY, dx, dy) {
+      // 检测8个方向的边界
+      let direction = null;
+
+      if (newX < 10) direction = 'west';
+      else if (newX > 90) direction = 'east';
+
+      if (newY < 10) direction = 'north';
+      else if (newY > 90) direction = 'south';
+
+      // 对角线边界检测
+      if (dx !== 0 && dy !== 0) {
+        if (newX < 10 && newY < 10) direction = this.getDiagonalDirection('west', 'north');
+        else if (newX < 10 && newY > 90) direction = this.getDiagonalDirection('west', 'south');
+        else if (newX > 90 && newY < 10) direction = this.getDiagonalDirection('east', 'north');
+        else if (newX > 90 && newY > 90) direction = this.getDiagonalDirection('east', 'south');
+      }
+
+      if (direction) {
+        if (this.hasExit(direction)) {
+          // 移动到边界位置
+          this.playerX = Math.max(5, Math.min(95, newX));
+          this.playerY = Math.max(5, Math.min(95, newY));
+          // 触发房间切换
+          this.triggerRoomMove(direction);
+          return true;
+        } else {
+          // 无出口，碰撞
+          this.bounceBack();
+          return false;
+        }
+      }
+
+      // 正常移动
+      this.playerX = newX;
+      this.playerY = newY;
+      return false;
+    },
+
+    // 获取对角线方向
+    getDiagonalDirection(dir1, dir2) {
+      // 根据对角线组合返回优先方向
+      if (this.hasExit(dir1)) return dir1;
+      if (this.hasExit(dir2)) return dir2;
+      return dir1;
+    },
+
+    // 触发房间切换移动
+    triggerRoomMove(direction) {
+      this.isMoving = true;
+      this.stopContinuousMove();
+      // 延迟发送移动事件，让玩家看到移动到边界的效果
+      setTimeout(() => {
+        this.$emit('move', direction);
+      }, 150);
+    },
+
+    hasExit(direction) {
+      return this.exits.includes(direction);
     },
     bounceBack() {
       // 简单的碰撞反馈
@@ -178,23 +255,13 @@ export default {
         btn.style.animation = 'bounce 0.3s';
       }
     },
-    onMoveComplete() {
-      if (this.pendingDirection) {
-        // 有待处理的移动方向，触发房间切换
-        const direction = this.pendingDirection;
-        this.pendingDirection = null;
-        this.$emit('move', direction);
-      }
-      this.isAnimating = false;
-    },
-    onMoveStart() {
-      this.isAnimating = true;
-    },
     resetPosition() {
       this.playerX = 50;
       this.playerY = 50;
       this.isMoving = false;
       this.isAnimating = false;
+      this.stopContinuousMove();
+      this.keysPressed.clear();
     }
   }
 };
