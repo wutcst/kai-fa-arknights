@@ -22,9 +22,9 @@ public class GameController {
     private final Game game;
     private Room currentRoom;
 
-    public GameController() {
-        game = new Game();
-        currentRoom = game.getCurrentRoom();
+    public GameController(Game game) {
+        this.game = game;
+        this.currentRoom = game.getCurrentRoom();
     }
 
     /**

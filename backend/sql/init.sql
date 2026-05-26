@@ -19,3 +19,17 @@ INSERT INTO users (username, password) VALUES
     ('player2', '123456'),
     ('admin', 'admin123')
 ON DUPLICATE KEY UPDATE username = username;
+
+-- 创建游戏存档表
+CREATE TABLE IF NOT EXISTS game_saves (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    current_room_id VARCHAR(50) NOT NULL,
+    player_inventory JSON,           -- 背包物品序列化
+    player_weight INT DEFAULT 0,
+    player_max_weight INT DEFAULT 20,
+    room_history JSON,               -- 移动历史序列化
+    saved_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

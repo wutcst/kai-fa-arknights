@@ -11,6 +11,10 @@ public class Item {
     private int weight;
     private int value;
 
+    public Item() {
+        // 无参构造函数，供Jackson反序列化使用
+    }
+
     public Item(String id, String name, String description, int weight, int value) {
         this.id = id;
         this.name = name;

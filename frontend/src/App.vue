@@ -3,10 +3,19 @@
     <!-- 未登录显示登录界面 -->
     <Login v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
 
-    <!-- 已登录显示游戏界面 -->
+    <!-- 已登录但未选择游戏显示开始界面 -->
+    <GameStart
+      v-else-if="showGameStart"
+      :username="username"
+      @start-game="handleStartGame"
+      @continue-game="handleContinueGame"
+    />
+
+    <!-- 已登录且已选择游戏显示游戏界面 -->
     <template v-else>
     <div class="top-bar">
       <span class="username">👤 {{ username }}</span>
+      <button @click="handleBackToMenu" class="btn-menu">返回主界面</button>
       <button @click="handleLogout" class="btn-logout">退出登录</button>
     </div>
     <h1>🌍 文字冒险世界</h1>
@@ -56,6 +65,9 @@
         <button class="map-toggle-btn" @click="getHelp">
           ❓ 帮助
         </button>
+        <button class="map-toggle-btn btn-save" @click="handleSave">
+          💾 存档
+        </button>
         <button class="map-toggle-btn btn-back" @click="goBack">
           ↩️ 返回
         </button>
@@ -72,7 +84,7 @@
 
         <!-- 键盘提示 -->
         <div class="keyboard-hint">
-          <span>方向键移动 | F房间物品 | B背包 | M地图 | H帮助 | Backspace/ESC返回</span>
+          <span>方向键移动 | F房间物品 | B背包 | M地图 | H帮助 | R存档 | Backspace/ESC返回</span>
         </div>
       </div>
     </div>
@@ -146,11 +158,12 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie } from '@/api/game';
+import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie, saveGame } from '@/api/game';
 import RoomView from '@/components/RoomView.vue';
 import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
 import Login from '@/components/Login.vue';
+import GameStart from '@/views/GameStart.vue';
 
 export default {
   name: 'App',
@@ -158,12 +171,14 @@ export default {
     RoomView,
     GameMap,
     GameControls,
-    Login
+    Login,
+    GameStart
   },
   data() {
     return {
       // 登录状态
       isLoggedIn: false,
+      showGameStart: true,
       username: '',
       // 游戏状态
       message: '欢迎来到文字冒险世界！',
@@ -198,8 +213,8 @@ export default {
         return;
       }
       
-      // 只有在已登录状态下才处理游戏快捷键
-      if (!this.isLoggedIn) return;
+      // 只有在已登录且不在开始界面才处理游戏快捷键
+      if (!this.isLoggedIn || this.showGameStart) return;
       
       // 防止重复处理
       if (this.isMoving) return;
@@ -228,7 +243,13 @@ export default {
         this.getHelp();
         return;
       }
-      
+
+      // R 键存档
+      if (e.key === 'r' || e.key === 'R') {
+        this.handleSave();
+        return;
+      }
+
       // M 键切换地图
       if (e.key === 'm' || e.key === 'M') {
         this.showMap = !this.showMap;
@@ -247,7 +268,7 @@ export default {
     if (savedUsername) {
       this.username = savedUsername;
       this.isLoggedIn = true;
-      this.fetchMap();
+      this.showGameStart = true;  // 显示游戏开始界面
     }
   },
   methods: {
@@ -255,11 +276,41 @@ export default {
     handleLoginSuccess(username) {
       this.username = username;
       this.isLoggedIn = true;
+      this.showGameStart = true;  // 显示游戏开始界面
+      localStorage.setItem('username', username);
+    },
+    // 开始新游戏
+    handleStartGame(gameData) {
+      this.showGameStart = false;
+      this.updateGameState(gameData);
       this.fetchMap();
+    },
+    // 继续游戏
+    handleContinueGame(gameData) {
+      this.showGameStart = false;
+      this.updateGameState(gameData);
+    },
+    // 更新游戏状态
+    updateGameState(gameData) {
+      this.currentRoomName = gameData.description || '';
+      this.currentRoomId = gameData.roomId || '';
+      this.longDescription = gameData.longDescription || '';
+      this.exits = Array.from(gameData.exits || []);
+      this.items = gameData.items || [];
+      this.inventory = gameData.inventory || [];
+      this.playerWeight = gameData.playerWeight || 0;
+      this.playerMaxWeight = gameData.playerMaxWeight || 20;
+      this.displayMessage = '';
+      this.isError = false;
+    },
+    // 返回主界面
+    handleBackToMenu() {
+      this.showGameStart = true;
     },
     // 退出登录
     handleLogout() {
       this.isLoggedIn = false;
+      this.showGameStart = true;
       this.username = '';
       localStorage.removeItem('username');
     },
@@ -417,6 +468,16 @@ export default {
         this.displayMessage = '吃饼干失败：' + error.message;
         this.isError = true;
       }
+    },
+    // 手动保存游戏进度
+    async handleSave() {
+      try {
+        await saveGame(this.username);
+        this.displayMessage = '💾 游戏已保存';
+      } catch (e) {
+        this.displayMessage = '保存失败';
+        this.isError = true;
+      }
     }
   },
   computed: {
@@ -474,6 +535,24 @@ h1 {
   color: white;
   font-weight: bold;
   font-size: 16px;
+}
+
+.btn-menu {
+  padding: 8px 16px;
+  background: rgba(156, 39, 176, 0.8);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s;
+  margin-right: 10px;
+}
+
+.btn-menu:hover {
+  background: #7B1FA2;
+  transform: scale(1.05);
 }
 
 .btn-logout {
@@ -998,6 +1077,14 @@ h1 {
 
 .map-toggle-btn.btn-back:hover {
   background: #7B1FA2;
+}
+
+.map-toggle-btn.btn-save {
+  background: #FF9800;
+}
+
+.map-toggle-btn.btn-save:hover {
+  background: #F57C00;
 }
 
 .map-toggle-btn.btn-look {

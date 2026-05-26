@@ -10,6 +10,8 @@ package cn.edu.whut.sept.zuul.service;
 import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -19,8 +21,8 @@ import java.util.Random;
 /**
  * 游戏核心服务.
  */
-public class Game
-{
+@Service
+public class Game {
     private Room currentRoom;
     private Map<String, Room> rooms;
     private List<Room> roomHistory;  // 房间移动历史
@@ -343,5 +345,54 @@ public class Game
         sb.append("  总重量: " + invWeight + " | 总价值: " + invValue);
 
         return sb.toString();
+    }
+
+    /**
+     * 获取房间移动历史.
+     */
+    public List<Room> getRoomHistory() {
+        return new ArrayList<>(roomHistory);
+    }
+
+    /**
+     * 设置房间移动历史.
+     */
+    public void setRoomHistory(List<Room> history) {
+        this.roomHistory.clear();
+        this.roomHistory.addAll(history);
+    }
+
+    /**
+     * 设置玩家背包物品.
+     */
+    public void setPlayerInventory(List<Item> items) {
+        this.player.getInventory().clear();
+        this.player.getInventory().addAll(items);
+    }
+
+    /**
+     * 设置玩家最大负重.
+     */
+    public void setMaxWeight(int weight) {
+        this.player.increaseMaxWeight(weight - this.player.getMaxWeight());
+    }
+
+    /**
+     * 重置游戏到初始状态.
+     */
+    public void resetToStart() {
+        this.currentRoom = rooms.get("outside");
+        this.roomHistory.clear();
+        this.player.getInventory().clear();
+        this.player.setMaxWeight(20);
+        this.justTeleported = false;
+        this.teleportedFrom = null;
+    }
+
+    /**
+     * 获取所有房间的Map.
+     */
+    public Map<String, Room> getAllRooms() {
+        return this.rooms;
     }
 }

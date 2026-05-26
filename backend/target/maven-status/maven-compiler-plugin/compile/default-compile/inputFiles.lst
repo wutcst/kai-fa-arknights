@@ -1,7 +1,15 @@
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\repository\GameSaveRepository.java
 C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\model\Room.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\service\AuthService.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\repository\UserRepository.java
 C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\model\Player.java
 C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\controller\GameController.java
-C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\ZuulApplication.java
-C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\service\Game.java
 C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\model\RoomDTO.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\model\GameSave.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\ZuulApplication.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\model\User.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\service\Game.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\controller\SaveController.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\controller\AuthController.java
 C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\model\Item.java
+C:\Users\lenovo\OneDrive\桌面\学习\软工实践2\kai-fa-arknights\backend\src\main\java\cn\edu\whut\sept\zuul\service\SaveService.java

@@ -5,6 +5,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8080/api/game';
+const SAVE_API_BASE_URL = 'http://localhost:8080/api/save';
 
 // 获取游戏状态
 export function getGameStatus() {
@@ -54,4 +55,24 @@ export function getItems() {
 // 吃魔法饼干
 export function eatCookie() {
   return axios.post(`${API_BASE_URL}/eatcookie`);
+}
+
+// 检查存档是否存在
+export function checkSave(username) {
+  return axios.get(`${SAVE_API_BASE_URL}/hasSave`, { params: { username } });
+}
+
+// 保存游戏
+export function saveGame(username) {
+  return axios.post(`${SAVE_API_BASE_URL}/save`, { username });
+}
+
+// 加载游戏
+export function loadGame(username) {
+  return axios.post(`${SAVE_API_BASE_URL}/load`, { username });
+}
+
+// 开始新游戏
+export function newGame(username) {
+  return axios.post(`${SAVE_API_BASE_URL}/newGame`, { username });
 }

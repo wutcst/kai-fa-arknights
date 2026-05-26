@@ -92,16 +92,17 @@ export default {
       let direction = null;
       let dx = 0, dy = 0;
 
-      if (key === 'ArrowUp') {
+      // 方向键 或 WASD
+      if (key === 'ArrowUp' || key === 'w' || key === 'W') {
         direction = 'north';
         dy = -20;
-      } else if (key === 'ArrowDown') {
+      } else if (key === 'ArrowDown' || key === 's' || key === 'S') {
         direction = 'south';
         dy = 20;
-      } else if (key === 'ArrowLeft') {
+      } else if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
         direction = 'west';
         dx = -20;
-      } else if (key === 'ArrowRight') {
+      } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
         direction = 'east';
         dx = 20;
       }
@@ -120,16 +121,17 @@ export default {
       let direction = null;
       let dx = 0, dy = 0;
 
-      if (key === 'ArrowUp') {
+      // 方向键 或 WASD
+      if (key === 'ArrowUp' || key === 'w' || key === 'W') {
         direction = 'north';
         dy = -20;
-      } else if (key === 'ArrowDown') {
+      } else if (key === 'ArrowDown' || key === 's' || key === 'S') {
         direction = 'south';
         dy = 20;
-      } else if (key === 'ArrowLeft') {
+      } else if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
         direction = 'west';
         dx = -20;
-      } else if (key === 'ArrowRight') {
+      } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
         direction = 'east';
         dx = 20;
       }
