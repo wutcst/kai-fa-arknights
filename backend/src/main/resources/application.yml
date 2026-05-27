@@ -5,7 +5,7 @@ spring:
   application:
     name: zuul-backend
   datasource:
-    url: jdbc:mysql://localhost:3306/arknights_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/arknights_db?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     driverClassName: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456

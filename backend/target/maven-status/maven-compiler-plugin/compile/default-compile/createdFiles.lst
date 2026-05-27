@@ -1,7 +1,0 @@
-cn\edu\whut\sept\zuul\repository\GameSaveRepository.class
-cn\edu\whut\sept\zuul\model\GameSave.class
-cn\edu\whut\sept\zuul\service\SaveService.class
-cn\edu\whut\sept\zuul\service\SaveService$2.class
-cn\edu\whut\sept\zuul\model\Player.class
-cn\edu\whut\sept\zuul\service\SaveService$1.class
-cn\edu\whut\sept\zuul\controller\SaveController.class
