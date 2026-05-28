@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 房间实体类.
@@ -98,8 +99,27 @@ public class Room
             case "garden": return "花园";
             case "dormitory": return "宿舍楼";
             case "bookstore": return "书店";
+            case "theater_lobby": return "教学楼大厅";
+            case "theater_classroom_101": return "101教室";
+            case "theater_classroom_102": return "102教室";
+            case "theater_stairway_1f": return "一楼楼梯间";
+            case "theater_classroom_201": return "201教室";
+            case "theater_classroom_202": return "202教室";
+            case "theater_office": return "教师办公室";
+            case "theater_stairway_2f": return "二楼楼梯间";
+            case "theater_classroom_301": return "301教室";
+            case "theater_classroom_302": return "302教室";
+            case "theater_lab": return "计算机实验室";
+            case "theater_stairway_3f": return "三楼楼梯间";
             default: return id;
         }
+    }
+
+    /**
+     * 设置房间物品（用于从存档恢复）.
+     */
+    public void setItems(List<Item> items) {
+        this.items = items;
     }
 
     public String getId() { return id; }

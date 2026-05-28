@@ -2,6 +2,15 @@
   <div class="game-controls">
     <div class="control-row">
       <button
+        class="direction-btn up"
+        @click="$emit('move', 'up')"
+        :disabled="!hasExit('up')"
+      >
+        ↑ 上楼
+      </button>
+    </div>
+    <div class="control-row">
+      <button
         class="direction-btn"
         @click="$emit('move', 'north')"
         :disabled="!hasExit('north')"
@@ -32,6 +41,15 @@
         :disabled="!hasExit('south')"
       >
         ↓ 南
+      </button>
+    </div>
+    <div class="control-row">
+      <button
+        class="direction-btn down"
+        @click="$emit('move', 'down')"
+        :disabled="!hasExit('down')"
+      >
+        ↓ 下楼
       </button>
     </div>
   </div>

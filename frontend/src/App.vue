@@ -3,10 +3,19 @@
     <!-- 未登录显示登录界面 -->
     <Login v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
 
-    <!-- 已登录显示游戏界面 -->
+    <!-- 已登录但未选择游戏显示开始界面 -->
+    <GameStart
+      v-else-if="showGameStart"
+      :username="username"
+      @start-game="handleStartGame"
+      @continue-game="handleContinueGame"
+    />
+
+    <!-- 已登录且已选择游戏显示游戏界面 -->
     <template v-else>
     <div class="top-bar">
       <span class="username">👤 {{ username }}</span>
+      <button @click="handleBackToMenu" class="btn-menu">返回主界面</button>
       <button @click="handleLogout" class="btn-logout">退出登录</button>
     </div>
     <h1>🌍 文字冒险世界</h1>
@@ -56,6 +65,9 @@
         <button class="map-toggle-btn" @click="getHelp">
           ❓ 帮助
         </button>
+        <button class="map-toggle-btn btn-save" @click="handleSave">
+          💾 存档
+        </button>
         <button class="map-toggle-btn btn-back" @click="goBack">
           ↩️ 返回
         </button>
@@ -72,71 +84,30 @@
 
         <!-- 键盘提示 -->
         <div class="keyboard-hint">
-          <span>方向键移动 | F房间物品 | B背包 | M地图 | H帮助 | Backspace/ESC返回</span>
+          <span>方向键移动 | F房间物品 | B背包 | M地图 | H帮助 | R存档 | Backspace/ESC返回</span>
         </div>
       </div>
     </div>
 
     <!-- 悬浮物品面板 - 房间物品 -->
-    <div v-if="showRoomItems" class="floating-items-panel floating-room-items" @click.self="showRoomItems = false">
-      <div class="floating-items-content">
-        <div class="floating-items-header">
-          <h3>🎒 房间内的物品</h3>
-          <button class="btn-close" @click="showRoomItems = false">✕</button>
-        </div>
-        <div class="floating-item-list">
-          <div v-if="items.length === 0" class="empty-msg">房间里没有物品</div>
-          <div v-for="item in items" :key="item.id" class="floating-item-card">
-            <div class="item-main">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-desc">{{ item.description }}</span>
-            </div>
-            <div class="item-footer">
-              <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
-              <button class="btn-take" @click="handleTake(item.id)">拾取</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <RoomItemsPanel
+      :show="showRoomItems"
+      :items="items"
+      @close="showRoomItems = false"
+      @take="handleTake"
+    />
 
     <!-- 悬浮物品面板 - 背包 -->
-    <div v-if="showInventoryPanel" class="floating-items-panel floating-inventory" @click.self="showInventoryPanel = false">
-      <div class="floating-items-content">
-        <div class="floating-items-header">
-          <h3>🎒 我的背包</h3>
-          <div class="weight-bar-wrapper">
-            <div class="weight-bar">
-              <div class="weight-bar-fill" :style="{ width: weightPercent + '%' }"></div>
-            </div>
-            <span class="weight-text">{{ playerWeight }} / {{ playerMaxWeight }}</span>
-          </div>
-          <div class="value-info">
-            <span class="value-label">总价值:</span>
-            <span class="value-amount">💰 {{ totalValue }}</span>
-          </div>
-          <button class="btn-close" @click="showInventoryPanel = false">✕</button>
-        </div>
-        <div class="floating-item-list">
-          <div v-if="inventory.length === 0" class="empty-msg">背包是空的</div>
-          <div v-for="item in inventory" :key="item.id" class="floating-item-card">
-            <div class="item-main">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-desc">{{ item.description }}</span>
-            </div>
-            <div class="item-footer">
-              <span class="item-stats">重量: {{ item.weight }} | 价值: {{ item.value }}</span>
-              <button class="btn-drop" @click="handleDrop(item.id)">丢弃</button>
-            </div>
-          </div>
-          <button
-            v-if="hasMagicCookie"
-            class="btn-cookie"
-            @click="handleEatCookie"
-          >🍪 吃魔法饼干（+5负重）</button>
-        </div>
-      </div>
-    </div>
+    <InventoryPanel
+      :show="showInventoryPanel"
+      :inventory="inventory"
+      :player-weight="playerWeight"
+      :player-max-weight="playerMaxWeight"
+      :total-value="totalValue"
+      @close="showInventoryPanel = false"
+      @drop="handleDrop"
+      @eat-cookie="handleEatCookie"
+    />
     </template>
   </div>
 </template>
@@ -146,11 +117,14 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie } from '@/api/game';
+import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie, saveGame } from '@/api/game';
 import RoomView from '@/components/RoomView.vue';
 import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
 import Login from '@/components/Login.vue';
+import GameStart from '@/views/GameStart.vue';
+import RoomItemsPanel from '@/components/RoomItemsPanel.vue';
+import InventoryPanel from '@/components/InventoryPanel.vue';
 
 export default {
   name: 'App',
@@ -158,12 +132,16 @@ export default {
     RoomView,
     GameMap,
     GameControls,
-    Login
+    Login,
+    GameStart,
+    RoomItemsPanel,
+    InventoryPanel
   },
   data() {
     return {
       // 登录状态
       isLoggedIn: false,
+      showGameStart: true,
       username: '',
       // 游戏状态
       message: '欢迎来到文字冒险世界！',
@@ -198,8 +176,8 @@ export default {
         return;
       }
       
-      // 只有在已登录状态下才处理游戏快捷键
-      if (!this.isLoggedIn) return;
+      // 只有在已登录且不在开始界面才处理游戏快捷键
+      if (!this.isLoggedIn || this.showGameStart) return;
       
       // 防止重复处理
       if (this.isMoving) return;
@@ -228,7 +206,13 @@ export default {
         this.getHelp();
         return;
       }
-      
+
+      // R 键存档
+      if (e.key === 'r' || e.key === 'R') {
+        this.handleSave();
+        return;
+      }
+
       // M 键切换地图
       if (e.key === 'm' || e.key === 'M') {
         this.showMap = !this.showMap;
@@ -247,7 +231,7 @@ export default {
     if (savedUsername) {
       this.username = savedUsername;
       this.isLoggedIn = true;
-      this.fetchMap();
+      this.showGameStart = true;  // 显示游戏开始界面
     }
   },
   methods: {
@@ -255,20 +239,55 @@ export default {
     handleLoginSuccess(username) {
       this.username = username;
       this.isLoggedIn = true;
+      this.showGameStart = true;  // 显示游戏开始界面
+      localStorage.setItem('username', username);
+    },
+    // 开始新游戏
+    handleStartGame(gameData) {
+      this.showGameStart = false;
+      this.updateGameState(gameData);
       this.fetchMap();
+    },
+    // 继续游戏
+    handleContinueGame(gameData) {
+      this.showGameStart = false;
+      this.updateGameState(gameData);
+      this.fetchMap(gameData.roomId);  // 传入保存的房间ID
+    },
+    // 更新游戏状态
+    updateGameState(gameData) {
+      this.currentRoomName = gameData.description || '';
+      this.currentRoomId = gameData.roomId || '';
+      this.longDescription = gameData.longDescription || '';
+      this.exits = Array.from(gameData.exits || []);
+      this.items = gameData.items || [];
+      this.inventory = gameData.inventory || [];
+      this.playerWeight = gameData.playerWeight || 0;
+      this.playerMaxWeight = gameData.playerMaxWeight || 20;
+      this.displayMessage = '';
+      this.isError = false;
+    },
+    // 返回主界面
+    handleBackToMenu() {
+      this.showGameStart = true;
     },
     // 退出登录
     handleLogout() {
       this.isLoggedIn = false;
+      this.showGameStart = true;
       this.username = '';
       localStorage.removeItem('username');
     },
-    async fetchMap() {
+    async fetchMap(savedRoomId = null) {
       try {
         const response = await getMap();
         this.rooms = response.data.rooms;
-        this.currentRoomId = response.data.currentRoomId;
-        this.fetchStatus();
+        // 如果传入了保存的房间ID（继续游戏时），使用它；否则使用后端返回的
+        this.currentRoomId = savedRoomId || response.data.currentRoomId;
+        // 只有在新游戏时才调用fetchStatus，继续游戏时已有完整状态
+        if (!savedRoomId) {
+          this.fetchStatus();
+        }
       } catch (error) {
         this.message = '错误：无法连接到服务器，请确保后端正在运行！';
         this.isError = true;
@@ -417,18 +436,19 @@ export default {
         this.displayMessage = '吃饼干失败：' + error.message;
         this.isError = true;
       }
+    },
+    // 手动保存游戏进度
+    async handleSave() {
+      try {
+        await saveGame(this.username);
+        this.displayMessage = '💾 游戏已保存';
+      } catch (e) {
+        this.displayMessage = '保存失败';
+        this.isError = true;
+      }
     }
   },
   computed: {
-    // 检查背包中是否有魔法饼干
-    hasMagicCookie() {
-      return this.inventory.some(item => item.id === 'magic_cookie');
-    },
-    // 负重百分比
-    weightPercent() {
-      if (this.playerMaxWeight === 0) return 0;
-      return Math.min(100, (this.playerWeight / this.playerMaxWeight) * 100);
-    },
     // 背包物品总价值
     totalValue() {
       return this.inventory.reduce((sum, item) => sum + (item.value || 0), 0);
@@ -474,6 +494,24 @@ h1 {
   color: white;
   font-weight: bold;
   font-size: 16px;
+}
+
+.btn-menu {
+  padding: 8px 16px;
+  background: rgba(156, 39, 176, 0.8);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s;
+  margin-right: 10px;
+}
+
+.btn-menu:hover {
+  background: #7B1FA2;
+  transform: scale(1.05);
 }
 
 .btn-logout {
@@ -998,6 +1036,14 @@ h1 {
 
 .map-toggle-btn.btn-back:hover {
   background: #7B1FA2;
+}
+
+.map-toggle-btn.btn-save {
+  background: #FF9800;
+}
+
+.map-toggle-btn.btn-save:hover {
+  background: #F57C00;
 }
 
 .map-toggle-btn.btn-look {

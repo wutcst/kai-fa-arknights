@@ -70,6 +70,13 @@ public class Player {
     }
 
     /**
+     * 设置最大负重.
+     */
+    public void setMaxWeight(int weight) {
+        this.maxWeight = weight;
+    }
+
+    /**
      * 检查是否可以添加物品.
      */
     public boolean canCarry(Item item) {

@@ -10,6 +10,8 @@ package cn.edu.whut.sept.zuul.service;
 import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -19,10 +21,11 @@ import java.util.Random;
 /**
  * 游戏核心服务.
  */
-public class Game
-{
+@Service
+public class Game {
     private Room currentRoom;
     private Map<String, Room> rooms;
+    private Map<String, List<Item>> initialRoomItems;  // 初始房间物品快照
     private List<Room> roomHistory;  // 房间移动历史
     private boolean justTeleported;   // 是否刚触发传送
     private String teleportedFrom;    // 从哪个房间传送走的
@@ -31,10 +34,12 @@ public class Game
     public Game()
     {
         rooms = new HashMap<>();
+        initialRoomItems = new HashMap<>();
         roomHistory = new ArrayList<>();
         justTeleported = false;
         player = new Player("冒险者");
         createRooms();
+        saveInitialRoomItems();
     }
 
     public Map<String, Room> getRooms() {
@@ -45,10 +50,37 @@ public class Game
         return player;
     }
 
+    /**
+     * 获取所有房间的当前物品状态.
+     * 返回 Map：roomId -> items list
+     */
+    public Map<String, List<Item>> getAllRoomItems() {
+        Map<String, List<Item>> roomItems = new HashMap<>();
+        for (Map.Entry<String, Room> entry : rooms.entrySet()) {
+            roomItems.put(entry.getKey(), new ArrayList<>(entry.getValue().getItems()));
+        }
+        return roomItems;
+    }
+
+    /**
+     * 设置所有房间的物品状态（从存档恢复）.
+     */
+    public void setAllRoomItems(Map<String, List<Item>> roomItems) {
+        for (Map.Entry<String, List<Item>> entry : roomItems.entrySet()) {
+            Room room = rooms.get(entry.getKey());
+            if (room != null) {
+                room.setItems(new ArrayList<>(entry.getValue()));
+            }
+        }
+    }
+
     private void createRooms()
     {
         Room outside, theater, pub, lab, office, portal;
         Room library, gym, cafeteria, garden, bookstore, dormitory;
+        Room theaterLobby, theaterClassroom101, theaterClassroom102, theaterStairway1f;
+        Room theaterClassroom201, theaterClassroom202, theaterOffice, theaterStairway2f;
+        Room theaterClassroom301, theaterClassroom302, theaterLab, theaterStairway3f;
 
         // create the rooms
         outside = new Room("outside the main entrance of the university", "outside");
@@ -63,6 +95,22 @@ public class Game
         garden = new Room("in the campus garden", "garden");
         bookstore = new Room("in the campus bookstore", "bookstore");
         dormitory = new Room("in the student dormitory", "dormitory");
+
+        // 教学楼内部房间
+        theaterLobby = new Room("in the theater lobby", "theater_lobby");
+        theaterClassroom101 = new Room("in classroom 101", "theater_classroom_101");
+        theaterClassroom102 = new Room("in classroom 102", "theater_classroom_102");
+        theaterStairway1f = new Room("in the 1st floor stairway", "theater_stairway_1f");
+
+        theaterClassroom201 = new Room("in classroom 201", "theater_classroom_201");
+        theaterClassroom202 = new Room("in classroom 202", "theater_classroom_202");
+        theaterOffice = new Room("in the teacher office", "theater_office");
+        theaterStairway2f = new Room("in the 2nd floor stairway", "theater_stairway_2f");
+
+        theaterClassroom301 = new Room("in classroom 301", "theater_classroom_301");
+        theaterClassroom302 = new Room("in classroom 302", "theater_classroom_302");
+        theaterLab = new Room("in the computer lab", "theater_lab");
+        theaterStairway3f = new Room("in the 3rd floor stairway", "theater_stairway_3f");
 
         // initialise room exits
         outside.setExit("east", theater);
@@ -100,6 +148,37 @@ public class Game
         // 传送房间只连接到校门口
         portal.setExit("south", outside);
 
+        // 教学楼内部连接
+        // 一楼：south进入内部
+        theater.setExit("south", theaterLobby);  // 从外部进入教学楼内部
+        theaterLobby.setExit("north", theater);  // 回到外部
+        theaterLobby.setExit("west", theaterClassroom101);
+        theaterLobby.setExit("east", theaterClassroom102);
+        theaterLobby.setExit("up", theaterStairway1f);
+        theaterClassroom101.setExit("east", theaterLobby);
+        theaterClassroom102.setExit("west", theaterLobby);
+        theaterStairway1f.setExit("down", theaterLobby);
+        theaterStairway1f.setExit("up", theaterStairway2f);
+
+        // 二楼
+        theaterStairway2f.setExit("down", theaterStairway1f);
+        theaterStairway2f.setExit("up", theaterStairway3f);
+        theaterStairway2f.setExit("west", theaterClassroom201);
+        theaterStairway2f.setExit("east", theaterClassroom202);
+        theaterStairway2f.setExit("south", theaterOffice);
+        theaterClassroom201.setExit("east", theaterStairway2f);
+        theaterClassroom202.setExit("west", theaterStairway2f);
+        theaterOffice.setExit("north", theaterStairway2f);
+
+        // 三楼
+        theaterStairway3f.setExit("down", theaterStairway2f);
+        theaterStairway3f.setExit("west", theaterClassroom301);
+        theaterStairway3f.setExit("east", theaterClassroom302);
+        theaterStairway3f.setExit("south", theaterLab);
+        theaterClassroom301.setExit("east", theaterStairway3f);
+        theaterClassroom302.setExit("west", theaterStairway3f);
+        theaterLab.setExit("north", theaterStairway3f);
+
         // save all rooms
         rooms.put("outside", outside);
         rooms.put("theater", theater);
@@ -113,6 +192,20 @@ public class Game
         rooms.put("garden", garden);
         rooms.put("bookstore", bookstore);
         rooms.put("dormitory", dormitory);
+
+        // 教学楼内部房间
+        rooms.put("theater_lobby", theaterLobby);
+        rooms.put("theater_classroom_101", theaterClassroom101);
+        rooms.put("theater_classroom_102", theaterClassroom102);
+        rooms.put("theater_stairway_1f", theaterStairway1f);
+        rooms.put("theater_classroom_201", theaterClassroom201);
+        rooms.put("theater_classroom_202", theaterClassroom202);
+        rooms.put("theater_office", theaterOffice);
+        rooms.put("theater_stairway_2f", theaterStairway2f);
+        rooms.put("theater_classroom_301", theaterClassroom301);
+        rooms.put("theater_classroom_302", theaterClassroom302);
+        rooms.put("theater_lab", theaterLab);
+        rooms.put("theater_stairway_3f", theaterStairway3f);
 
         // 添加物品到各个房间
         outside.addItem(new Item("stone", "石头", "一块普通的石头", 2, 5));
@@ -148,10 +241,46 @@ public class Game
         dormitory.addItem(new Item("pillow", "枕头", "柔软的枕头", 1, 20));
         dormitory.addItem(new Item("blanket", "毯子", "温暖的毯子", 2, 40));
 
+        // 教学楼内部物品
+        theaterLobby.addItem(new Item("brochure", "宣传册", "校园宣传册", 1, 0));
+        theaterLobby.addItem(new Item("floor_map", "楼层地图", "教学楼楼层分布图", 1, 0));
+
+        theaterClassroom101.addItem(new Item("desk", "课桌", "木制课桌", 10, 50));
+        theaterClassroom101.addItem(new Item("eraser", "黑板擦", "粉尘黑板擦", 1, 5));
+
+        theaterClassroom102.addItem(new Item("projector_remote", "投影仪遥控", "投影仪遥控器", 1, 20));
+        theaterClassroom102.addItem(new Item("chalk_box", "粉笔盒", "一盒彩色粉笔", 1, 10));
+
+        theaterStairway1f.addItem(new Item("fire_extinguisher", "灭火器", "干粉灭火器", 5, 100));
+
+        theaterClassroom201.addItem(new Item("globe", "地球仪", "教学用地球仪", 3, 80));
+        theaterClassroom201.addItem(new Item("student_work", "学生作品", "优秀学生美术作品", 2, 0));
+
+        theaterClassroom202.addItem(new Item("model", "模型", "建筑结构模型", 4, 120));
+
+        theaterOffice.addItem(new Item("coffee", "咖啡", "一杯热咖啡", 1, 25));
+        theaterOffice.addItem(new Item("certificate", "证书", "优秀教师证书", 1, 0));
+
+        theaterStairway2f.addItem(new Item("first_aid_kit", "急救箱", "基础急救用品", 2, 50));
+
+        theaterClassroom301.addItem(new Item("globe_2", "地球仪", "教学用地球仪", 3, 80));
+        theaterClassroom301.addItem(new Item("atlas", "地图集", "世界地图集", 4, 100));
+
+        theaterClassroom302.addItem(new Item("painting", "油画", "风景油画", 3, 0));
+
+        theaterLab.addItem(new Item("computer", "电脑", "教学用电脑", 8, 2000));
+        theaterLab.addItem(new Item("usb_drive", "U盘", "16G优盘", 1, 30));
+        theaterLab.addItem(new Item("lab_coat", "实验服", "白色实验服", 2, 50));
+
+        theaterStairway3f.addItem(new Item("safety_sign", "安全标识", "消防通道指示牌", 1, 0));
+
         // 随机在多个房间添加魔法饼干
         Random random = new Random();
-        Room[] cookieRooms = {outside, pub, lab, library, gym, cafeteria, garden, bookstore};
-        int cookieCount = random.nextInt(4) + 3;  // 3-6块魔法饼干
+        Room[] cookieRooms = {outside, pub, lab, library, gym, cafeteria, garden, bookstore,
+                             theaterLobby, theaterClassroom101, theaterClassroom102,
+                             theaterClassroom201, theaterClassroom202, theaterOffice,
+                             theaterClassroom301, theaterClassroom302, theaterLab};
+        int cookieCount = random.nextInt(6) + 5;  // 5-10块魔法饼干
         for (int i = 0; i < cookieCount; i++) {
             Room r = cookieRooms[random.nextInt(cookieRooms.length)];
             r.addItem(new Item("magic_cookie", "魔法饼干", "散发神奇香气的饼干，吃了可以增加负重", 1, 0));
@@ -173,11 +302,15 @@ public class Game
         if (room.getId().equals("portal")) {
             teleportedFrom = currentRoom.getZhName();  // 记录传送前的位置
             justTeleported = true;
-            // 随机传送到其他房间（除了传送房间本身）
-            Room[] targetRooms = {rooms.get("outside"), rooms.get("theater"),
-                                  rooms.get("pub"), rooms.get("lab"), rooms.get("office"),
-                                  rooms.get("library"), rooms.get("gym"), rooms.get("cafeteria"),
-                                  rooms.get("garden"), rooms.get("bookstore"), rooms.get("dormitory")};
+            // 随机传送到其他房间（除了传送房间本身和教学楼内部）
+            Room[] targetRooms = {
+                rooms.get("outside"), rooms.get("theater"),
+                rooms.get("pub"), rooms.get("lab"), rooms.get("office"),
+                rooms.get("library"), rooms.get("gym"), rooms.get("cafeteria"),
+                rooms.get("garden"), rooms.get("bookstore"), rooms.get("dormitory"),
+                rooms.get("theater_lobby"), rooms.get("theater_classroom_101"),
+                rooms.get("theater_classroom_102"), rooms.get("theater_stairway_1f")
+            };
             Random random = new Random();
             this.currentRoom = targetRooms[random.nextInt(targetRooms.length)];
             // 传送后清空历史记录，以新位置为起点
@@ -343,5 +476,83 @@ public class Game
         sb.append("  总重量: " + invWeight + " | 总价值: " + invValue);
 
         return sb.toString();
+    }
+
+    /**
+     * 获取房间移动历史.
+     */
+    public List<Room> getRoomHistory() {
+        return new ArrayList<>(roomHistory);
+    }
+
+    /**
+     * 设置房间移动历史.
+     */
+    public void setRoomHistory(List<Room> history) {
+        this.roomHistory.clear();
+        this.roomHistory.addAll(history);
+    }
+
+    /**
+     * 设置玩家背包物品.
+     */
+    public void setPlayerInventory(List<Item> items) {
+        this.player.getInventory().clear();
+        this.player.getInventory().addAll(items);
+    }
+
+    /**
+     * 设置玩家最大负重.
+     */
+    public void setMaxWeight(int weight) {
+        this.player.increaseMaxWeight(weight - this.player.getMaxWeight());
+    }
+
+    /**
+     * 保存初始房间物品快照.
+     */
+    private void saveInitialRoomItems() {
+        for (Map.Entry<String, Room> entry : rooms.entrySet()) {
+            List<Item> itemsCopy = new ArrayList<>();
+            for (Item item : entry.getValue().getItems()) {
+                itemsCopy.add(new Item(item.getId(), item.getName(), item.getDescription(),
+                                      item.getWeight(), item.getValue()));
+            }
+            initialRoomItems.put(entry.getKey(), itemsCopy);
+        }
+    }
+
+    public void resetToStart() {
+        this.currentRoom = rooms.get("outside");
+        this.roomHistory.clear();
+        this.player.getInventory().clear();
+        this.player.setMaxWeight(20);
+        this.justTeleported = false;
+        this.teleportedFrom = null;
+        // 恢复房间物品到初始状态
+        restoreRoomItems();
+    }
+
+    /**
+     * 恢复房间物品到初始状态.
+     */
+    private void restoreRoomItems() {
+        for (Map.Entry<String, List<Item>> entry : initialRoomItems.entrySet()) {
+            Room room = rooms.get(entry.getKey());
+            if (room != null) {
+                room.getItems().clear();
+                for (Item item : entry.getValue()) {
+                    room.addItem(new Item(item.getId(), item.getName(), item.getDescription(),
+                                         item.getWeight(), item.getValue()));
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取所有房间的Map.
+     */
+    public Map<String, Room> getAllRooms() {
+        return this.rooms;
     }
 }
