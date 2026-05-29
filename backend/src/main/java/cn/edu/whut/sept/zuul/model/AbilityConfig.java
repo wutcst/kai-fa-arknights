@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * 能力配置实体类.
+ * 定义游戏中各种能力的配置参数.
+ */
 @Entity
 @Table(name = "ability_config")
 public class AbilityConfig {
@@ -121,10 +125,22 @@ public class AbilityConfig {
         this.createdAt = createdAt;
     }
 
+    /**
+     * 计算指定等级的能力升级费用.
+     *
+     * @param currentLevel 当前等级
+     * @return 升级到下一级需要的金币
+     */
     public int calculateCost(int currentLevel) {
         return (int) (baseCost * Math.pow(costMultiplier.doubleValue(), currentLevel - 1));
     }
 
+    /**
+     * 计算指定等级的能力效果值.
+     *
+     * @param level 等级
+     * @return 该等级的能力效果值
+     */
     public int calculateValue(int level) {
         return baseValue + incrementPerLevel * (level - 1);
     }

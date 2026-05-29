@@ -14,6 +14,11 @@ public class Player {
     private int maxWeight;              // 最大负重
     private int baseMaxWeight;          // 基础最大负重
 
+    /**
+     * 构造函数.
+     *
+     * @param name 玩家名称
+     */
     public Player(String name) {
         this.name = name;
         this.inventory = new ArrayList<>();
@@ -21,18 +26,22 @@ public class Player {
         this.maxWeight = baseMaxWeight;
     }
 
+    /** 获取玩家名称. */
     public String getName() {
         return name;
     }
 
+    /** 设置玩家名称. */
     public void setName(String name) {
         this.name = name;
     }
 
+    /** 获取当前房间. */
     public Room getCurrentRoom() {
         return currentRoom;
     }
 
+    /** 设置当前房间. */
     public void setCurrentRoom(Room room) {
         this.currentRoom = room;
     }

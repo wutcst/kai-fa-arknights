@@ -21,6 +21,9 @@ public class AuthController {
 
     /**
      * 用户注册.
+     *
+     * @param request 包含用户名和密码的请求
+     * @return 注册结果
      */
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody Map<String, String> request) {
@@ -35,6 +38,9 @@ public class AuthController {
 
     /**
      * 用户登录.
+     *
+     * @param request 包含用户名和密码的请求
+     * @return 登录结果
      */
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> request) {
@@ -50,6 +56,9 @@ public class AuthController {
 
     /**
      * 修改密码.
+     *
+     * @param request 包含用户名、旧密码和新密码的请求
+     * @return 修改结果
      */
     @PostMapping("/changePassword")
     public Map<String, Object> changePassword(@RequestBody Map<String, String> request) {
@@ -65,6 +74,9 @@ public class AuthController {
 
     /**
      * 检查用户名是否存在.
+     *
+     * @param username 用户名
+     * @return 检查结果
      */
     @GetMapping("/checkUsername")
     public Map<String, Object> checkUsername(@RequestParam String username) {
@@ -76,6 +88,9 @@ public class AuthController {
 
     /**
      * 根据用户名获取用户信息.
+     *
+     * @param username 用户名
+     * @return 用户信息
      */
     @GetMapping("/user")
     public Map<String, Object> getUserByUsername(@RequestParam String username) {

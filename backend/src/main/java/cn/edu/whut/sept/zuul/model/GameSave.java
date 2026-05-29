@@ -42,6 +42,12 @@ public class GameSave {
         this.savedAt = LocalDateTime.now();
     }
 
+    /**
+     * 构造函数.
+     *
+     * @param userId         用户ID
+     * @param currentRoomId 当前房间ID
+     */
     public GameSave(Long userId, String currentRoomId) {
         this.userId = userId;
         this.currentRoomId = currentRoomId;
@@ -50,75 +56,57 @@ public class GameSave {
         this.savedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
+    /** 获取存档ID. */
+    public Long getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /** 设置存档ID. */
+    public void setId(Long id) { this.id = id; }
 
-    public Long getUserId() {
-        return userId;
-    }
+    /** 获取用户ID. */
+    public Long getUserId() { return userId; }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    /** 设置用户ID. */
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public String getCurrentRoomId() {
-        return currentRoomId;
-    }
+    /** 获取当前房间ID. */
+    public String getCurrentRoomId() { return currentRoomId; }
 
-    public void setCurrentRoomId(String currentRoomId) {
-        this.currentRoomId = currentRoomId;
-    }
+    /** 设置当前房间ID. */
+    public void setCurrentRoomId(String currentRoomId) { this.currentRoomId = currentRoomId; }
 
-    public String getPlayerInventory() {
-        return playerInventory;
-    }
+    /** 获取玩家背包（JSON格式）. */
+    public String getPlayerInventory() { return playerInventory; }
 
-    public void setPlayerInventory(String playerInventory) {
-        this.playerInventory = playerInventory;
-    }
+    /** 设置玩家背包（JSON格式）. */
+    public void setPlayerInventory(String playerInventory) { this.playerInventory = playerInventory; }
 
-    public Integer getPlayerWeight() {
-        return playerWeight;
-    }
+    /** 获取玩家当前重量. */
+    public Integer getPlayerWeight() { return playerWeight; }
 
-    public void setPlayerWeight(Integer playerWeight) {
-        this.playerWeight = playerWeight;
-    }
+    /** 设置玩家当前重量. */
+    public void setPlayerWeight(Integer playerWeight) { this.playerWeight = playerWeight; }
 
-    public Integer getPlayerMaxWeight() {
-        return playerMaxWeight;
-    }
+    /** 获取玩家最大负重. */
+    public Integer getPlayerMaxWeight() { return playerMaxWeight; }
 
-    public void setPlayerMaxWeight(Integer playerMaxWeight) {
-        this.playerMaxWeight = playerMaxWeight;
-    }
+    /** 设置玩家最大负重. */
+    public void setPlayerMaxWeight(Integer playerMaxWeight) { this.playerMaxWeight = playerMaxWeight; }
 
-    public String getRoomHistory() {
-        return roomHistory;
-    }
+    /** 获取房间历史（JSON格式）. */
+    public String getRoomHistory() { return roomHistory; }
 
-    public void setRoomHistory(String roomHistory) {
-        this.roomHistory = roomHistory;
-    }
+    /** 设置房间历史（JSON格式）. */
+    public void setRoomHistory(String roomHistory) { this.roomHistory = roomHistory; }
 
-    public String getRoomItems() {
-        return roomItems;
-    }
+    /** 获取房间物品状态（JSON格式）. */
+    public String getRoomItems() { return roomItems; }
 
-    public void setRoomItems(String roomItems) {
-        this.roomItems = roomItems;
-    }
+    /** 设置房间物品状态（JSON格式）. */
+    public void setRoomItems(String roomItems) { this.roomItems = roomItems; }
 
-    public LocalDateTime getSavedAt() {
-        return savedAt;
-    }
+    /** 获取存档时间. */
+    public LocalDateTime getSavedAt() { return savedAt; }
 
-    public void setSavedAt(LocalDateTime savedAt) {
-        this.savedAt = savedAt;
-    }
+    /** 设置存档时间. */
+    public void setSavedAt(LocalDateTime savedAt) { this.savedAt = savedAt; }
 }

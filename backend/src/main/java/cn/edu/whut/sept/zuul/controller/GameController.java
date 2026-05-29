@@ -3,6 +3,7 @@ package cn.edu.whut.sept.zuul.controller;
 import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
+import cn.edu.whut.sept.zuul.service.AbilityService;
 import cn.edu.whut.sept.zuul.service.Game;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -20,9 +21,19 @@ import java.util.ArrayList;
 public class GameController {
 
     private final Game game;
+    private final AbilityService abilityService;
 
-    public GameController(Game game) {
+    public GameController(Game game, AbilityService abilityService) {
         this.game = game;
+        this.abilityService = abilityService;
+    }
+
+    private int getPlayerMaxWeight() {
+        Long userId = game.getCurrentUserId();
+        if (userId != null) {
+            return abilityService.getMaxWeight(userId);
+        }
+        return game.getPlayer().getMaxWeight();
     }
 
     private Room getCurrentRoom() {
@@ -47,6 +58,9 @@ public class GameController {
 
     /**
      * 移动角色到指定方向.
+     *
+     * @param request 包含移动方向的请求
+     * @return 移动结果及当前房间状态
      */
     @PostMapping("/move")
     public Map<String, Object> move(@RequestBody Map<String, String> request) {
@@ -184,6 +198,9 @@ public class GameController {
 
     /**
      * 拾取物品（take命令）.
+     *
+     * @param request 包含物品ID的请求
+     * @return 拾取结果及当前状态
      */
     @PostMapping("/take")
     public Map<String, Object> take(@RequestBody Map<String, String> request) {
@@ -201,7 +218,7 @@ public class GameController {
         result.put("items", getRoomItems(currentRoom));
         result.put("inventory", getPlayerInventory());
         result.put("playerWeight", game.getPlayer().getTotalWeight());
-        result.put("playerMaxWeight", game.getPlayer().getMaxWeight());
+        result.put("playerMaxWeight", getPlayerMaxWeight());
 
         // 检查是否拾取成功
         result.put("success", message.contains("拾取了"));
@@ -210,6 +227,9 @@ public class GameController {
 
     /**
      * 丢弃物品（drop命令）.
+     *
+     * @param request 包含物品ID的请求
+     * @return 丢弃结果及当前状态
      */
     @PostMapping("/drop")
     public Map<String, Object> drop(@RequestBody Map<String, String> request) {
@@ -227,7 +247,7 @@ public class GameController {
         result.put("items", getRoomItems(currentRoom));
         result.put("inventory", getPlayerInventory());
         result.put("playerWeight", game.getPlayer().getTotalWeight());
-        result.put("playerMaxWeight", game.getPlayer().getMaxWeight());
+        result.put("playerMaxWeight", getPlayerMaxWeight());
 
         result.put("success", !message.contains("没有"));
         return result;
@@ -248,7 +268,7 @@ public class GameController {
         result.put("items", getRoomItems(currentRoom));
         result.put("inventory", getPlayerInventory());
         result.put("playerWeight", game.getPlayer().getTotalWeight());
-        result.put("playerMaxWeight", game.getPlayer().getMaxWeight());
+        result.put("playerMaxWeight", getPlayerMaxWeight());
 
         return result;
     }
@@ -269,7 +289,7 @@ public class GameController {
         result.put("items", getRoomItems(currentRoom));
         result.put("inventory", getPlayerInventory());
         result.put("playerWeight", game.getPlayer().getTotalWeight());
-        result.put("playerMaxWeight", game.getPlayer().getMaxWeight());
+        result.put("playerMaxWeight", getPlayerMaxWeight());
 
         result.put("success", message.contains("吃了"));
         return result;

@@ -101,7 +101,7 @@ public class AbilityService {
 
         int newLevel = currentLevel + 1;
         userAbility.setAbilityLevel(abilityCode, newLevel);
-        userAbilityRepository.save(userAbility);
+        userAbilityRepository.saveAndFlush(userAbility);
 
         int newValue = config.calculateValue(newLevel);
 

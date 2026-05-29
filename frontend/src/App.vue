@@ -9,6 +9,7 @@
       :username="username"
       @start-game="handleStartGame"
       @continue-game="handleContinueGame"
+      @logout="handleLogout"
     />
 
     <!-- 已登录且已选择游戏显示游戏界面 -->

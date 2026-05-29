@@ -36,6 +36,9 @@ public class SaveController {
 
     /**
      * 检查用户是否有存档.
+     *
+     * @param username 用户名
+     * @return 是否存在存档
      */
     @GetMapping("/hasSave")
     public Map<String, Object> hasSave(@RequestParam String username) {
@@ -49,6 +52,9 @@ public class SaveController {
 
     /**
      * 保存游戏进度.
+     *
+     * @param request 包含用户名的请求
+     * @return 保存结果
      */
     @PostMapping("/save")
     public Map<String, Object> saveGame(@RequestBody Map<String, String> request) {
@@ -74,6 +80,9 @@ public class SaveController {
 
     /**
      * 加载游戏进度.
+     *
+     * @param request 包含用户名的请求
+     * @return 加载结果及游戏状态
      */
     @PostMapping("/load")
     public Map<String, Object> loadGame(@RequestBody Map<String, String> request) {
@@ -110,7 +119,11 @@ public class SaveController {
         game.setPlayerInventory(inventory);
         game.setMaxWeight(playerMaxWeight);
         game.setRoomHistory(history);
-        game.setAllRoomItems(roomItems);  // 恢复房间物品状态
+        game.setAllRoomItems(roomItems);
+        game.setCurrentUserId(userId);
+
+        int currentMaxWeight = abilityService.getMaxWeight(userId);
+        game.setMaxWeight(currentMaxWeight);
 
         return Map.of(
             "success", true,
@@ -122,12 +135,15 @@ public class SaveController {
             "items", getRoomItems(savedRoom),
             "inventory", getPlayerInventory(),
             "playerWeight", playerWeight,
-            "playerMaxWeight", playerMaxWeight
+            "playerMaxWeight", currentMaxWeight
         );
     }
 
     /**
      * 开始新游戏（删除存档并重置状态）.
+     *
+     * @param request 包含用户名的请求
+     * @return 新游戏状态
      */
     @PostMapping("/newGame")
     public Map<String, Object> newGame(@RequestBody Map<String, String> request) {
@@ -148,6 +164,7 @@ public class SaveController {
 
         // 重置游戏状态
         game.resetToStart();
+        game.setCurrentUserId(userId);
 
         // 根据用户能力设置初始属性
         int maxWeight = abilityService.getMaxWeight(userId);
@@ -168,6 +185,9 @@ public class SaveController {
 
     /**
      * 探索结算 - 将背包物品转换为金币.
+     *
+     * @param request 包含用户名的请求
+     * @return 结算结果
      */
     @PostMapping("/settle")
     public Map<String, Object> settleExploration(@RequestBody Map<String, String> request) {
