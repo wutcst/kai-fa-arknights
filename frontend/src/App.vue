@@ -15,6 +15,7 @@
     <template v-else>
     <div class="top-bar">
       <span class="username">👤 {{ username }}</span>
+      <span class="gold-display">💰 金币: {{ userGold }}</span>
       <button @click="handleBackToMenu" class="btn-menu">返回主界面</button>
       <button @click="handleLogout" class="btn-logout">退出登录</button>
     </div>
@@ -30,6 +31,7 @@
             :roomName="currentRoomName"
             :description="longDescription"
             :exits="exits"
+            :moveSpeed="currentMoveSpeed"
             @move="move"
           />
         </div>
@@ -71,6 +73,12 @@
         <button class="map-toggle-btn btn-back" @click="goBack">
           ↩️ 返回
         </button>
+        <button class="map-toggle-btn btn-settle" @click="showSettleConfirm = true">
+          💎 结算
+        </button>
+        <button class="map-toggle-btn btn-ability" @click="showAbilityPanel = true; fetchUserAbility()">
+          ⬆️ 升级
+        </button>
 
         <!-- 悬浮地图 -->
         <div v-if="showMap" class="floating-map" @click="showMap = false">
@@ -108,6 +116,26 @@
       @drop="handleDrop"
       @eat-cookie="handleEatCookie"
     />
+
+    <!-- 悬浮能力面板 -->
+    <AbilityPanel
+      v-if="showAbilityPanel"
+      :gold="userGold"
+      :configs="abilityConfigs"
+      :ability="userAbility"
+      @close="showAbilityPanel = false"
+      @upgrade="handleUpgrade"
+    />
+
+    <!-- 结算确认对话框 -->
+    <ConfirmDialog
+      v-if="showSettleConfirm"
+      title="确认结算"
+      :message="'结算后游戏将重置，您将返回主界面。\n背包中的物品将转换为金币。'"
+      :goldAmount="expectedSettleGold"
+      @confirm="handleSettle"
+      @cancel="showSettleConfirm = false"
+    />
     </template>
   </div>
 </template>
@@ -117,7 +145,8 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie, saveGame } from '@/api/game';
+import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie, saveGame, newGame, settleExploration, getUserAbility, getAbilityConfigs, upgradeAbility, getUserStats } from '@/api/game';
+import { getUserByUsername } from '@/api/auth';
 import RoomView from '@/components/RoomView.vue';
 import GameMap from '@/components/GameMap.vue';
 import GameControls from '@/components/GameControls.vue';
@@ -125,6 +154,8 @@ import Login from '@/components/Login.vue';
 import GameStart from '@/views/GameStart.vue';
 import RoomItemsPanel from '@/components/RoomItemsPanel.vue';
 import InventoryPanel from '@/components/InventoryPanel.vue';
+import AbilityPanel from '@/components/AbilityPanel.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 export default {
   name: 'App',
@@ -135,7 +166,9 @@ export default {
     Login,
     GameStart,
     RoomItemsPanel,
-    InventoryPanel
+    InventoryPanel,
+    AbilityPanel,
+    ConfirmDialog
   },
   data() {
     return {
@@ -156,10 +189,22 @@ export default {
       playerMaxWeight: 20,
       showRoomItems: false,  // 是否显示房间物品面板
       showInventoryPanel: false,  // 是否显示背包面板
+      showAbilityPanel: false,  // 是否显示能力面板
+      showSettleConfirm: false,  // 是否显示结算确认对话框
       rooms: [],
       isError: false,
       showMap: false,  // 是否显示地图
-      isMoving: false  // 是否正在移动中
+      isMoving: false,  // 是否正在移动中
+      // 金币和能力
+      userGold: 0,
+      userAbility: null,
+      abilityConfigs: [],
+      abilityLevels: {
+        maxWeightLevel: 1,
+        goldBonusLevel: 1,
+        moveSpeedLevel: 1
+      },
+      currentMoveSpeed: 0.5  // 当前移动速度
     };
   },
   created() {
@@ -247,12 +292,14 @@ export default {
       this.showGameStart = false;
       this.updateGameState(gameData);
       this.fetchMap();
+      this.fetchUserAbility();
     },
     // 继续游戏
     handleContinueGame(gameData) {
       this.showGameStart = false;
       this.updateGameState(gameData);
       this.fetchMap(gameData.roomId);  // 传入保存的房间ID
+      this.fetchUserAbility();
     },
     // 更新游戏状态
     updateGameState(gameData) {
@@ -446,12 +493,125 @@ export default {
         this.displayMessage = '保存失败';
         this.isError = true;
       }
+    },
+    // 获取用户金币和能力信息
+    async fetchUserAbility() {
+      try {
+        const userResp = await getUserByUsername(this.username);
+        if (!userResp.data.success) {
+          console.error('获取用户信息失败:', userResp.data.message);
+          return;
+        }
+        const userId = userResp.data.id;
+        console.log('获取到用户ID:', userId);
+        const [abilityResp, configsResp] = await Promise.all([
+          getUserAbility(userId),
+          getAbilityConfigs()
+        ]);
+        console.log('能力响应:', abilityResp.data);
+        this.userAbility = abilityResp.data;
+        this.userGold = abilityResp.data.gold || 0;
+        this.abilityConfigs = configsResp.data;
+        this.abilityLevels = {
+          maxWeightLevel: abilityResp.data.maxWeightLevel || 1,
+          goldBonusLevel: abilityResp.data.goldBonusLevel || 1,
+          moveSpeedLevel: abilityResp.data.moveSpeedLevel || 1
+        };
+        // 计算移动速度
+        const speedConfig = configsResp.data.find(c => c.abilityCode === 'move_speed');
+        if (speedConfig) {
+          const speedLevel = abilityResp.data.moveSpeedLevel || 1;
+          const baseSpeed = 0.5;
+const increment = 0.15;
+          this.currentMoveSpeed = baseSpeed + (speedLevel - 1) * increment;
+        }
+        console.log('用户金币:', this.userGold);
+      } catch (error) {
+        console.error('获取能力信息失败:', error);
+      }
+    },
+    // 探索结算
+    async handleSettle() {
+      this.showSettleConfirm = false;
+      try {
+        const response = await settleExploration(this.username);
+        if (response.data.success) {
+          this.displayMessage = response.data.message;
+          this.userGold = response.data.totalGold;
+          this.inventory = [];
+          this.playerWeight = 0;
+          this.playerMaxWeight = response.data.playerMaxWeight;
+          this.isError = false;
+          await this.fetchUserAbility();
+          await newGame(this.username);
+          this.showGameStart = true;
+        } else {
+          this.displayMessage = response.data.message;
+          this.isError = true;
+        }
+      } catch (error) {
+        this.displayMessage = '结算失败：' + error.message;
+        this.isError = true;
+      }
+    },
+    // 升级能力
+    async handleUpgrade(abilityCode) {
+      try {
+        const userResp = await getUserByUsername(this.username);
+        if (!userResp.data.success) return;
+        const userId = userResp.data.id;
+        const response = await upgradeAbility(userId, abilityCode);
+        if (response.data.success) {
+          this.displayMessage = response.data.message;
+          this.userGold = response.data.remainingGold;
+          await this.fetchUserAbility();
+          if (abilityCode === 'max_weight') {
+            const statsResp = await getUserStats(userId);
+            console.log('升级后 maxWeight:', statsResp.data.maxWeight);
+            this.playerMaxWeight = statsResp.data.maxWeight;
+            console.log('this.playerMaxWeight 已更新为:', this.playerMaxWeight);
+          }
+          this.isError = false;
+        } else {
+          this.displayMessage = response.data.message;
+          this.isError = true;
+        }
+      } catch (error) {
+        this.displayMessage = '升级失败：' + error.message;
+        this.isError = true;
+      }
+    },
+    // 计算升级所需金币
+    calculateUpgradeCost(abilityCode) {
+      const config = this.abilityConfigs.find(c => c.abilityCode === abilityCode);
+      if (!config || !this.userAbility) return 0;
+      const level = this.userAbility[config.abilityCode + 'Level'] || 1;
+      if (level >= config.maxLevel) return null;
+      return Math.floor(config.baseCost * Math.pow(config.costMultiplier, level - 1));
+    },
+    // 获取能力当前值
+    getAbilityValue(abilityCode) {
+      const config = this.abilityConfigs.find(c => c.abilityCode === abilityCode);
+      if (!config || !this.userAbility) return config?.baseValue || 0;
+      const level = this.userAbility[config.abilityCode + 'Level'] || 1;
+      return config.baseValue + config.incrementPerLevel * (level - 1);
     }
   },
   computed: {
     // 背包物品总价值
     totalValue() {
       return this.inventory.reduce((sum, item) => sum + (item.value || 0), 0);
+    },
+    inventoryTotalValue() {
+      return this.inventory.reduce((sum, item) => sum + (item.value || 0), 0);
+    },
+    // 预期结算收益（含金币加成）
+    expectedSettleGold() {
+      const baseGold = this.inventoryTotalValue;
+      const bonusLevel = this.abilityLevels?.goldBonusLevel || 1;
+      const bonusPercent = (bonusLevel - 1) * 10;
+      const bonus = Math.floor(baseGold * bonusPercent / 100);
+      return baseGold + bonus;
     }
   }
 };
@@ -529,6 +689,31 @@ h1 {
 .btn-logout:hover {
   background: #e74c3c;
   transform: scale(1.05);
+}
+
+.gold-display {
+  background: rgba(255, 215, 0, 0.3);
+  padding: 5px 15px;
+  border-radius: 20px;
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.btn-settle {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.btn-settle:hover {
+  background: linear-gradient(135deg, #8e44ad, #9b59b6);
+}
+
+.btn-ability {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+
+.btn-ability:hover {
+  background: linear-gradient(135deg, #e67e22, #f39c12);
 }
 
 /* 整体布局 */

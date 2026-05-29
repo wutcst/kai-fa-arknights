@@ -24,3 +24,8 @@ export function changePassword(username, oldPassword, newPassword) {
 export function checkUsername(username) {
   return axios.get(`${API_BASE_URL}/checkUsername`, { params: { username } });
 }
+
+// 根据用户名获取用户信息
+export function getUserByUsername(username) {
+  return axios.get(`${API_BASE_URL}/user`, { params: { username } });
+}

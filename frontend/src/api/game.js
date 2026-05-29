@@ -76,3 +76,33 @@ export function loadGame(username) {
 export function newGame(username) {
   return axios.post(`${SAVE_API_BASE_URL}/newGame`, { username });
 }
+
+// 探索结算
+export function settleExploration(username) {
+  return axios.post(`${SAVE_API_BASE_URL}/settle`, { username });
+}
+
+// 能力相关API
+const ABILITY_API_BASE_URL = 'http://localhost:8080/api/ability';
+
+// 获取用户能力信息
+export function getUserAbility(userId) {
+  return axios.get(`${ABILITY_API_BASE_URL}/user/${userId}`);
+}
+
+// 获取所有能力配置
+export function getAbilityConfigs() {
+  return axios.get(`${ABILITY_API_BASE_URL}/config`);
+}
+
+// 升级能力
+export function upgradeAbility(userId, abilityCode) {
+  return axios.post(`${ABILITY_API_BASE_URL}/upgrade`, null, {
+    params: { userId, abilityCode }
+  });
+}
+
+// 获取用户属性数值
+export function getUserStats(userId) {
+  return axios.get(`${ABILITY_API_BASE_URL}/stats/${userId}`);
+}

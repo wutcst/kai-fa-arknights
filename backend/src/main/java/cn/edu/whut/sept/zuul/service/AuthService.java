@@ -96,4 +96,11 @@ public class AuthService {
     public boolean userExists(String username) {
         return userRepository.existsByUsername(username);
     }
+
+    /**
+     * 根据用户名查找用户.
+     */
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }

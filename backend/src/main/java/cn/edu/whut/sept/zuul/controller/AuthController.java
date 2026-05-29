@@ -1,8 +1,10 @@
 package cn.edu.whut.sept.zuul.controller;
 
+import cn.edu.whut.sept.zuul.model.User;
 import cn.edu.whut.sept.zuul.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 认证 REST API 控制器.
@@ -69,6 +71,23 @@ public class AuthController {
         boolean exists = authService.userExists(username);
         return Map.of(
             "exists", exists
+        );
+    }
+
+    /**
+     * 根据用户名获取用户信息.
+     */
+    @GetMapping("/user")
+    public Map<String, Object> getUserByUsername(@RequestParam String username) {
+        Optional<User> userOpt = authService.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return Map.of("success", false, "message", "用户不存在");
+        }
+        User user = userOpt.get();
+        return Map.of(
+            "success", true,
+            "id", user.getId(),
+            "username", user.getUsername()
         );
     }
 }

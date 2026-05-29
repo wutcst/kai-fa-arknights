@@ -4,6 +4,7 @@ import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.model.User;
 import cn.edu.whut.sept.zuul.repository.UserRepository;
+import cn.edu.whut.sept.zuul.service.AbilityService;
 import cn.edu.whut.sept.zuul.service.Game;
 import cn.edu.whut.sept.zuul.service.SaveService;
 import org.springframework.web.bind.annotation.*;
@@ -24,11 +25,13 @@ public class SaveController {
     private final Game game;
     private final SaveService saveService;
     private final UserRepository userRepository;
+    private final AbilityService abilityService;
 
-    public SaveController(Game game, SaveService saveService, UserRepository userRepository) {
+    public SaveController(Game game, SaveService saveService, UserRepository userRepository, AbilityService abilityService) {
         this.game = game;
         this.saveService = saveService;
         this.userRepository = userRepository;
+        this.abilityService = abilityService;
     }
 
     /**
@@ -146,6 +149,10 @@ public class SaveController {
         // 重置游戏状态
         game.resetToStart();
 
+        // 根据用户能力设置初始属性
+        int maxWeight = abilityService.getMaxWeight(userId);
+        game.setMaxWeight(maxWeight);
+
         Room currentRoom = game.getCurrentRoom();
         return Map.of(
             "success", true,
@@ -154,7 +161,45 @@ public class SaveController {
             "longDescription", currentRoom.getShortDescription(),
             "exits", currentRoom.getExits(),
             "roomId", currentRoom.getId(),
-            "items", getRoomItems(currentRoom)
+            "items", getRoomItems(currentRoom),
+            "playerMaxWeight", maxWeight
+        );
+    }
+
+    /**
+     * 探索结算 - 将背包物品转换为金币.
+     */
+    @PostMapping("/settle")
+    public Map<String, Object> settleExploration(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        if (username == null || username.trim().isEmpty()) {
+            return Map.of("success", false, "message", "用户名不能为空");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(username.trim());
+        if (userOpt.isEmpty()) {
+            return Map.of("success", false, "message", "用户不存在");
+        }
+
+        Long userId = userOpt.get().getId();
+        List<Item> inventory = new ArrayList<>(game.getPlayer().getInventory());
+
+        Map<String, Object> settleResult = abilityService.settleExploration(userId, inventory);
+
+        int goldEarned = (int) settleResult.get("goldEarned");
+        int totalGold = (int) settleResult.get("totalGold");
+
+        game.getPlayer().getInventory().clear();
+        game.setMaxWeight(abilityService.getMaxWeight(userId));
+
+        return Map.of(
+            "success", true,
+            "message", "结算成功！获得 " + goldEarned + " 金币",
+            "goldEarned", goldEarned,
+            "totalGold", totalGold,
+            "inventory", new ArrayList<>(),
+            "playerWeight", 0,
+            "playerMaxWeight", abilityService.getMaxWeight(userId)
         );
     }
 
