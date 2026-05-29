@@ -1,5 +1,11 @@
 # 软件工程实训任务二：小组协同开发
 
+[![CI](https://github.com/wutcst/kai-fa-arknights/actions/workflows/ci.yml/badge.svg)](https://github.com/wutcst/kai-fa-arknights/actions/workflows/ci.yml)
+
+## CI / 持续集成
+
+本仓库已配置 GitHub Actions 持续集成流程，覆盖后端 Maven 测试与打包、前端依赖安装、代码规范检查和前端构建。CI 成功后会自动上传后端 jar 与前端 dist 构建产物，用于满足课程 DevOps / 持续集成要求。
+
 ## 任务目的
 * 巩固强化软件编程规范
 * 提高面向对象软件建模与抽象能力
@@ -75,5 +81,4 @@
 4. 每小组制作一只5-10分钟的视频对作业成果进行说明展示，并公开发表在bilibili.com上，统一以【武理26软工实践】作为视频标题前缀
 5. 期末时以小组答辩形式进行公开答辩验收；
 6. 允许使用AI进行辅助开发和设计，但需在报告中明确详细说明所使用的AI模型及所辅助完成的开发工作等内容；
-
 
