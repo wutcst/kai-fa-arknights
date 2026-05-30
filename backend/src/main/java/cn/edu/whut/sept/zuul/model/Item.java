@@ -23,9 +23,28 @@ public class Item {
         this.value = value;
     }
 
+    /**
+     * 获取物品ID.
+     */
     public String getId() { return id; }
+
+    /**
+     * 获取物品名称.
+     */
     public String getName() { return name; }
+
+    /**
+     * 获取物品描述.
+     */
     public String getDescription() { return description; }
+
+    /**
+     * 获取物品重量.
+     */
     public int getWeight() { return weight; }
+
+    /**
+     * 获取物品价值.
+     */
     public int getValue() { return value; }
 }
