@@ -117,29 +117,53 @@ public class Room
 
     /**
      * 设置房间物品（用于从存档恢复）.
+     *
+     * @param items 物品列表
      */
     public void setItems(List<Item> items) {
         this.items = items;
     }
 
+    /**
+     * 获取房间ID.
+     */
     public String getId() { return id; }
+
+    /**
+     * 获取房间中文名称.
+     */
     public String getZhName() { return zhName; }
 
+    /**
+     * 设置房间出口.
+     *
+     * @param direction 方向
+     * @param neighbor  相连的房间
+     */
     public void setExit(String direction, Room neighbor)
     {
         exits.put(direction, neighbor);
     }
 
+    /**
+     * 获取房间短描述（英文）.
+     */
     public String getShortDescription()
     {
         return description;
     }
 
+    /**
+     * 获取房间长描述.
+     */
     public String getLongDescription()
     {
         return "You are " + description + ".\n" + getExitString();
     }
 
+    /**
+     * 获取出口方向字符串.
+     */
     private String getExitString()
     {
         String returnString = "Exits:";
@@ -150,11 +174,20 @@ public class Room
         return returnString;
     }
 
+    /**
+     * 获取指定方向的出口房间.
+     *
+     * @param direction 方向
+     * @return 出口房间，如果不存在则返回null
+     */
     public Room getExit(String direction)
     {
         return exits.get(direction);
     }
 
+    /**
+     * 获取所有出口方向.
+     */
     public Set<String> getExits() {
         return exits.keySet();
     }
