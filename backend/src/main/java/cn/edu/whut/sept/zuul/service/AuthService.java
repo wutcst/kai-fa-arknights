@@ -18,6 +18,10 @@ public class AuthService {
 
     /**
      * 用户注册.
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @return 注册结果信息
      */
     public String register(String username, String password) {
         if (username == null || username.trim().isEmpty()) {
@@ -42,6 +46,10 @@ public class AuthService {
 
     /**
      * 用户登录.
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @return 登录结果信息
      */
     public String login(String username, String password) {
         if (username == null || username.trim().isEmpty()) {
@@ -63,6 +71,11 @@ public class AuthService {
 
     /**
      * 修改密码.
+     *
+     * @param username    用户名
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @return 修改结果信息
      */
     public String changePassword(String username, String oldPassword, String newPassword) {
         if (username == null || username.trim().isEmpty()) {
@@ -92,8 +105,21 @@ public class AuthService {
 
     /**
      * 检查用户是否存在.
+     *
+     * @param username 用户名
+     * @return 是否存在
      */
     public boolean userExists(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    /**
+     * 根据用户名查找用户.
+     *
+     * @param username 用户名
+     * @return 用户对象（如果存在）
+     */
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }

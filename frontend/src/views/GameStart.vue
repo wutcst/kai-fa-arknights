@@ -4,6 +4,13 @@
       <h1>🌍 文字冒险世界</h1>
       <p class="welcome-text">欢迎, {{ username }}!</p>
 
+      <button
+        class="btn-logout"
+        @click="handleLogout"
+      >
+        🚪 退出登录
+      </button>
+
       <div class="game-options">
         <button
           v-if="hasSave"
@@ -96,7 +103,6 @@ export default {
       try {
         const response = await newGame(this.username);
         if (response.data.success) {
-          // 先保存初始状态作为存档
           await saveGame(this.username);
           this.$emit('start-game', response.data);
         } else {
@@ -107,6 +113,9 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    handleLogout() {
+      this.$emit('logout');
     }
   }
 };
@@ -143,6 +152,23 @@ export default {
   color: #666;
   font-size: 16px;
   margin-bottom: 30px;
+}
+
+.btn-logout {
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.btn-logout:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
 }
 
 .game-options {

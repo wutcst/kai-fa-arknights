@@ -42,6 +42,12 @@ public class GameSave {
         this.savedAt = LocalDateTime.now();
     }
 
+    /**
+     * 构造函数.
+     *
+     * @param userId         用户ID
+     * @param currentRoomId 当前房间ID
+     */
     public GameSave(Long userId, String currentRoomId) {
         this.userId = userId;
         this.currentRoomId = currentRoomId;

@@ -30,6 +30,7 @@ public class Game {
     private boolean justTeleported;   // 是否刚触发传送
     private String teleportedFrom;    // 从哪个房间传送走的
     private Player player;            // 玩家对象
+    private Long currentUserId;       // 当前用户ID
 
     public Game()
     {
@@ -42,12 +43,30 @@ public class Game {
         saveInitialRoomItems();
     }
 
+    /**
+     * 获取所有房间映射.
+     *
+     * @return 房间ID到房间对象的映射
+     */
     public Map<String, Room> getRooms() {
         return rooms;
     }
 
+    /**
+     * 获取玩家对象.
+     *
+     * @return 玩家对象
+     */
     public Player getPlayer() {
         return player;
+    }
+
+    public Long getCurrentUserId() {
+        return currentUserId;
+    }
+
+    public void setCurrentUserId(Long currentUserId) {
+        this.currentUserId = currentUserId;
     }
 
     /**
@@ -290,12 +309,19 @@ public class Game {
         player.setCurrentRoom(currentRoom);
     }
 
+    /**
+     * 获取当前房间.
+     *
+     * @return 当前房间对象
+     */
     public Room getCurrentRoom() {
         return currentRoom;
     }
 
     /**
      * 设置当前房间，处理历史记录和传送逻辑.
+     *
+     * @param room 要设置的房间
      */
     public void setCurrentRoom(Room room) {
         // 如果进入传送房间，触发随机传送
@@ -368,6 +394,8 @@ public class Game {
 
     /**
      * 检查是否可以回退.
+     *
+     * @return 是否可以回退
      */
     public boolean canGoBack() {
         return !roomHistory.isEmpty();
@@ -480,6 +508,8 @@ public class Game {
 
     /**
      * 获取房间移动历史.
+     *
+     * @return 房间历史列表的副本
      */
     public List<Room> getRoomHistory() {
         return new ArrayList<>(roomHistory);
@@ -487,6 +517,8 @@ public class Game {
 
     /**
      * 设置房间移动历史.
+     *
+     * @param history 房间历史列表
      */
     public void setRoomHistory(List<Room> history) {
         this.roomHistory.clear();
@@ -495,6 +527,8 @@ public class Game {
 
     /**
      * 设置玩家背包物品.
+     *
+     * @param items 物品列表
      */
     public void setPlayerInventory(List<Item> items) {
         this.player.getInventory().clear();
@@ -503,6 +537,8 @@ public class Game {
 
     /**
      * 设置玩家最大负重.
+     *
+     * @param weight 最大负重值
      */
     public void setMaxWeight(int weight) {
         this.player.increaseMaxWeight(weight - this.player.getMaxWeight());
@@ -522,6 +558,9 @@ public class Game {
         }
     }
 
+    /**
+     * 重置游戏到初始状态.
+     */
     public void resetToStart() {
         this.currentRoom = rooms.get("outside");
         this.roomHistory.clear();

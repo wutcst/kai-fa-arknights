@@ -1,8 +1,10 @@
 package cn.edu.whut.sept.zuul.controller;
 
+import cn.edu.whut.sept.zuul.model.User;
 import cn.edu.whut.sept.zuul.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 认证 REST API 控制器.
@@ -19,6 +21,9 @@ public class AuthController {
 
     /**
      * 用户注册.
+     *
+     * @param request 包含用户名和密码的请求
+     * @return 注册结果
      */
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody Map<String, String> request) {
@@ -33,6 +38,9 @@ public class AuthController {
 
     /**
      * 用户登录.
+     *
+     * @param request 包含用户名和密码的请求
+     * @return 登录结果
      */
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> request) {
@@ -48,6 +56,9 @@ public class AuthController {
 
     /**
      * 修改密码.
+     *
+     * @param request 包含用户名、旧密码和新密码的请求
+     * @return 修改结果
      */
     @PostMapping("/changePassword")
     public Map<String, Object> changePassword(@RequestBody Map<String, String> request) {
@@ -63,12 +74,35 @@ public class AuthController {
 
     /**
      * 检查用户名是否存在.
+     *
+     * @param username 用户名
+     * @return 检查结果
      */
     @GetMapping("/checkUsername")
     public Map<String, Object> checkUsername(@RequestParam String username) {
         boolean exists = authService.userExists(username);
         return Map.of(
             "exists", exists
+        );
+    }
+
+    /**
+     * 根据用户名获取用户信息.
+     *
+     * @param username 用户名
+     * @return 用户信息
+     */
+    @GetMapping("/user")
+    public Map<String, Object> getUserByUsername(@RequestParam String username) {
+        Optional<User> userOpt = authService.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return Map.of("success", false, "message", "用户不存在");
+        }
+        User user = userOpt.get();
+        return Map.of(
+            "success", true,
+            "id", user.getId(),
+            "username", user.getUsername()
         );
     }
 }

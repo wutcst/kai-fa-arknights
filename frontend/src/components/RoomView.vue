@@ -55,6 +55,10 @@ export default {
     canMove: {
       type: Boolean,
       default: true
+    },
+    moveSpeed: {
+      type: Number,
+      default: 0.5
     }
   },
   data() {
@@ -67,12 +71,14 @@ export default {
       pendingDirection: null,  // 待处理的移动方向
       // 连续移动相关
       keysPressed: new Set(),
-      moveSpeed: 0.8,  // 每帧移动百分比
       animationFrameId: null,
       isContinuousMove: false
     };
   },
   computed: {
+    effectiveMoveSpeed() {
+      return this.moveSpeed || 0.5;
+    },
     playerStyle() {
       return {
         left: this.playerX + '%',
@@ -161,10 +167,10 @@ export default {
       let dx = 0, dy = 0;
 
       // 计算各方向增量
-      if (this.keysPressed.has('arrowup') || this.keysPressed.has('w')) dy -= this.moveSpeed;
-      if (this.keysPressed.has('arrowdown') || this.keysPressed.has('s')) dy += this.moveSpeed;
-      if (this.keysPressed.has('arrowleft') || this.keysPressed.has('a')) dx -= this.moveSpeed;
-      if (this.keysPressed.has('arrowright') || this.keysPressed.has('d')) dx += this.moveSpeed;
+      if (this.keysPressed.has('arrowup') || this.keysPressed.has('w')) dy -= this.effectiveMoveSpeed;
+      if (this.keysPressed.has('arrowdown') || this.keysPressed.has('s')) dy += this.effectiveMoveSpeed;
+      if (this.keysPressed.has('arrowleft') || this.keysPressed.has('a')) dx -= this.effectiveMoveSpeed;
+      if (this.keysPressed.has('arrowright') || this.keysPressed.has('d')) dx += this.effectiveMoveSpeed;
 
       // 对角线移动归一化
       if (dx !== 0 && dy !== 0) {

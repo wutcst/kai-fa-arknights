@@ -3,6 +3,10 @@ package cn.edu.whut.sept.zuul.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * 用户能力实体类.
+ * 存储用户的能力等级、金币等信息.
+ */
 @Entity
 @Table(name = "user_abilities")
 public class UserAbility {
@@ -109,6 +113,12 @@ public class UserAbility {
         this.updatedAt = updatedAt;
     }
 
+    /**
+     * 获取指定能力等级.
+     *
+     * @param abilityCode 能力代码（max_weight/gold_bonus/move_speed）
+     * @return 能力等级，默认返回1
+     */
     public int getAbilityLevel(String abilityCode) {
         switch (abilityCode) {
             case "max_weight":
@@ -122,6 +132,12 @@ public class UserAbility {
         }
     }
 
+    /**
+     * 设置指定能力等级.
+     *
+     * @param abilityCode 能力代码（max_weight/gold_bonus/move_speed）
+     * @param level       要设置的等级
+     */
     public void setAbilityLevel(String abilityCode, int level) {
         switch (abilityCode) {
             case "max_weight":
@@ -137,11 +153,22 @@ public class UserAbility {
         this.updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 增加金币.
+     *
+     * @param amount 增加的金币数量
+     */
     public void addGold(int amount) {
         this.gold += amount;
         this.updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 消耗金币.
+     *
+     * @param amount 消耗的金币数量
+     * @return 是否成功消耗（金币不足时返回false）
+     */
     public boolean spendGold(int amount) {
         if (this.gold >= amount) {
             this.gold -= amount;

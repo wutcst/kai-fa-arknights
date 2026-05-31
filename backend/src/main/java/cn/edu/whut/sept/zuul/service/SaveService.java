@@ -35,6 +35,9 @@ public class SaveService {
 
     /**
      * 检查用户是否有存档.
+     *
+     * @param userId 用户ID
+     * @return 是否有存档
      */
     public boolean hasSave(Long userId) {
         return gameSaveRepository.existsByUserId(userId);
@@ -42,6 +45,9 @@ public class SaveService {
 
     /**
      * 获取用户的存档信息.
+     *
+     * @param userId 用户ID
+     * @return 存档信息（如果存在）
      */
     public Optional<GameSave> getSave(Long userId) {
         return gameSaveRepository.findByUserId(userId);
@@ -49,6 +55,13 @@ public class SaveService {
 
     /**
      * 保存游戏进度.
+     *
+     * @param userId      用户ID
+     * @param currentRoom 当前房间
+     * @param player      玩家对象
+     * @param roomHistory 房间移动历史
+     * @param roomItems   各房间物品状态
+     * @return 保存的存档对象
      */
     public GameSave saveGame(Long userId, Room currentRoom, Player player, List<Room> roomHistory, Map<String, List<Item>> roomItems) {
         GameSave save = gameSaveRepository.findByUserId(userId)
@@ -93,6 +106,8 @@ public class SaveService {
 
     /**
      * 删除存档.
+     *
+     * @param userId 用户ID
      */
     public void deleteSave(Long userId) {
         gameSaveRepository.deleteByUserId(userId);
@@ -100,7 +115,10 @@ public class SaveService {
 
     /**
      * 从存档加载游戏状态.
-     * 返回包含加载状态的Map.
+     *
+     * @param userId   用户ID
+     * @param allRooms 所有房间的映射
+     * @return 包含加载状态的Map
      */
     public Map<String, Object> loadGame(Long userId, Map<String, Room> allRooms) {
         Optional<GameSave> saveOpt = gameSaveRepository.findByUserId(userId);
