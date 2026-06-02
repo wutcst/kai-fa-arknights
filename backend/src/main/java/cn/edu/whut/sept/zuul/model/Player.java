@@ -72,6 +72,13 @@ public class Player {
     }
 
     /**
+     * 获取基础最大负重.
+     */
+    public int getBaseMaxWeight() {
+        return baseMaxWeight;
+    }
+
+    /**
      * 增加最大负重（魔法饼干效果）.
      */
     public void increaseMaxWeight(int amount) {
