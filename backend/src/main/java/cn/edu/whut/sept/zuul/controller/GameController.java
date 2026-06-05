@@ -36,6 +36,11 @@ public class GameController {
         return game.getPlayer().getMaxWeight();
     }
 
+    /**
+     * 获取当前房间对象.
+     *
+     * @return 当前房间
+     */
     private Room getCurrentRoom() {
         return game.getCurrentRoom();
     }
@@ -103,6 +108,8 @@ public class GameController {
 
     /**
      * 查看当前房间信息（look命令）.
+     *
+     * @return 当前房间详细信息
      */
     @GetMapping("/look")
     public Map<String, Object> look() {
@@ -119,6 +126,8 @@ public class GameController {
 
     /**
      * 返回上一个房间（back命令）.
+     *
+     * @return 返回结果及当前房间状态
      */
     @PostMapping("/back")
     public Map<String, Object> back() {
@@ -153,6 +162,8 @@ public class GameController {
 
     /**
      * 获取地图数据（所有房间及连接关系）.
+     *
+     * @return 所有房间及其连接关系
      */
     @GetMapping("/map")
     public Map<String, Object> getMap() {
@@ -187,6 +198,8 @@ public class GameController {
 
     /**
      * 获取帮助信息.
+     *
+     * @return 帮助信息
      */
     @GetMapping("/help")
     public Map<String, Object> getHelp() {
@@ -255,6 +268,8 @@ public class GameController {
 
     /**
      * 查看所有物品（items命令）.
+     *
+     * @return 房间物品和背包物品列表
      */
     @GetMapping("/items")
     public Map<String, Object> items() {
@@ -275,6 +290,8 @@ public class GameController {
 
     /**
      * 吃魔法饼干（eat cookie命令）.
+     *
+     * @return 吃饼干结果及当前状态
      */
     @PostMapping("/eatcookie")
     public Map<String, Object> eatCookie() {
@@ -295,10 +312,22 @@ public class GameController {
         return result;
     }
 
+    /**
+     * 获取房间的中文长描述.
+     *
+     * @param room 房间对象
+     * @return 中文长描述
+     */
     private String getZhLongDescription(Room room) {
         return "";
     }
 
+    /**
+     * 将英文方向转换为中文.
+     *
+     * @param dir 英文方向
+     * @return 中文方向
+     */
     private String getZhDirection(String dir) {
         switch(dir) {
             case "north": return "北方";

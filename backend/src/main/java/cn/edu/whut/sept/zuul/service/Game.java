@@ -546,6 +546,7 @@ public class Game {
 
     /**
      * 保存初始房间物品快照.
+     * 用于游戏重置时恢复房间物品.
      */
     private void saveInitialRoomItems() {
         for (Map.Entry<String, Room> entry : rooms.entrySet()) {

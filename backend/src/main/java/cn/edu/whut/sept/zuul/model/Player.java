@@ -72,6 +72,19 @@ public class Player {
     }
 
     /**
+<<<<<<< Updated upstream
+=======
+     * 获取基础最大负重.
+     * 基础最大负重是不受魔法饼干影响的初始负重上限.
+     *
+     * @return 基础最大负重值
+     */
+    public int getBaseMaxWeight() {
+        return baseMaxWeight;
+    }
+
+    /**
+>>>>>>> Stashed changes
      * 增加最大负重（魔法饼干效果）.
      */
     public void increaseMaxWeight(int amount) {
