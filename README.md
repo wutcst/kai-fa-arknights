@@ -84,6 +84,8 @@ PR 目标分支为 `master` 或 `feature` 时也会触发 CI。
 
 `feature` 稳定并通过构建、测试和文档检查后，再通过 PR 合入 `master`。课程验收结束前建议保留 `feature`，用于展示协同开发过程和集成历史。
 
+当前历史分支处理清单见 [docs/branch-governance.md](docs/branch-governance.md)。
+
 ## 课程任务说明
 
 本仓库用于完成“软件工程实训任务二：小组协同开发”。课程要求包括：
