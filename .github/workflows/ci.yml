@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -9,6 +10,13 @@ on:
     branches:
       - master
       - feature
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
@@ -36,6 +44,7 @@ jobs:
         run: mvn -B package
 
       - name: Upload backend jar
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
           name: backend-jar
@@ -77,6 +86,7 @@ jobs:
         run: npm run build
 
       - name: Upload frontend dist
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
