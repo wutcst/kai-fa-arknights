@@ -278,12 +278,13 @@ public class GameTest {
     void testRoomHistoryClearedAfterTeleport() {
         game.setCurrentRoom(game.getRooms().get("theater"));
         game.setCurrentRoom(game.getRooms().get("lab"));
-        int historySizeBeforeTeleport = game.getRoomHistory().size();
         assertFalse(game.getRoomHistory().isEmpty());
 
         game.setCurrentRoom(game.getRooms().get("portal"));
         assertTrue(game.isJustTeleported());
-        assertNotEquals("lab", game.getCurrentRoom().getId());
+        assertNotEquals("portal", game.getCurrentRoom().getId());
+        assertEquals(1, game.getRoomHistory().size());
+        assertEquals(game.getCurrentRoom(), game.getRoomHistory().get(0));
     }
 
     @Test
