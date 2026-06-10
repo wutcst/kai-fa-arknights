@@ -140,8 +140,8 @@ export default {
     tryMoveByKey(event) {
       this.$refs.roomGrid?.tryMoveByKey(event);
     },
-    resetPosition() {
-      this.$refs.roomGrid?.resetPosition();
+    resetPosition(entryDirection) {
+      this.$refs.roomGrid?.resetPosition(entryDirection);
     }
   }
 };

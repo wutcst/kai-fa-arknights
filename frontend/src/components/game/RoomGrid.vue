@@ -197,9 +197,16 @@ export default {
       event.preventDefault();
       this.movePlayer(direction);
     },
-    resetPosition() {
-      this.playerRow = CENTER;
-      this.playerCol = CENTER;
+    resetPosition(entryDirection) {
+      const entryPositions = {
+        north: [GRID_SIZE - 2, CENTER],
+        south: [1, CENTER],
+        west: [CENTER, GRID_SIZE - 2],
+        east: [CENTER, 1]
+      };
+      const [row, col] = entryPositions[entryDirection] || [CENTER, CENTER];
+      this.playerRow = row;
+      this.playerCol = col;
       this.bumpWall();
     }
   },

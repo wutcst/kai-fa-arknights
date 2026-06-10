@@ -348,7 +348,7 @@ export default {
         // 移动完成后重置小人位置（带延迟以配合动画）
         setTimeout(() => {
           if (this.$refs.roomView) {
-            this.$refs.roomView.resetPosition();
+            this.$refs.roomView.resetPosition(direction);
           }
         }, 50);
       }
