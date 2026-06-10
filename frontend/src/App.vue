@@ -483,7 +483,7 @@ export default {
           return;
         }
         this.updateGameState(response.data);
-        this.appendLog(this.displayMessage, this.isError);
+        this.appendLog('读取存档成功');
         await this.fetchMap(response.data.roomId);
         await this.fetchUserAbility();
       } catch (error) {
