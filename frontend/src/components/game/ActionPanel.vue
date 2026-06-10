@@ -2,11 +2,11 @@
   <section class="action-panel">
     <h2>行动</h2>
     <div class="move-pad">
-      <button :disabled="!hasExit('north') || busy" @click="$emit('move', 'north')">北</button>
-      <button :disabled="!hasExit('west') || busy" @click="$emit('move', 'west')">西</button>
+      <button class="north-action" :disabled="!hasExit('north') || busy" @click="$emit('move', 'north')">北</button>
+      <button class="west-action" :disabled="!hasExit('west') || busy" @click="$emit('move', 'west')">西</button>
       <button :disabled="busy" class="center-action" @click="$emit('look')">查看</button>
-      <button :disabled="!hasExit('east') || busy" @click="$emit('move', 'east')">东</button>
-      <button :disabled="!hasExit('south') || busy" @click="$emit('move', 'south')">南</button>
+      <button class="east-action" :disabled="!hasExit('east') || busy" @click="$emit('move', 'east')">东</button>
+      <button class="south-action" :disabled="!hasExit('south') || busy" @click="$emit('move', 'south')">南</button>
     </div>
 
     <div class="action-stack">
@@ -80,18 +80,34 @@ h2 {
 
 .move-pad {
   display: grid;
+  grid-template-areas:
+    ". north ."
+    "west center east"
+    ". south .";
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 14px;
 }
 
-.move-pad button:first-child,
-.move-pad button:last-child {
-  grid-column: 2;
+.north-action {
+  grid-area: north;
+}
+
+.west-action {
+  grid-area: west;
+}
+
+.east-action {
+  grid-area: east;
+}
+
+.south-action {
+  grid-area: south;
 }
 
 .center-action {
   background: #7a5a32;
+  grid-area: center;
 }
 
 .action-stack {
