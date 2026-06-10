@@ -53,7 +53,7 @@ assignees: ""
 填写本任务对应的开发分支，例如：
 
 ```text
-feature/inventory-system
+feat/inventory-system
 ```
 
 ## 相关说明
