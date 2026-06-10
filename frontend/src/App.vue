@@ -242,7 +242,8 @@ export default {
       this.currentRoomId = gameData.roomId || '';
       this.longDescription = gameData.longDescription || '';
       this.exits = Array.from(gameData.exits || []);
-      this.items = gameData.items || [];
+      // 房间物品必须通过“查看”显现，避免进入房间时提前暴露。
+      this.items = [];
       this.inventory = gameData.inventory || [];
       this.syncSelectedInventory();
       this.playerWeight = gameData.playerWeight || 0;
