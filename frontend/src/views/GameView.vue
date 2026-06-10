@@ -31,6 +31,7 @@
         @move="$emit('move', $event)"
         @active-item-change="activeRoomItemId = $event"
         @active-item-name-change="activeRoomItemName = $event"
+        @active-vertical-exit-change="activeVerticalExit = $event"
       />
 
       <aside class="right-rail">
@@ -39,6 +40,7 @@
           :inventory="inventory"
           :active-room-item-id="activeRoomItemId"
           :active-room-item-name="activeRoomItemName"
+          :active-vertical-exit="activeVerticalExit"
           :selected-inventory-id="selectedInventoryId"
           :busy="busy"
           @move="$emit('move', $event)"
@@ -142,7 +144,8 @@ export default {
   data() {
     return {
       activeRoomItemId: '',
-      activeRoomItemName: ''
+      activeRoomItemName: '',
+      activeVerticalExit: ''
     };
   },
   methods: {

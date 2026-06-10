@@ -9,8 +9,8 @@
       <button class="south-action" :disabled="!hasExit('south') || busy" @click="$emit('move', 'south')">南</button>
     </div>
     <div class="stair-actions">
-      <button :disabled="!hasExit('up') || busy" @click="$emit('move', 'up')">上楼</button>
-      <button :disabled="!hasExit('down') || busy" @click="$emit('move', 'down')">下楼</button>
+      <button :disabled="activeVerticalExit !== 'up' || busy" @click="$emit('move', 'up')">上楼</button>
+      <button :disabled="activeVerticalExit !== 'down' || busy" @click="$emit('move', 'down')">下楼</button>
     </div>
 
     <div class="action-stack">
@@ -47,6 +47,10 @@ export default {
       default: ''
     },
     activeRoomItemName: {
+      type: String,
+      default: ''
+    },
+    activeVerticalExit: {
       type: String,
       default: ''
     },

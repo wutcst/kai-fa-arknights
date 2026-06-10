@@ -22,8 +22,9 @@
     </div>
     <div v-if="hasVerticalExit" class="floor-hint">
       楼层出口：
-      <strong v-if="hasExit('up')">上楼</strong>
-      <strong v-if="hasExit('down')">下楼</strong>
+      <strong v-if="hasExit('up')">右上楼梯上楼</strong>
+      <strong v-if="hasExit('down')">左下楼梯下楼</strong>
+      <span v-if="activeVerticalExit">当前可{{ activeVerticalExit === 'up' ? '上楼' : '下楼' }}</span>
     </div>
     <p class="room-description">{{ description || '观察周围环境，选择下一步行动。' }}</p>
   </section>
@@ -72,6 +73,12 @@ export default {
         [5, 3]
       ];
     },
+    stairPositions() {
+      return {
+        up: [7, 3],
+        down: [1, 5]
+      };
+    },
     visibleItems() {
       return this.items.slice(0, 6);
     },
@@ -83,6 +90,12 @@ export default {
     },
     hasVerticalExit() {
       return this.hasExit('up') || this.hasExit('down');
+    },
+    activeVerticalExit() {
+      return ['up', 'down'].find((direction) => {
+        const [col, row] = this.stairPositions[direction];
+        return this.hasExit(direction) && row === this.playerRow && col === this.playerCol;
+      }) || '';
     },
     cells() {
       return Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, index) => {
@@ -109,6 +122,12 @@ export default {
           label = this.itemLabel(this.visibleItems[itemIndex]);
         }
 
+        const stairDirection = this.stairAt(row, col);
+        if (stairDirection && !label) {
+          classes.push('stair', `stair-${stairDirection}`);
+          label = stairDirection === 'up' ? '⇧' : '⇩';
+        }
+
         if (row === this.playerRow && col === this.playerCol) {
           classes.push('player');
           label = '◆';
@@ -128,6 +147,12 @@ export default {
       handler(item) {
         this.$emit('active-item-change', item?.id || '');
         this.$emit('active-item-name-change', item?.name || '');
+      }
+    },
+    activeVerticalExit: {
+      immediate: true,
+      handler(direction) {
+        this.$emit('active-vertical-exit-change', direction);
       }
     }
   },
@@ -150,6 +175,12 @@ export default {
         east: 'E'
       };
       return labels[direction] || '';
+    },
+    stairAt(row, col) {
+      return ['up', 'down'].find((direction) => {
+        const [stairCol, stairRow] = this.stairPositions[direction];
+        return this.hasExit(direction) && stairRow === row && stairCol === col;
+      }) || '';
     },
     itemLabel(item) {
       if (item.id === 'magic_cookie') return '🍪';
@@ -226,11 +257,15 @@ export default {
       this.movePlayer(direction);
     },
     resetPosition(entryDirection) {
+      const upEntry = this.stairPositions.down;
+      const downEntry = this.stairPositions.up;
       const entryPositions = {
         north: [GRID_SIZE - 2, CENTER],
         south: [1, CENTER],
         west: [CENTER, GRID_SIZE - 2],
-        east: [CENTER, 1]
+        east: [CENTER, 1],
+        up: [upEntry[1], upEntry[0]],
+        down: [downEntry[1], downEntry[0]]
       };
       const [row, col] = entryPositions[entryDirection] || [CENTER, CENTER];
       this.playerRow = row;
@@ -346,6 +381,26 @@ export default {
 .item {
   background: radial-gradient(circle, #f1d27a 0 28%, #634520 29% 70%, #2a1e16 71%);
   border: 1px solid #d7a84d;
+}
+
+.stair {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 4px, transparent 4px 8px),
+    linear-gradient(180deg, #315d4a, #182b24);
+  border: 1px solid #8fe2b4;
+  color: #dff5e8;
+  font-weight: 900;
+}
+
+.player.stair {
+  background:
+    radial-gradient(circle at 50% 50%, #f8f1d5 0 25%, #1f8f69 26% 52%, transparent 53%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 4px, transparent 4px 8px),
+    linear-gradient(180deg, #315d4a, #182b24);
+  border-color: #b7f5cf;
+  box-shadow:
+    0 0 0 3px rgba(143, 226, 180, 0.22),
+    0 0 28px rgba(143, 226, 180, 0.62);
 }
 
 .cell-label {
