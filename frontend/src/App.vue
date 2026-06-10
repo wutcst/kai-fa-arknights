@@ -14,109 +14,46 @@
 
     <!-- 已登录且已选择游戏显示游戏界面 -->
     <template v-else>
-    <div class="top-bar">
-      <span class="username">👤 {{ username }}</span>
-      <span class="gold-display">💰 金币: {{ userGold }}</span>
-      <button @click="handleBackToMenu" class="btn-menu">返回主界面</button>
-      <button @click="handleLogout" class="btn-logout">退出登录</button>
-    </div>
-    <h1>🌍 文字冒险世界</h1>
-
-    <div class="game-wrapper">
-      <!-- 左侧：房间视图 -->
-      <div class="main-area">
-        <!-- 房间视图 -->
-        <div class="room-wrapper">
-          <RoomView
-            ref="roomView"
-            :roomName="currentRoomName"
-            :description="longDescription"
-            :exits="exits"
-            :moveSpeed="currentMoveSpeed"
-            @move="move"
-          />
-        </div>
-
-        <!-- 底部状态栏 -->
-        <div class="status-bar" :class="{ error: isError }">
-          <div class="status-location">📍 {{ currentRoomName }}</div>
-          <div class="status-message">{{ displayMessage || longDescription }}</div>
-          <div class="status-exits" v-if="exits.length">出口：{{ exits.join('、') }}</div>
-        </div>
-      </div>
-
-      <!-- 右侧：控制面板 -->
-      <div class="side-panel">
-        <!-- 方向控制 -->
-        <div class="controls-section">
-          <GameControls
-            :exits="exits"
-            @move="move"
-          />
-        </div>
-
-        <!-- 操作按钮组 -->
-        <button class="map-toggle-btn btn-look" @click="look">
-          🔍 查看
-        </button>
-        <button class="map-toggle-btn" @click="showInventory">
-          🎒 背包
-        </button>
-        <button class="map-toggle-btn" @click="showMap = !showMap">
-          🗺️ {{ showMap ? '隐藏地图' : '显示地图' }}
-        </button>
-        <button class="map-toggle-btn" @click="getHelp">
-          ❓ 帮助
-        </button>
-        <button class="map-toggle-btn btn-save" @click="handleSave">
-          💾 存档
-        </button>
-        <button class="map-toggle-btn btn-back" @click="goBack">
-          ↩️ 返回
-        </button>
-        <button class="map-toggle-btn btn-settle" @click="showSettleConfirm = true">
-          💎 结算
-        </button>
-        <button class="map-toggle-btn btn-ability" @click="showAbilityPanel = true; fetchUserAbility()">
-          ⬆️ 升级
-        </button>
-
-        <!-- 悬浮地图 -->
-        <div v-if="showMap" class="floating-map" @click="showMap = false">
-          <div class="floating-map-content" @click.stop>
-            <GameMap
-              :rooms="rooms"
-              :currentRoomId="currentRoomId"
-            />
-          </div>
-        </div>
-
-        <!-- 键盘提示 -->
-        <div class="keyboard-hint">
-          <span>方向键移动 | F房间物品 | B背包 | M地图 | H帮助 | R存档 | Backspace/ESC返回</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 悬浮物品面板 - 房间物品 -->
-    <RoomItemsPanel
-      :show="showRoomItems"
+    <GameView
+      ref="roomView"
+      :username="username"
+      :user-gold="userGold"
+      :room-name="currentRoomName"
+      :description="longDescription"
+      :exits="exits"
       :items="items"
-      @close="showRoomItems = false"
-      @take="handleTake"
-    />
-
-    <!-- 悬浮物品面板 - 背包 -->
-    <InventoryPanel
-      :show="showInventoryPanel"
       :inventory="inventory"
       :player-weight="playerWeight"
       :player-max-weight="playerMaxWeight"
-      :total-value="totalValue"
-      @close="showInventoryPanel = false"
+      :selected-inventory-id="selectedInventoryId"
+      :messages="messageLog"
+      :is-error="isError"
+      :busy="isMoving"
+      @move="move"
+      @look="look"
+      @take="handleTake"
       @drop="handleDrop"
       @eat-cookie="handleEatCookie"
+      @save="handleSave"
+      @load="handleLoad"
+      @back="goBack"
+      @toggle-map="showMap = !showMap"
+      @open-ability="showAbilityPanel = true; fetchUserAbility()"
+      @settle="showSettleConfirm = true"
+      @select-inventory="selectedInventoryId = $event"
+      @back-to-menu="handleBackToMenu"
+      @logout="handleLogout"
     />
+
+    <!-- 悬浮地图 -->
+    <div v-if="showMap" class="floating-map" @click="showMap = false">
+      <div class="floating-map-content" @click.stop>
+        <GameMap
+          :rooms="rooms"
+          :currentRoomId="currentRoomId"
+        />
+      </div>
+    </div>
 
     <!-- 悬浮能力面板 -->
     <AbilityPanel
@@ -146,28 +83,22 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie, saveGame, newGame, settleExploration, getUserAbility, getAbilityConfigs, upgradeAbility, getUserStats } from '@/api/game';
+import { getMap, getGameStatus, move, look, goBack, takeItem, dropItem, getItems, eatCookie, saveGame, loadGame, newGame, settleExploration, getUserAbility, getAbilityConfigs, upgradeAbility, getUserStats } from '@/api/game';
 import { getUserByUsername } from '@/api/auth';
-import RoomView from '@/components/RoomView.vue';
 import GameMap from '@/components/GameMap.vue';
-import GameControls from '@/components/GameControls.vue';
 import Login from '@/components/Login.vue';
 import GameStart from '@/views/GameStart.vue';
-import RoomItemsPanel from '@/components/RoomItemsPanel.vue';
-import InventoryPanel from '@/components/InventoryPanel.vue';
+import GameView from '@/views/GameView.vue';
 import AbilityPanel from '@/components/AbilityPanel.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 export default {
   name: 'App',
   components: {
-    RoomView,
     GameMap,
-    GameControls,
     Login,
     GameStart,
-    RoomItemsPanel,
-    InventoryPanel,
+    GameView,
     AbilityPanel,
     ConfirmDialog
   },
@@ -186,6 +117,8 @@ export default {
       exits: [],
       items: [],           // 房间物品
       inventory: [],       // 玩家背包
+      selectedInventoryId: '',
+      messageLog: [],
       playerWeight: 0,
       playerMaxWeight: 20,
       showRoomItems: false,  // 是否显示房间物品面板
@@ -292,6 +225,7 @@ export default {
     handleStartGame(gameData) {
       this.showGameStart = false;
       this.updateGameState(gameData);
+      this.appendLog('开始新的探索');
       this.fetchMap();
       this.fetchUserAbility();
     },
@@ -299,6 +233,7 @@ export default {
     handleContinueGame(gameData) {
       this.showGameStart = false;
       this.updateGameState(gameData);
+      this.appendLog('读取已有存档，继续探索');
       this.fetchMap(gameData.roomId);  // 传入保存的房间ID
       this.fetchUserAbility();
     },
@@ -310,6 +245,7 @@ export default {
       this.exits = Array.from(gameData.exits || []);
       this.items = gameData.items || [];
       this.inventory = gameData.inventory || [];
+      this.syncSelectedInventory();
       this.playerWeight = gameData.playerWeight || 0;
       this.playerMaxWeight = gameData.playerMaxWeight || 20;
       this.displayMessage = '';
@@ -318,13 +254,40 @@ export default {
     // 返回主界面
     handleBackToMenu() {
       this.showGameStart = true;
+      this.selectedInventoryId = '';
     },
     // 退出登录
     handleLogout() {
       this.isLoggedIn = false;
       this.showGameStart = true;
       this.username = '';
+      this.selectedInventoryId = '';
+      this.messageLog = [];
       localStorage.removeItem('username');
+    },
+    appendLog(text, error = false) {
+      const now = new Date();
+      const time = now.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      this.messageLog = [
+        ...this.messageLog.slice(-19),
+        {
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          time,
+          text,
+          error
+        }
+      ];
+    },
+    syncSelectedInventory() {
+      if (!this.selectedInventoryId) return;
+      const exists = this.inventory.some(item => item.id === this.selectedInventoryId);
+      if (!exists) {
+        this.selectedInventoryId = '';
+      }
     },
     async fetchMap(savedRoomId = null) {
       try {
@@ -339,6 +302,7 @@ export default {
       } catch (error) {
         this.message = '错误：无法连接到服务器，请确保后端正在运行！';
         this.isError = true;
+        this.appendLog(this.message, true);
       }
     },
     async fetchStatus() {
@@ -355,6 +319,7 @@ export default {
       } catch (error) {
         this.displayMessage = '错误：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     async move(direction) {
@@ -376,9 +341,11 @@ export default {
         this.showRoomItems = false;
         this.showInventoryPanel = false;
         this.isError = response.data.teleported;
+        this.appendLog(this.displayMessage || `移动到 ${this.currentRoomName}`, this.isError);
       } catch (error) {
         this.displayMessage = '移动错误：' + (error.response?.data?.message || error.message);
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       } finally {
         this.isMoving = false;
         // 移动完成后重置小人位置（带延迟以配合动画）
@@ -401,9 +368,11 @@ export default {
         this.showInventoryPanel = false;
         this.displayMessage = '';
         this.isError = false;
+        this.appendLog(this.items.length ? `查看房间，发现 ${this.items.length} 个物品` : '查看房间，暂未发现物品');
       } catch (error) {
         this.displayMessage = '查看错误：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     async goBack() {
@@ -418,9 +387,11 @@ export default {
         this.showRoomItems = false;
         this.showInventoryPanel = false;
         this.isError = !response.data.success;
+        this.appendLog(this.displayMessage || '返回上个房间', this.isError);
       } catch (error) {
         this.displayMessage = '返回错误：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     getHelp() {
@@ -433,12 +404,15 @@ export default {
         this.inventory = response.data.inventory || [];
         this.playerWeight = response.data.playerWeight || 0;
         this.playerMaxWeight = response.data.playerMaxWeight || 50;
+        this.syncSelectedInventory();
         this.showInventoryPanel = true;  // 显示背包悬浮面板
         this.showRoomItems = false;
         this.displayMessage = response.data.message;
+        this.appendLog(this.displayMessage || `查看背包，共 ${this.inventory.length} 个物品`);
       } catch (error) {
         this.displayMessage = '查看背包失败：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     // 拾取物品
@@ -451,9 +425,12 @@ export default {
         this.playerWeight = response.data.playerWeight || 0;
         this.playerMaxWeight = response.data.playerMaxWeight || 50;
         this.isError = !response.data.success;
+        this.syncSelectedInventory();
+        this.appendLog(this.displayMessage || '拾取物品', this.isError);
       } catch (error) {
         this.displayMessage = '拾取失败：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     // 丢弃物品
@@ -466,9 +443,12 @@ export default {
         this.playerWeight = response.data.playerWeight || 0;
         this.playerMaxWeight = response.data.playerMaxWeight || 50;
         this.isError = !response.data.success;
+        this.syncSelectedInventory();
+        this.appendLog(this.displayMessage || '丢弃物品', this.isError);
       } catch (error) {
         this.displayMessage = '丢弃失败：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     // 吃魔法饼干
@@ -480,9 +460,12 @@ export default {
         this.playerWeight = response.data.playerWeight || 0;
         this.playerMaxWeight = response.data.playerMaxWeight || 50;
         this.isError = !response.data.success;
+        this.syncSelectedInventory();
+        this.appendLog(this.displayMessage || '使用魔法饼干', this.isError);
       } catch (error) {
         this.displayMessage = '吃饼干失败：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     // 手动保存游戏进度
@@ -490,9 +473,26 @@ export default {
       try {
         await saveGame(this.username);
         this.displayMessage = '💾 游戏已保存';
+        this.isError = false;
+        this.appendLog(this.displayMessage);
       } catch (e) {
         this.displayMessage = '保存失败';
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
+      }
+    },
+    async handleLoad() {
+      try {
+        const response = await loadGame(this.username);
+        this.updateGameState(response.data);
+        this.displayMessage = response.data.message || '已读取存档';
+        this.isError = !response.data.success;
+        this.appendLog(this.displayMessage, this.isError);
+        this.fetchMap(response.data.roomId);
+      } catch (error) {
+        this.displayMessage = '读取存档失败：' + error.message;
+        this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     // 获取用户金币和能力信息
@@ -540,19 +540,23 @@ const increment = 0.15;
           this.displayMessage = response.data.message;
           this.userGold = response.data.totalGold;
           this.inventory = [];
+          this.selectedInventoryId = '';
           this.playerWeight = 0;
           this.playerMaxWeight = response.data.playerMaxWeight;
           this.isError = false;
           await this.fetchUserAbility();
           await newGame(this.username);
           this.showGameStart = true;
+          this.appendLog(this.displayMessage);
         } else {
           this.displayMessage = response.data.message;
           this.isError = true;
+          this.appendLog(this.displayMessage, true);
         }
       } catch (error) {
         this.displayMessage = '结算失败：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     // 升级能力
@@ -573,13 +577,16 @@ const increment = 0.15;
             console.log('this.playerMaxWeight 已更新为:', this.playerMaxWeight);
           }
           this.isError = false;
+          this.appendLog(this.displayMessage);
         } else {
           this.displayMessage = response.data.message;
           this.isError = true;
+          this.appendLog(this.displayMessage, true);
         }
       } catch (error) {
         this.displayMessage = '升级失败：' + error.message;
         this.isError = true;
+        this.appendLog(this.displayMessage, true);
       }
     },
     // 计算升级所需金币
