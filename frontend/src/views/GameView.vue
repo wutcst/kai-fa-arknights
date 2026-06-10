@@ -155,18 +155,33 @@ export default {
   },
   computed: {
     floorLabel() {
-      const source = `${this.roomId} ${this.roomName}`.toLowerCase();
-      if (source.includes('1f') || source.includes('101') || source.includes('102') || source.includes('一楼')) {
+      const floorByRoomId = {
+        theater_lobby: '教学楼一楼',
+        theater_classroom_101: '教学楼一楼',
+        theater_classroom_102: '教学楼一楼',
+        theater_stairway_1f: '教学楼一楼',
+        theater_classroom_201: '教学楼二楼',
+        theater_classroom_202: '教学楼二楼',
+        theater_office: '教学楼二楼',
+        theater_stairway_2f: '教学楼二楼',
+        theater_classroom_301: '教学楼三楼',
+        theater_classroom_302: '教学楼三楼',
+        theater_lab: '教学楼三楼',
+        theater_stairway_3f: '教学楼三楼'
+      };
+      if (floorByRoomId[this.roomId]) {
+        return floorByRoomId[this.roomId];
+      }
+
+      const source = `${this.roomName}`.toLowerCase();
+      if (source.includes('101') || source.includes('102') || source.includes('一楼')) {
         return '教学楼一楼';
       }
-      if (source.includes('2f') || source.includes('201') || source.includes('202') || source.includes('二楼')) {
+      if (source.includes('201') || source.includes('202') || source.includes('二楼')) {
         return '教学楼二楼';
       }
-      if (source.includes('3f') || source.includes('301') || source.includes('302') || source.includes('三楼')) {
+      if (source.includes('301') || source.includes('302') || source.includes('三楼')) {
         return '教学楼三楼';
-      }
-      if (source.includes('theater_lobby')) {
-        return '教学楼一楼';
       }
       return '室外区域';
     }
