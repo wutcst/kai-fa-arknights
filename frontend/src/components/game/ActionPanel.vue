@@ -8,6 +8,10 @@
       <button class="east-action" :disabled="!hasExit('east') || busy" @click="$emit('move', 'east')">东</button>
       <button class="south-action" :disabled="!hasExit('south') || busy" @click="$emit('move', 'south')">南</button>
     </div>
+    <div class="stair-actions">
+      <button :disabled="!hasExit('up') || busy" @click="$emit('move', 'up')">上楼</button>
+      <button :disabled="!hasExit('down') || busy" @click="$emit('move', 'down')">下楼</button>
+    </div>
 
     <div class="action-stack">
       <button :disabled="!activeRoomItemId || busy" @click="$emit('take', activeRoomItemId)">
@@ -90,6 +94,13 @@ h2 {
     ". south .";
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+  margin-bottom: 14px;
+}
+
+.stair-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
   margin-bottom: 14px;
 }
 

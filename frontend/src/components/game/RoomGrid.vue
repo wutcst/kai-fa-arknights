@@ -20,6 +20,11 @@
       可拾取：<strong>{{ activeRoomItem.name }}</strong>
       <span>按“拾取当前位置物品”放入背包</span>
     </div>
+    <div v-if="hasVerticalExit" class="floor-hint">
+      楼层出口：
+      <strong v-if="hasExit('up')">上楼</strong>
+      <strong v-if="hasExit('down')">下楼</strong>
+    </div>
     <p class="room-description">{{ description || '观察周围环境，选择下一步行动。' }}</p>
   </section>
 </template>
@@ -75,6 +80,9 @@ export default {
         ([itemCol, itemRow]) => itemCol === this.playerCol && itemRow === this.playerRow
       );
       return itemIndex >= 0 ? this.visibleItems[itemIndex] : null;
+    },
+    hasVerticalExit() {
+      return this.hasExit('up') || this.hasExit('down');
     },
     cells() {
       return Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, index) => {
@@ -364,6 +372,23 @@ export default {
   gap: 8px;
   margin-top: 12px;
   padding: 10px 12px;
+}
+
+.floor-hint {
+  align-items: center;
+  background: rgba(88, 185, 133, 0.12);
+  border: 1px solid rgba(88, 185, 133, 0.38);
+  border-radius: 12px;
+  color: #dff5e8;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+}
+
+.floor-hint strong {
+  color: #8fe2b4;
 }
 
 .pickup-hint strong {
