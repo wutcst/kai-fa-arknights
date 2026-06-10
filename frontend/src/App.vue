@@ -19,6 +19,7 @@
       :username="username"
       :user-gold="userGold"
       :room-name="currentRoomName"
+      :room-id="currentRoomId"
       :description="longDescription"
       :exits="exits"
       :items="items"

@@ -5,6 +5,10 @@
       <strong>{{ roomName || '未知房间' }}</strong>
     </div>
     <div>
+      <span class="status-label">FLOOR</span>
+      <strong>{{ floorLabel }}</strong>
+    </div>
+    <div>
       <span class="status-label">LOAD</span>
       <strong>{{ playerWeight }} / {{ playerMaxWeight }}</strong>
     </div>
@@ -25,6 +29,10 @@ export default {
     roomName: {
       type: String,
       default: ''
+    },
+    floorLabel: {
+      type: String,
+      default: '室外区域'
     },
     username: {
       type: String,
@@ -65,7 +73,7 @@ export default {
 <style scoped>
 .status-shell {
   display: grid;
-  grid-template-columns: 1.1fr 0.7fr 0.9fr 1.6fr;
+  grid-template-columns: 1.1fr 0.8fr 0.7fr 0.9fr 1.6fr;
   gap: 12px;
   align-items: center;
   background: rgba(13, 18, 19, 0.86);

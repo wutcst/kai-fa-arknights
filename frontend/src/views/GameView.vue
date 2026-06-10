@@ -14,6 +14,7 @@
 
     <GameStatusBar
       :room-name="roomName"
+      :floor-label="floorLabel"
       :username="username"
       :player-weight="playerWeight"
       :player-max-weight="playerMaxWeight"
@@ -100,6 +101,10 @@ export default {
       type: String,
       default: ''
     },
+    roomId: {
+      type: String,
+      default: ''
+    },
     description: {
       type: String,
       default: ''
@@ -147,6 +152,24 @@ export default {
       activeRoomItemName: '',
       activeVerticalExit: ''
     };
+  },
+  computed: {
+    floorLabel() {
+      const source = `${this.roomId} ${this.roomName}`.toLowerCase();
+      if (source.includes('1f') || source.includes('101') || source.includes('102') || source.includes('一楼')) {
+        return '教学楼一楼';
+      }
+      if (source.includes('2f') || source.includes('201') || source.includes('202') || source.includes('二楼')) {
+        return '教学楼二楼';
+      }
+      if (source.includes('3f') || source.includes('301') || source.includes('302') || source.includes('三楼')) {
+        return '教学楼三楼';
+      }
+      if (source.includes('theater_lobby')) {
+        return '教学楼一楼';
+      }
+      return '室外区域';
+    }
   },
   methods: {
     tryMoveByKey(event) {
