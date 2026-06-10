@@ -1,7 +1,41 @@
-# 忽略以下目录中的所有子目录及文件
-/target/*
-/.idea/*
+# =========================
+# Build outputs
+# =========================
+target/
+backend/target/
+frontend/dist/
 
-# 忽略以下文件
+# =========================
+# Node / frontend
+# =========================
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# IDE / editor
+# =========================
+.idea/
+.vscode/
 *.iml
+
+# =========================
+# OS files
+# =========================
 .DS_Store
+Thumbs.db
+
+# =========================
+# Runtime / logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Local env files
+# =========================
+.env
+.env.*
+!.env.example
