@@ -73,16 +73,16 @@ PR 目标分支为 `master` 或 `feature` 时也会触发 CI。
 
 ## 分支策略
 
-当前项目阶段采用如下分支角色：
+当前课程验收阶段采用如下分支角色：
 
-- `master`：稳定发布分支，保持可验收版本。
-- `feature`：当前事实上的集成分支，集中合并有效功能。
+- `master`：最终稳定发布分支，当前已包含可验收项目版本。
+- `feature`：课程协作和集成过程分支，保留用于展示开发、PR、测试和集成历史。
 - `feat/*`：功能开发分支，从 `feature` 新建，完成后 PR 回 `feature`。
 - `fix/*`：缺陷修复分支，从 `feature` 新建，完成后 PR 回 `feature`。
 - `test/*`：测试补充分支，从 `feature` 新建，完成后 PR 回 `feature`。
 - `docs/*`：文档维护分支，从 `feature` 新建，完成后 PR 回 `feature`。
 
-`feature` 稳定并通过构建、测试和文档检查后，再通过 PR 合入 `master`。课程验收结束前建议保留 `feature`，用于展示协同开发过程和集成历史。
+`master` 已通过发布快照方式集成当前稳定项目版本。课程验收结束前不建议删除 `feature` 或历史工作分支，用于保留协同开发过程证据；验收结束后再统一清理临时分支。
 
 当前历史分支处理清单见 [docs/branch-governance.md](docs/branch-governance.md)。
 
