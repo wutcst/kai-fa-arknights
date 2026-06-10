@@ -476,11 +476,16 @@ export default {
     async handleLoad() {
       try {
         const response = await loadGame(this.username);
-        this.updateGameState(response.data);
         this.displayMessage = response.data.message || '已读取存档';
         this.isError = !response.data.success;
+        if (!response.data.success) {
+          this.appendLog(this.displayMessage, true);
+          return;
+        }
+        this.updateGameState(response.data);
         this.appendLog(this.displayMessage, this.isError);
-        this.fetchMap(response.data.roomId);
+        await this.fetchMap(response.data.roomId);
+        await this.fetchUserAbility();
       } catch (error) {
         this.displayMessage = '读取存档失败：' + error.message;
         this.isError = true;
