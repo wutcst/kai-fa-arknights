@@ -5,7 +5,7 @@
       <strong>{{ roomName || '未知房间' }}</strong>
     </div>
 
-    <div class="room-grid" :class="{ pulse: pulseKey }" ref="grid">
+    <div class="room-grid" :class="{ bump: isBumping }" ref="grid">
       <div
         v-for="cell in cells"
         :key="cell.key"
@@ -46,7 +46,10 @@ export default {
   },
   data() {
     return {
-      pulseKey: 0
+      playerRow: CENTER,
+      playerCol: CENTER,
+      isBumping: false,
+      bumpTimer: null
     };
   },
   computed: {
@@ -75,11 +78,6 @@ export default {
           classes.push('floor');
         }
 
-        if (row === CENTER && col === CENTER) {
-          classes.push('player');
-          label = '◆';
-        }
-
         const direction = this.exitAt(row, col);
         if (direction) {
           classes.push('door', `door-${direction}`);
@@ -90,6 +88,11 @@ export default {
         if (itemIndex >= 0 && this.visibleItems[itemIndex] && !label) {
           classes.push('item');
           label = this.itemLabel(this.visibleItems[itemIndex]);
+        }
+
+        if (row === this.playerRow && col === this.playerCol) {
+          classes.push('player');
+          label = '◆';
         }
 
         return {
@@ -126,6 +129,54 @@ export default {
       if ((item.name || '').includes('金币')) return '◎';
       return '✦';
     },
+    nextPosition(direction) {
+      const offsets = {
+        north: [-1, 0],
+        south: [1, 0],
+        west: [0, -1],
+        east: [0, 1]
+      };
+      const [rowOffset, colOffset] = offsets[direction] || [0, 0];
+      return {
+        row: this.playerRow + rowOffset,
+        col: this.playerCol + colOffset
+      };
+    },
+    directionForBoundary(row, col) {
+      if (row === 0 && col === CENTER) return 'north';
+      if (row === GRID_SIZE - 1 && col === CENTER) return 'south';
+      if (row === CENTER && col === 0) return 'west';
+      if (row === CENTER && col === GRID_SIZE - 1) return 'east';
+      return '';
+    },
+    isFloor(row, col) {
+      return row > 0 && row < GRID_SIZE - 1 && col > 0 && col < GRID_SIZE - 1;
+    },
+    bumpWall() {
+      if (this.bumpTimer) {
+        clearTimeout(this.bumpTimer);
+      }
+      this.isBumping = true;
+      this.bumpTimer = setTimeout(() => {
+        this.isBumping = false;
+      }, 140);
+    },
+    movePlayer(direction) {
+      const { row, col } = this.nextPosition(direction);
+      if (this.isFloor(row, col)) {
+        this.playerRow = row;
+        this.playerCol = col;
+        return;
+      }
+
+      const boundaryDirection = this.directionForBoundary(row, col);
+      if (boundaryDirection && boundaryDirection === direction && this.hasExit(direction)) {
+        this.$emit('move', direction);
+        return;
+      }
+
+      this.bumpWall();
+    },
     tryMoveByKey(event) {
       const keyMap = {
         ArrowUp: 'north',
@@ -144,14 +195,17 @@ export default {
       const direction = keyMap[event.key];
       if (!direction) return;
       event.preventDefault();
-      if (this.hasExit(direction)) {
-        this.$emit('move', direction);
-      } else {
-        this.pulseKey += 1;
-      }
+      this.movePlayer(direction);
     },
     resetPosition() {
-      this.pulseKey += 1;
+      this.playerRow = CENTER;
+      this.playerCol = CENTER;
+      this.bumpWall();
+    }
+  },
+  beforeUnmount() {
+    if (this.bumpTimer) {
+      clearTimeout(this.bumpTimer);
     }
   }
 };
@@ -200,7 +254,7 @@ export default {
   transition: transform 0.18s ease;
 }
 
-.room-grid.pulse {
+.room-grid.bump {
   transform: scale(0.995);
 }
 
