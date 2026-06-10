@@ -121,8 +121,6 @@ export default {
       messageLog: [],
       playerWeight: 0,
       playerMaxWeight: 20,
-      showRoomItems: false,  // 是否显示房间物品面板
-      showInventoryPanel: false,  // 是否显示背包面板
       showAbilityPanel: false,  // 是否显示能力面板
       showSettleConfirm: false,  // 是否显示结算确认对话框
       rooms: [],
@@ -338,8 +336,6 @@ export default {
         this.exits = Array.from(response.data.exits);
         // 移动后清空物品列表，只有点击查看时才加载
         this.items = [];
-        this.showRoomItems = false;
-        this.showInventoryPanel = false;
         this.isError = response.data.teleported;
         this.appendLog(this.displayMessage || `移动到 ${this.currentRoomName}`, this.isError);
       } catch (error) {
@@ -364,8 +360,6 @@ export default {
         this.longDescription = response.data.longDescription;
         this.exits = Array.from(response.data.exits);
         this.items = response.data.items || [];
-        this.showRoomItems = true;  // 查看时显示房间物品面板
-        this.showInventoryPanel = false;
         this.displayMessage = '';
         this.isError = false;
         this.appendLog(this.items.length ? `查看房间，发现 ${this.items.length} 个物品` : '查看房间，暂未发现物品');
@@ -384,8 +378,6 @@ export default {
         this.longDescription = response.data.longDescription;
         this.exits = Array.from(response.data.exits);
         this.items = [];
-        this.showRoomItems = false;
-        this.showInventoryPanel = false;
         this.isError = !response.data.success;
         this.appendLog(this.displayMessage || '返回上个房间', this.isError);
       } catch (error) {
@@ -405,8 +397,6 @@ export default {
         this.playerWeight = response.data.playerWeight || 0;
         this.playerMaxWeight = response.data.playerMaxWeight || 50;
         this.syncSelectedInventory();
-        this.showInventoryPanel = true;  // 显示背包悬浮面板
-        this.showRoomItems = false;
         this.displayMessage = response.data.message;
         this.appendLog(this.displayMessage || `查看背包，共 ${this.inventory.length} 个物品`);
       } catch (error) {
@@ -606,10 +596,6 @@ const increment = 0.15;
     }
   },
   computed: {
-    // 背包物品总价值
-    totalValue() {
-      return this.inventory.reduce((sum, item) => sum + (item.value || 0), 0);
-    },
     inventoryTotalValue() {
       return this.inventory.reduce((sum, item) => sum + (item.value || 0), 0);
     },
