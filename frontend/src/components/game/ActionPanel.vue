@@ -10,7 +10,9 @@
     </div>
 
     <div class="action-stack">
-      <button :disabled="!activeRoomItemId || busy" @click="$emit('take', activeRoomItemId)">拾取当前位置物品</button>
+      <button :disabled="!activeRoomItemId || busy" @click="$emit('take', activeRoomItemId)">
+        {{ activeRoomItemName ? `拾取：${activeRoomItemName}` : '拾取当前位置物品' }}
+      </button>
       <button :disabled="!selectedInventoryId || busy" @click="$emit('drop', selectedInventoryId)">丢弃选中物品</button>
       <button :disabled="!hasMagicCookie || busy" @click="$emit('eat-cookie')">使用魔法饼干</button>
       <button :disabled="busy" @click="$emit('save')">保存游戏</button>
@@ -38,6 +40,10 @@ export default {
     },
     activeRoomItemId: {
       type: [String, Number],
+      default: ''
+    },
+    activeRoomItemName: {
+      type: String,
       default: ''
     },
     selectedInventoryId: {

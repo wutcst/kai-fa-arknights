@@ -16,6 +16,10 @@
       </div>
     </div>
 
+    <div v-if="activeRoomItem" class="pickup-hint">
+      可拾取：<strong>{{ activeRoomItem.name }}</strong>
+      <span>按“拾取当前位置物品”放入背包</span>
+    </div>
     <p class="room-description">{{ description || '观察周围环境，选择下一步行动。' }}</p>
   </section>
 </template>
@@ -115,6 +119,7 @@ export default {
       immediate: true,
       handler(item) {
         this.$emit('active-item-change', item?.id || '');
+        this.$emit('active-item-name-change', item?.name || '');
       }
     }
   },
@@ -320,6 +325,16 @@ export default {
   transform: scale(1.08);
 }
 
+.player.item {
+  background:
+    radial-gradient(circle at 50% 50%, #f8f1d5 0 26%, #1f8f69 27% 54%, transparent 55%),
+    radial-gradient(circle, rgba(247, 214, 123, 0.9), rgba(99, 69, 32, 0.9) 70%);
+  border-color: #ffe08a;
+  box-shadow:
+    0 0 0 3px rgba(247, 214, 123, 0.22),
+    0 0 28px rgba(247, 214, 123, 0.68);
+}
+
 .item {
   background: radial-gradient(circle, #f1d27a 0 28%, #634520 29% 70%, #2a1e16 71%);
   border: 1px solid #d7a84d;
@@ -336,6 +351,28 @@ export default {
   color: #d9c8aa;
   line-height: 1.6;
   text-align: left;
+}
+
+.pickup-hint {
+  align-items: center;
+  background: rgba(247, 214, 123, 0.12);
+  border: 1px solid rgba(247, 214, 123, 0.42);
+  border-radius: 12px;
+  color: #f7ead2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+}
+
+.pickup-hint strong {
+  color: #ffe08a;
+}
+
+.pickup-hint span {
+  color: #cdbb9e;
+  font-size: 13px;
 }
 
 @media (max-width: 760px) {
