@@ -29,13 +29,14 @@
         :exits="exits"
         :items="items"
         @move="$emit('move', $event)"
+        @active-item-change="activeRoomItemId = $event"
       />
 
       <aside class="right-rail">
         <ActionPanel
           :exits="exits"
-          :items="items"
           :inventory="inventory"
+          :active-room-item-id="activeRoomItemId"
           :selected-inventory-id="selectedInventoryId"
           :busy="busy"
           @move="$emit('move', $event)"
@@ -135,6 +136,11 @@ export default {
       type: Boolean,
       default: false
     }
+  },
+  data() {
+    return {
+      activeRoomItemId: ''
+    };
   },
   methods: {
     tryMoveByKey(event) {

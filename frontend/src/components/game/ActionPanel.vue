@@ -10,7 +10,7 @@
     </div>
 
     <div class="action-stack">
-      <button :disabled="!items.length || busy" @click="$emit('take', firstRoomItemId)">拾取房间物品</button>
+      <button :disabled="!activeRoomItemId || busy" @click="$emit('take', activeRoomItemId)">拾取当前位置物品</button>
       <button :disabled="!selectedInventoryId || busy" @click="$emit('drop', selectedInventoryId)">丢弃选中物品</button>
       <button :disabled="!hasMagicCookie || busy" @click="$emit('eat-cookie')">使用魔法饼干</button>
       <button :disabled="busy" @click="$emit('save')">保存游戏</button>
@@ -32,13 +32,13 @@ export default {
       type: Array,
       default: () => []
     },
-    items: {
-      type: Array,
-      default: () => []
-    },
     inventory: {
       type: Array,
       default: () => []
+    },
+    activeRoomItemId: {
+      type: [String, Number],
+      default: ''
     },
     selectedInventoryId: {
       type: [String, Number],
@@ -50,9 +50,6 @@ export default {
     }
   },
   computed: {
-    firstRoomItemId() {
-      return this.items[0]?.id || '';
-    },
     hasMagicCookie() {
       return this.inventory.some(item => item.id === 'magic_cookie');
     }

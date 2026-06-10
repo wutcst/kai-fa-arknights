@@ -53,11 +53,8 @@ export default {
     };
   },
   computed: {
-    visibleItems() {
-      return this.items.slice(0, 6);
-    },
-    cells() {
-      const itemPositions = [
+    itemPositions() {
+      return [
         [2, 2],
         [6, 2],
         [2, 6],
@@ -65,7 +62,17 @@ export default {
         [3, 5],
         [5, 3]
       ];
-
+    },
+    visibleItems() {
+      return this.items.slice(0, 6);
+    },
+    activeRoomItem() {
+      const itemIndex = this.itemPositions.findIndex(
+        ([itemCol, itemRow]) => itemCol === this.playerCol && itemRow === this.playerRow
+      );
+      return itemIndex >= 0 ? this.visibleItems[itemIndex] : null;
+    },
+    cells() {
       return Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, index) => {
         const row = Math.floor(index / GRID_SIZE);
         const col = index % GRID_SIZE;
@@ -84,7 +91,7 @@ export default {
           label = this.exitLabel(direction);
         }
 
-        const itemIndex = itemPositions.findIndex(([itemCol, itemRow]) => itemCol === col && itemRow === row);
+        const itemIndex = this.itemPositions.findIndex(([itemCol, itemRow]) => itemCol === col && itemRow === row);
         if (itemIndex >= 0 && this.visibleItems[itemIndex] && !label) {
           classes.push('item');
           label = this.itemLabel(this.visibleItems[itemIndex]);
@@ -101,6 +108,14 @@ export default {
           label
         };
       });
+    }
+  },
+  watch: {
+    activeRoomItem: {
+      immediate: true,
+      handler(item) {
+        this.$emit('active-item-change', item?.id || '');
+      }
     }
   },
   methods: {
