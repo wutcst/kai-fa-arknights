@@ -250,6 +250,7 @@ export default {
 .room-grid {
   display: grid;
   grid-template-columns: repeat(9, minmax(28px, 1fr));
+  grid-template-rows: repeat(9, minmax(0, 1fr));
   gap: 4px;
   aspect-ratio: 1;
   background:
@@ -269,9 +270,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  aspect-ratio: 1;
   border-radius: 6px;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
   transition: transform 0.16s ease, filter 0.16s ease, background 0.16s ease;
 }
 
