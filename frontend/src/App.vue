@@ -38,6 +38,7 @@
       @load="handleLoad"
       @back="goBack"
       @toggle-map="showMap = !showMap"
+      @help="getHelp"
       @open-ability="showAbilityPanel = true; fetchUserAbility()"
       @settle="showSettleConfirm = true"
       @select-inventory="selectedInventoryId = $event"

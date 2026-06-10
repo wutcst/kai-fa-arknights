@@ -47,6 +47,7 @@
           @load="$emit('load')"
           @back="$emit('back')"
           @toggle-map="$emit('toggle-map')"
+          @help="$emit('help')"
           @open-ability="$emit('open-ability')"
           @settle="$emit('settle')"
         />
