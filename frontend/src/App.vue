@@ -21,6 +21,7 @@
       :room-name="currentRoomName"
       :room-id="currentRoomId"
       :player-grid-position="playerGridPosition"
+      :move-speed="currentMoveSpeed"
       :description="longDescription"
       :exits="exits"
       :items="items"

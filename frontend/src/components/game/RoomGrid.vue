@@ -14,11 +14,18 @@
       >
         <span v-if="cell.label" class="cell-label">{{ cell.label }}</span>
       </div>
+      <div
+        class="player-avatar"
+        :style="playerStyle"
+        aria-label="玩家当前位置"
+      >
+        ◆
+      </div>
     </div>
 
     <div v-if="activeRoomItem" class="pickup-hint">
       可拾取：<strong>{{ activeRoomItem.name }}</strong>
-      <span>按“拾取当前位置物品”放入背包</span>
+      <span>靠近物品后按“拾取附近物品”放入背包</span>
     </div>
     <div v-if="hasVerticalExit" class="floor-hint">
       楼层出口：
@@ -33,6 +40,12 @@
 <script>
 const GRID_SIZE = 9;
 const CENTER = 4;
+const MIN_POSITION = 0.5;
+const MAX_POSITION = GRID_SIZE - 1.5;
+const INTERACT_DISTANCE = 0.78;
+const DOOR_TRIGGER_DISTANCE = 0.42;
+const BASE_STEP_PER_FRAME = 0.032;
+const BUTTON_NUDGE_FRAMES = 12;
 
 export default {
   name: 'RoomGrid',
@@ -56,14 +69,21 @@ export default {
     playerGridPosition: {
       type: Object,
       default: null
+    },
+    moveSpeed: {
+      type: Number,
+      default: 0.5
     }
   },
   data() {
     return {
-      playerRow: CENTER,
-      playerCol: CENTER,
+      playerX: CENTER,
+      playerY: CENTER,
       isBumping: false,
-      bumpTimer: null
+      bumpTimer: null,
+      activeDirections: new Set(),
+      animationFrame: null,
+      lastFrameTime: 0
     };
   },
   computed: {
@@ -87,9 +107,9 @@ export default {
       return this.items.slice(0, 6);
     },
     activeRoomItem() {
-      const itemIndex = this.itemPositions.findIndex(
-        ([itemCol, itemRow]) => itemCol === this.playerCol && itemRow === this.playerRow
-      );
+      const itemIndex = this.itemPositions.findIndex(([itemX, itemY]) => (
+        this.distanceTo(itemX, itemY) <= INTERACT_DISTANCE
+      ));
       return itemIndex >= 0 ? this.visibleItems[itemIndex] : null;
     },
     hasVerticalExit() {
@@ -97,14 +117,20 @@ export default {
     },
     activeVerticalExit() {
       return ['up', 'down'].find((direction) => {
-        const [col, row] = this.stairPositions[direction];
-        return this.hasExit(direction) && row === this.playerRow && col === this.playerCol;
+        const [stairX, stairY] = this.stairPositions[direction];
+        return this.hasExit(direction) && this.distanceTo(stairX, stairY) <= INTERACT_DISTANCE;
       }) || '';
     },
     playerPosition() {
       return {
-        row: this.playerRow,
-        col: this.playerCol
+        row: Number(this.playerY.toFixed(3)),
+        col: Number(this.playerX.toFixed(3))
+      };
+    },
+    playerStyle() {
+      return {
+        left: `${((this.playerX + 0.5) / GRID_SIZE) * 100}%`,
+        top: `${((this.playerY + 0.5) / GRID_SIZE) * 100}%`
       };
     },
     cells() {
@@ -123,24 +149,28 @@ export default {
         const direction = this.exitAt(row, col);
         if (direction) {
           classes.push('door', `door-${direction}`);
+          if (this.isNearDoor(direction)) {
+            classes.push('near-active');
+          }
           label = this.exitLabel(direction);
         }
 
         const itemIndex = this.itemPositions.findIndex(([itemCol, itemRow]) => itemCol === col && itemRow === row);
         if (itemIndex >= 0 && this.visibleItems[itemIndex] && !label) {
           classes.push('item');
+          if (this.activeRoomItem?.id === this.visibleItems[itemIndex].id) {
+            classes.push('near-active');
+          }
           label = this.itemLabel(this.visibleItems[itemIndex]);
         }
 
         const stairDirection = this.stairAt(row, col);
         if (stairDirection && !label) {
           classes.push('stair', `stair-${stairDirection}`);
+          if (this.activeVerticalExit === stairDirection) {
+            classes.push('near-active');
+          }
           label = stairDirection === 'up' ? '⇧' : '⇩';
-        }
-
-        if (row === this.playerRow && col === this.playerCol) {
-          classes.push('player');
-          label = '◆';
         }
 
         return {
@@ -175,20 +205,20 @@ export default {
       deep: true,
       handler(position) {
         if (!position) return;
-        const row = this.clampGridPosition(position.row);
-        const col = this.clampGridPosition(position.col);
-        if (row !== this.playerRow || col !== this.playerCol) {
-          this.playerRow = row;
-          this.playerCol = col;
+        const nextY = this.clampPosition(position.row);
+        const nextX = this.clampPosition(position.col);
+        if (Math.abs(nextY - this.playerY) > 0.001 || Math.abs(nextX - this.playerX) > 0.001) {
+          this.playerY = nextY;
+          this.playerX = nextX;
         }
       }
     }
   },
   methods: {
-    clampGridPosition(value) {
+    clampPosition(value) {
       const number = Number(value);
       if (!Number.isFinite(number)) return CENTER;
-      return Math.max(0, Math.min(GRID_SIZE - 1, Math.trunc(number)));
+      return Math.max(MIN_POSITION, Math.min(MAX_POSITION, number));
     },
     hasExit(direction) {
       return this.exits.includes(direction);
@@ -221,28 +251,18 @@ export default {
       if ((item.name || '').includes('金币')) return '◎';
       return '✦';
     },
-    nextPosition(direction) {
-      const offsets = {
-        north: [-1, 0],
-        south: [1, 0],
-        west: [0, -1],
-        east: [0, 1]
-      };
-      const [rowOffset, colOffset] = offsets[direction] || [0, 0];
-      return {
-        row: this.playerRow + rowOffset,
-        col: this.playerCol + colOffset
-      };
+    distanceTo(targetX, targetY) {
+      return Math.hypot(this.playerX - targetX, this.playerY - targetY);
     },
-    directionForBoundary(row, col) {
-      if (row === 0 && col === CENTER) return 'north';
-      if (row === GRID_SIZE - 1 && col === CENTER) return 'south';
-      if (row === CENTER && col === 0) return 'west';
-      if (row === CENTER && col === GRID_SIZE - 1) return 'east';
-      return '';
-    },
-    isFloor(row, col) {
-      return row > 0 && row < GRID_SIZE - 1 && col > 0 && col < GRID_SIZE - 1;
+    isNearDoor(direction) {
+      const doorPositions = {
+        north: [CENTER, MIN_POSITION],
+        south: [CENTER, MAX_POSITION],
+        west: [MIN_POSITION, CENTER],
+        east: [MAX_POSITION, CENTER]
+      };
+      const [doorX, doorY] = doorPositions[direction] || [CENTER, CENTER];
+      return this.hasExit(direction) && this.distanceTo(doorX, doorY) <= INTERACT_DISTANCE;
     },
     bumpWall() {
       if (this.bumpTimer) {
@@ -253,23 +273,88 @@ export default {
         this.isBumping = false;
       }, 140);
     },
-    movePlayer(direction) {
-      const { row, col } = this.nextPosition(direction);
-      if (this.isFloor(row, col)) {
-        this.playerRow = row;
-        this.playerCol = col;
-        return;
-      }
-
-      const boundaryDirection = this.directionForBoundary(row, col);
-      if (boundaryDirection && boundaryDirection === direction && this.hasExit(direction)) {
-        this.$emit('move', direction);
-        return;
-      }
-
-      this.bumpWall();
+    normalizedVector() {
+      let x = 0;
+      let y = 0;
+      if (this.activeDirections.has('north')) y -= 1;
+      if (this.activeDirections.has('south')) y += 1;
+      if (this.activeDirections.has('west')) x -= 1;
+      if (this.activeDirections.has('east')) x += 1;
+      const length = Math.hypot(x, y);
+      if (!length) return { x: 0, y: 0 };
+      return { x: x / length, y: y / length };
     },
-    tryMoveByKey(event) {
+    movementStep(deltaMs) {
+      const speed = Math.max(0.2, Number(this.moveSpeed) || 0.5);
+      return BASE_STEP_PER_FRAME * speed * (deltaMs / 16.67);
+    },
+    startMovementLoop() {
+      if (this.animationFrame) return;
+      this.lastFrameTime = performance.now();
+      this.animationFrame = requestAnimationFrame(this.updateMovement);
+    },
+    stopMovementLoop() {
+      if (this.animationFrame) {
+        cancelAnimationFrame(this.animationFrame);
+        this.animationFrame = null;
+      }
+      this.lastFrameTime = 0;
+    },
+    updateMovement(timestamp) {
+      const deltaMs = Math.min(40, timestamp - this.lastFrameTime || 16.67);
+      this.lastFrameTime = timestamp;
+
+      if (!this.activeDirections.size) {
+        this.stopMovementLoop();
+        return;
+      }
+
+      const vector = this.normalizedVector();
+      this.applyMovement(vector.x * this.movementStep(deltaMs), vector.y * this.movementStep(deltaMs));
+      this.animationFrame = requestAnimationFrame(this.updateMovement);
+    },
+    applyMovement(deltaX, deltaY) {
+      if (!deltaX && !deltaY) return;
+
+      const nextX = this.clampPosition(this.playerX + deltaX);
+      const nextY = this.clampPosition(this.playerY + deltaY);
+      const blockedX = nextX === this.playerX && deltaX !== 0;
+      const blockedY = nextY === this.playerY && deltaY !== 0;
+
+      this.playerX = nextX;
+      this.playerY = nextY;
+
+      const exitDirection = this.exitDirectionForMovement(deltaX, deltaY);
+      if (exitDirection) {
+        this.activeDirections.clear();
+        this.stopMovementLoop();
+        this.$emit('move', exitDirection);
+        return;
+      }
+
+      if ((blockedX || blockedY) && !this.isNearAnyDoor()) {
+        this.bumpWall();
+      }
+    },
+    exitDirectionForMovement(deltaX, deltaY) {
+      if (deltaY < 0 && this.playerY <= MIN_POSITION + DOOR_TRIGGER_DISTANCE && this.isNearDoor('north')) {
+        return 'north';
+      }
+      if (deltaY > 0 && this.playerY >= MAX_POSITION - DOOR_TRIGGER_DISTANCE && this.isNearDoor('south')) {
+        return 'south';
+      }
+      if (deltaX < 0 && this.playerX <= MIN_POSITION + DOOR_TRIGGER_DISTANCE && this.isNearDoor('west')) {
+        return 'west';
+      }
+      if (deltaX > 0 && this.playerX >= MAX_POSITION - DOOR_TRIGGER_DISTANCE && this.isNearDoor('east')) {
+        return 'east';
+      }
+      return '';
+    },
+    isNearAnyDoor() {
+      return ['north', 'south', 'west', 'east'].some(direction => this.isNearDoor(direction));
+    },
+    directionFromKey(key) {
       const keyMap = {
         ArrowUp: 'north',
         w: 'north',
@@ -284,32 +369,68 @@ export default {
         d: 'east',
         D: 'east'
       };
-      const direction = keyMap[event.key];
+      return keyMap[key] || '';
+    },
+    tryMoveByKey(event) {
+      const direction = this.directionFromKey(event.key);
       if (!direction) return;
       event.preventDefault();
-      this.movePlayer(direction);
+      this.activeDirections.add(direction);
+      this.startMovementLoop();
+    },
+    stopMoveByKey(event) {
+      const direction = this.directionFromKey(event.key);
+      if (!direction) return;
+      this.activeDirections.delete(direction);
+    },
+    nudge(direction, frames = BUTTON_NUDGE_FRAMES) {
+      const vectors = {
+        north: [0, -1],
+        south: [0, 1],
+        west: [-1, 0],
+        east: [1, 0]
+      };
+      const [x, y] = vectors[direction] || [0, 0];
+      if (!x && !y) return;
+
+      let remaining = frames;
+      const tick = () => {
+        this.applyMovement(x * this.movementStep(16.67), y * this.movementStep(16.67));
+        remaining -= 1;
+        if (remaining > 0) {
+          requestAnimationFrame(tick);
+        }
+      };
+      requestAnimationFrame(tick);
     },
     resetPosition(entryDirection) {
       const upEntry = this.stairPositions.down;
       const downEntry = this.stairPositions.up;
       const entryPositions = {
-        north: [GRID_SIZE - 2, CENTER],
-        south: [1, CENTER],
-        west: [CENTER, GRID_SIZE - 2],
-        east: [CENTER, 1],
-        up: [upEntry[1], upEntry[0]],
-        down: [downEntry[1], downEntry[0]]
+        north: [CENTER, MAX_POSITION - 0.25],
+        south: [CENTER, MIN_POSITION + 0.25],
+        west: [MAX_POSITION - 0.25, CENTER],
+        east: [MIN_POSITION + 0.25, CENTER],
+        up: [upEntry[0], upEntry[1]],
+        down: [downEntry[0], downEntry[1]]
       };
-      const [row, col] = entryPositions[entryDirection] || [CENTER, CENTER];
-      this.playerRow = row;
-      this.playerCol = col;
+      const [x, y] = entryPositions[entryDirection] || [CENTER, CENTER];
+      this.activeDirections.clear();
+      this.stopMovementLoop();
+      this.playerX = this.clampPosition(x);
+      this.playerY = this.clampPosition(y);
       this.bumpWall();
     }
   },
+  mounted() {
+    window.addEventListener('keyup', this.stopMoveByKey, true);
+  },
   beforeUnmount() {
+    window.removeEventListener('keyup', this.stopMoveByKey, true);
     if (this.bumpTimer) {
       clearTimeout(this.bumpTimer);
     }
+    this.stopMovementLoop();
   }
 };
 </script>
@@ -355,6 +476,7 @@ export default {
   border: 6px solid #2a1e16;
   border-radius: 14px;
   padding: 8px;
+  position: relative;
   transition: transform 0.18s ease;
 }
 
@@ -394,21 +516,26 @@ export default {
   font-weight: 800;
 }
 
-.player {
+.player-avatar {
+  align-items: center;
   background: radial-gradient(circle, #f8f1d5 0 32%, #1f8f69 33% 64%, #0d2f2a 65%);
   border: 2px solid #f7d67b;
+  border-radius: 999px;
   box-shadow: 0 0 24px rgba(247, 214, 123, 0.55);
-  transform: scale(1.08);
-}
-
-.player.item {
-  background:
-    radial-gradient(circle at 50% 50%, #f8f1d5 0 26%, #1f8f69 27% 54%, transparent 55%),
-    radial-gradient(circle, rgba(247, 214, 123, 0.9), rgba(99, 69, 32, 0.9) 70%);
-  border-color: #ffe08a;
-  box-shadow:
-    0 0 0 3px rgba(247, 214, 123, 0.22),
-    0 0 28px rgba(247, 214, 123, 0.68);
+  color: #0d2f2a;
+  display: flex;
+  font-size: clamp(12px, 2vw, 20px);
+  font-weight: 900;
+  height: calc((100% - 64px) / 9 * 0.72);
+  justify-content: center;
+  min-height: 20px;
+  min-width: 20px;
+  pointer-events: none;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: box-shadow 0.16s ease;
+  width: calc((100% - 64px) / 9 * 0.72);
+  z-index: 3;
 }
 
 .item {
@@ -425,12 +552,15 @@ export default {
   font-weight: 900;
 }
 
-.player.stair {
-  background:
-    radial-gradient(circle at 50% 50%, #f8f1d5 0 25%, #1f8f69 26% 52%, transparent 53%),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 4px, transparent 4px 8px),
-    linear-gradient(180deg, #315d4a, #182b24);
-  border-color: #b7f5cf;
+.near-active {
+  box-shadow:
+    0 0 0 3px rgba(247, 214, 123, 0.22),
+    0 0 28px rgba(247, 214, 123, 0.68);
+  filter: brightness(1.18);
+  transform: scale(1.04);
+}
+
+.stair.near-active {
   box-shadow:
     0 0 0 3px rgba(143, 226, 180, 0.22),
     0 0 28px rgba(143, 226, 180, 0.62);

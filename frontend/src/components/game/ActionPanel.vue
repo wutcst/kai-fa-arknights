@@ -2,11 +2,11 @@
   <section class="action-panel">
     <h2>行动</h2>
     <div class="move-pad">
-      <button class="north-action" :disabled="!hasExit('north') || busy" @click="$emit('move', 'north')">北</button>
-      <button class="west-action" :disabled="!hasExit('west') || busy" @click="$emit('move', 'west')">西</button>
+      <button class="north-action" :disabled="busy" @click="$emit('move', 'north')">北</button>
+      <button class="west-action" :disabled="busy" @click="$emit('move', 'west')">西</button>
       <button :disabled="busy" class="center-action" @click="$emit('look')">查看</button>
-      <button class="east-action" :disabled="!hasExit('east') || busy" @click="$emit('move', 'east')">东</button>
-      <button class="south-action" :disabled="!hasExit('south') || busy" @click="$emit('move', 'south')">南</button>
+      <button class="east-action" :disabled="busy" @click="$emit('move', 'east')">东</button>
+      <button class="south-action" :disabled="busy" @click="$emit('move', 'south')">南</button>
     </div>
     <div class="stair-actions">
       <button :disabled="activeVerticalExit !== 'up' || busy" @click="$emit('move', 'up')">上楼</button>
@@ -15,7 +15,7 @@
 
     <div class="action-stack">
       <button :disabled="!activeRoomItemId || busy" @click="$emit('take', activeRoomItemId)">
-        {{ activeRoomItemName ? `拾取：${activeRoomItemName}` : '拾取当前位置物品' }}
+        {{ activeRoomItemName ? `拾取：${activeRoomItemName}` : '拾取附近物品' }}
       </button>
       <button :disabled="!selectedInventoryId || busy" @click="$emit('drop', selectedInventoryId)">丢弃选中物品</button>
       <button :disabled="!hasMagicCookie || busy" @click="$emit('eat-cookie')">使用魔法饼干</button>

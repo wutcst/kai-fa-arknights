@@ -74,8 +74,8 @@ public class SaveController {
         List<Room> history = game.getRoomHistory();
         Map<String, List<Item>> roomItems = game.getAllRoomItems();
 
-        int playerGridRow = getGridCoordinate(request.get("playerGridRow"));
-        int playerGridCol = getGridCoordinate(request.get("playerGridCol"));
+        double playerGridRow = getGridCoordinate(request.get("playerGridRow"));
+        double playerGridCol = getGridCoordinate(request.get("playerGridCol"));
         saveService.saveGame(userId, currentRoom, game.getPlayer(), history, roomItems, playerGridRow, playerGridCol);
 
         return Map.of("success", true, "message", "游戏已保存");
@@ -242,18 +242,18 @@ public class SaveController {
         return items;
     }
 
-    private int getGridCoordinate(Object value) {
+    private double getGridCoordinate(Object value) {
         if (value instanceof Number number) {
-            return Math.max(0, Math.min(8, number.intValue()));
+            return Math.max(0.5, Math.min(7.5, number.doubleValue()));
         }
         if (value instanceof String text) {
             try {
-                return Math.max(0, Math.min(8, Integer.parseInt(text)));
+                return Math.max(0.5, Math.min(7.5, Double.parseDouble(text)));
             } catch (NumberFormatException ignored) {
-                return 4;
+                return 4.0;
             }
         }
-        return 4;
+        return 4.0;
     }
 
     private List<Map<String, Object>> getPlayerInventory() {

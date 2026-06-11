@@ -30,6 +30,7 @@
         :exits="exits"
         :items="items"
         :player-grid-position="playerGridPosition"
+        :move-speed="moveSpeed"
         @move="$emit('move', $event)"
         @active-item-change="activeRoomItemId = $event"
         @active-item-name-change="activeRoomItemName = $event"
@@ -46,7 +47,7 @@
           :active-vertical-exit="activeVerticalExit"
           :selected-inventory-id="selectedInventoryId"
           :busy="busy"
-          @move="$emit('move', $event)"
+          @move="handleActionMove"
           @look="$emit('look')"
           @take="$emit('take', $event)"
           @drop="$emit('drop', $event)"
@@ -139,6 +140,10 @@ export default {
       type: Object,
       default: null
     },
+    moveSpeed: {
+      type: Number,
+      default: 0.5
+    },
     messages: {
       type: Array,
       default: () => []
@@ -193,6 +198,13 @@ export default {
     }
   },
   methods: {
+    handleActionMove(direction) {
+      if (direction === 'up' || direction === 'down') {
+        this.$emit('move', direction);
+        return;
+      }
+      this.$refs.roomGrid?.nudge(direction);
+    },
     tryMoveByKey(event) {
       this.$refs.roomGrid?.tryMoveByKey(event);
     },
