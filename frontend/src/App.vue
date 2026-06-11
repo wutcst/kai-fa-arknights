@@ -168,36 +168,42 @@ export default {
       // Backspace 或 Esc 返回
       if (e.key === 'Backspace' || e.key === 'Escape') {
         e.preventDefault();
+        this.playPlayerOperation();
         this.goBack();
         return;
       }
       
       // F 键查看房间物品
       if (e.key === 'f' || e.key === 'F') {
+        this.playPlayerOperation();
         this.look();
         return;
       }
 
       // B 键查看背包
       if (e.key === 'b' || e.key === 'B') {
+        this.playPlayerOperation();
         this.showInventory();
         return;
       }
       
       // H 键帮助
       if (e.key === 'h' || e.key === 'H') {
+        this.playPlayerOperation();
         this.getHelp();
         return;
       }
 
       // R 键存档
       if (e.key === 'r' || e.key === 'R') {
+        this.playPlayerOperation();
         this.handleSave();
         return;
       }
 
       // M 键切换地图
       if (e.key === 'm' || e.key === 'M') {
+        this.playPlayerOperation();
         this.showMap = !this.showMap;
         return;
       }
@@ -297,6 +303,9 @@ export default {
       if (!exists) {
         this.selectedInventoryId = '';
       }
+    },
+    playPlayerOperation() {
+      this.$refs.roomView?.playOperation();
     },
     async fetchMap(savedRoomId = null) {
       try {

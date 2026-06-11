@@ -7,8 +7,8 @@
       </div>
       <div class="top-actions">
         <span class="gold-pill">金币 {{ userGold }}</span>
-        <button @click="$emit('back-to-menu')">返回主界面</button>
-        <button class="logout" @click="$emit('logout')">退出登录</button>
+        <button @click="playCheckoutThen('back-to-menu')">返回主界面</button>
+        <button class="logout" @click="playCheckoutThen('logout')">退出登录</button>
       </div>
     </header>
 
@@ -48,17 +48,17 @@
           :selected-inventory-id="selectedInventoryId"
           :busy="busy"
           @move="handleActionMove"
-          @look="$emit('look')"
-          @take="$emit('take', $event)"
-          @drop="$emit('drop', $event)"
-          @eat-cookie="$emit('eat-cookie')"
-          @save="$emit('save')"
-          @load="$emit('load')"
-          @back="$emit('back')"
-          @toggle-map="$emit('toggle-map')"
-          @help="$emit('help')"
-          @open-ability="$emit('open-ability')"
-          @settle="$emit('settle')"
+          @look="playOperationThen('look')"
+          @take="playOperationThen('take', $event)"
+          @drop="playOperationThen('drop', $event)"
+          @eat-cookie="playOperationThen('eat-cookie')"
+          @save="playOperationThen('save')"
+          @load="playOperationThen('load')"
+          @back="playOperationThen('back')"
+          @toggle-map="playOperationThen('toggle-map')"
+          @help="playOperationThen('help')"
+          @open-ability="playOperationThen('open-ability')"
+          @settle="playOperationThen('settle')"
         />
 
         <InventoryPanel
@@ -200,16 +200,35 @@ export default {
   methods: {
     handleActionMove(direction) {
       if (direction === 'up' || direction === 'down') {
+        this.$refs.roomGrid?.playOperation();
         this.$emit('move', direction);
         return;
       }
       this.$refs.roomGrid?.nudge(direction);
+    },
+    playOperationThen(eventName, payload) {
+      this.$refs.roomGrid?.playOperation();
+      if (payload === undefined) {
+        this.$emit(eventName);
+        return;
+      }
+      this.$emit(eventName, payload);
+    },
+    async playCheckoutThen(eventName) {
+      await this.$refs.roomGrid?.playCheckout();
+      this.$emit(eventName);
     },
     tryMoveByKey(event) {
       this.$refs.roomGrid?.tryMoveByKey(event);
     },
     resetPosition(entryDirection) {
       this.$refs.roomGrid?.resetPosition(entryDirection);
+    },
+    playOperation() {
+      this.$refs.roomGrid?.playOperation();
+    },
+    playCheckout() {
+      return this.$refs.roomGrid?.playCheckout();
     }
   }
 };

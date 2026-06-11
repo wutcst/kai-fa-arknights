@@ -19,7 +19,17 @@
         :style="playerStyle"
         aria-label="玩家当前位置"
       >
-        ◆
+        <video
+          ref="playerVideo"
+          class="player-video"
+          :key="playerAnimation"
+          :src="playerVideoSrc"
+          :loop="isLoopingAnimation"
+          autoplay
+          muted
+          playsinline
+          @ended="handleAnimationEnded"
+        />
       </div>
     </div>
 
@@ -38,6 +48,12 @@
 </template>
 
 <script>
+import checkoutVideo from '@/assets/characters/维什戴尔-绝对主角-checkout.webm';
+import moveVideo from '@/assets/characters/维什戴尔-绝对主角-Move.webm';
+import operationVideo from '@/assets/characters/维什戴尔-绝对主角-Operation.webm';
+import sitVideo from '@/assets/characters/维什戴尔-绝对主角-Sit.webm';
+import sleepVideo from '@/assets/characters/维什戴尔-绝对主角-Sleep.webm';
+
 const GRID_SIZE = 9;
 const CENTER = 4;
 const MIN_POSITION = 0.5;
@@ -46,6 +62,9 @@ const INTERACT_DISTANCE = 0.78;
 const DOOR_TRIGGER_DISTANCE = 0.42;
 const BASE_STEP_PER_FRAME = 0.032;
 const BUTTON_NUDGE_FRAMES = 12;
+const SLEEP_DELAY_MS = 8000;
+const OPERATION_FALLBACK_MS = 1800;
+const CHECKOUT_FALLBACK_MS = 3500;
 
 export default {
   name: 'RoomGrid',
@@ -83,10 +102,30 @@ export default {
       bumpTimer: null,
       activeDirections: new Set(),
       animationFrame: null,
-      lastFrameTime: 0
+      lastFrameTime: 0,
+      playerAnimation: 'sit',
+      idleTimer: null,
+      operationTimer: null,
+      checkoutTimer: null,
+      checkoutResolver: null
     };
   },
   computed: {
+    playerVideos() {
+      return {
+        checkout: checkoutVideo,
+        move: moveVideo,
+        operation: operationVideo,
+        sit: sitVideo,
+        sleep: sleepVideo
+      };
+    },
+    playerVideoSrc() {
+      return this.playerVideos[this.playerAnimation] || sitVideo;
+    },
+    isLoopingAnimation() {
+      return !['operation', 'checkout'].includes(this.playerAnimation);
+    },
     itemPositions() {
       return [
         [2, 2],
@@ -300,6 +339,7 @@ export default {
     },
     startMovementLoop() {
       if (this.animationFrame) return;
+      this.setPlayerAnimation('move');
       this.lastFrameTime = performance.now();
       this.animationFrame = requestAnimationFrame(this.updateMovement);
     },
@@ -309,6 +349,9 @@ export default {
         this.animationFrame = null;
       }
       this.lastFrameTime = 0;
+      if (!this.activeDirections.size && this.playerAnimation === 'move') {
+        this.setPlayerAnimation('sit');
+      }
     },
     updateMovement(timestamp) {
       const deltaMs = Math.min(40, timestamp - this.lastFrameTime || 16.67);
@@ -405,10 +448,13 @@ export default {
 
       let remaining = frames;
       const tick = () => {
+        this.setPlayerAnimation('move');
         this.applyMovement(x * this.movementStep(16.67), y * this.movementStep(16.67));
         remaining -= 1;
         if (remaining > 0) {
           requestAnimationFrame(tick);
+        } else if (!this.activeDirections.size && this.playerAnimation === 'move') {
+          this.setPlayerAnimation('sit');
         }
       };
       requestAnimationFrame(tick);
@@ -429,17 +475,106 @@ export default {
       this.stopMovementLoop();
       this.playerX = this.clampPosition(x);
       this.playerY = this.clampPosition(y);
+      this.setPlayerAnimation('sit');
       this.bumpWall();
+    },
+    playOperation() {
+      if (this.playerAnimation === 'checkout') return;
+      if (this.operationTimer) {
+        clearTimeout(this.operationTimer);
+      }
+      this.setPlayerAnimation('operation');
+      this.operationTimer = setTimeout(() => {
+        if (this.playerAnimation === 'operation') {
+          this.setPlayerAnimation('sit');
+        }
+      }, OPERATION_FALLBACK_MS);
+    },
+    playCheckout() {
+      this.activeDirections.clear();
+      this.stopMovementLoop();
+      this.clearIdleTimer();
+      if (this.operationTimer) {
+        clearTimeout(this.operationTimer);
+        this.operationTimer = null;
+      }
+      this.setPlayerAnimation('checkout');
+      return new Promise((resolve) => {
+        this.checkoutResolver = resolve;
+        this.checkoutTimer = setTimeout(() => {
+          this.finishCheckout();
+        }, CHECKOUT_FALLBACK_MS);
+      });
+    },
+    setPlayerAnimation(animation) {
+      if (this.playerAnimation === 'checkout' && animation !== 'checkout') return;
+      this.playerAnimation = animation;
+      this.clearIdleTimer();
+      if (animation === 'sit') {
+        this.scheduleSleep();
+      }
+      this.$nextTick(() => {
+        const video = this.$refs.playerVideo;
+        if (video) {
+          video.currentTime = 0;
+          video.play?.().catch(() => {});
+        }
+      });
+    },
+    scheduleSleep() {
+      this.clearIdleTimer();
+      this.idleTimer = setTimeout(() => {
+        if (this.playerAnimation === 'sit' && !this.activeDirections.size) {
+          this.playerAnimation = 'sleep';
+        }
+      }, SLEEP_DELAY_MS);
+    },
+    clearIdleTimer() {
+      if (this.idleTimer) {
+        clearTimeout(this.idleTimer);
+        this.idleTimer = null;
+      }
+    },
+    handleAnimationEnded() {
+      if (this.playerAnimation === 'operation') {
+        if (this.operationTimer) {
+          clearTimeout(this.operationTimer);
+          this.operationTimer = null;
+        }
+        this.setPlayerAnimation('sit');
+      }
+      if (this.playerAnimation === 'checkout') {
+        this.finishCheckout();
+      }
+    },
+    finishCheckout() {
+      if (this.checkoutTimer) {
+        clearTimeout(this.checkoutTimer);
+        this.checkoutTimer = null;
+      }
+      const resolve = this.checkoutResolver;
+      this.checkoutResolver = null;
+      if (resolve) {
+        resolve();
+      }
     }
   },
   mounted() {
     window.addEventListener('keyup', this.stopMoveByKey, true);
+    this.scheduleSleep();
   },
   beforeUnmount() {
     window.removeEventListener('keyup', this.stopMoveByKey, true);
     if (this.bumpTimer) {
       clearTimeout(this.bumpTimer);
     }
+    if (this.operationTimer) {
+      clearTimeout(this.operationTimer);
+    }
+    if (this.checkoutTimer) {
+      clearTimeout(this.checkoutTimer);
+    }
+    this.clearIdleTimer();
     this.stopMovementLoop();
   }
 };
@@ -533,24 +668,23 @@ export default {
 
 .player-avatar {
   align-items: center;
-  background: radial-gradient(circle, #f8f1d5 0 32%, #1f8f69 33% 64%, #0d2f2a 65%);
-  border: 2px solid #f7d67b;
-  border-radius: 999px;
-  box-shadow: 0 0 24px rgba(247, 214, 123, 0.55);
-  color: #0d2f2a;
   display: flex;
-  font-size: clamp(12px, 2vw, 20px);
-  font-weight: 900;
-  height: calc((100% - 64px) / 9 * 0.72);
+  height: calc((100% - 64px) / 9 * 1.35);
   justify-content: center;
-  min-height: 20px;
-  min-width: 20px;
+  min-height: 36px;
+  min-width: 36px;
   pointer-events: none;
   position: absolute;
   transform: translate(-50%, -50%);
-  transition: box-shadow 0.16s ease;
-  width: calc((100% - 64px) / 9 * 0.72);
+  width: calc((100% - 64px) / 9 * 1.35);
   z-index: 3;
+}
+
+.player-video {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
 }
 
 .item {
