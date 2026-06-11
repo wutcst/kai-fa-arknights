@@ -52,6 +52,10 @@ export default {
     items: {
       type: Array,
       default: () => []
+    },
+    playerGridPosition: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -96,6 +100,12 @@ export default {
         const [col, row] = this.stairPositions[direction];
         return this.hasExit(direction) && row === this.playerRow && col === this.playerCol;
       }) || '';
+    },
+    playerPosition() {
+      return {
+        row: this.playerRow,
+        col: this.playerCol
+      };
     },
     cells() {
       return Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, index) => {
@@ -154,9 +164,32 @@ export default {
       handler(direction) {
         this.$emit('active-vertical-exit-change', direction);
       }
+    },
+    playerPosition: {
+      immediate: true,
+      handler(position) {
+        this.$emit('player-position-change', position);
+      }
+    },
+    playerGridPosition: {
+      deep: true,
+      handler(position) {
+        if (!position) return;
+        const row = this.clampGridPosition(position.row);
+        const col = this.clampGridPosition(position.col);
+        if (row !== this.playerRow || col !== this.playerCol) {
+          this.playerRow = row;
+          this.playerCol = col;
+        }
+      }
     }
   },
   methods: {
+    clampGridPosition(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return CENTER;
+      return Math.max(0, Math.min(GRID_SIZE - 1, Math.trunc(number)));
+    },
     hasExit(direction) {
       return this.exits.includes(direction);
     },

@@ -9,6 +9,7 @@ import cn.edu.whut.sept.zuul.service.Game;
 import cn.edu.whut.sept.zuul.service.SaveService;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,8 +58,8 @@ public class SaveController {
      * @return 保存结果
      */
     @PostMapping("/save")
-    public Map<String, Object> saveGame(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
+    public Map<String, Object> saveGame(@RequestBody Map<String, Object> request) {
+        String username = (String) request.get("username");
         if (username == null || username.trim().isEmpty()) {
             return Map.of("success", false, "message", "用户名不能为空");
         }
@@ -73,7 +74,9 @@ public class SaveController {
         List<Room> history = game.getRoomHistory();
         Map<String, List<Item>> roomItems = game.getAllRoomItems();
 
-        saveService.saveGame(userId, currentRoom, game.getPlayer(), history, roomItems);
+        int playerGridRow = getGridCoordinate(request.get("playerGridRow"));
+        int playerGridCol = getGridCoordinate(request.get("playerGridCol"));
+        saveService.saveGame(userId, currentRoom, game.getPlayer(), history, roomItems, playerGridRow, playerGridCol);
 
         return Map.of("success", true, "message", "游戏已保存");
     }
@@ -125,18 +128,20 @@ public class SaveController {
         int currentMaxWeight = abilityService.getMaxWeight(userId);
         game.setMaxWeight(currentMaxWeight);
 
-        return Map.of(
-            "success", true,
-            "message", "游戏已加载",
-            "description", savedRoom.getZhName(),
-            "longDescription", savedRoom.getShortDescription(),
-            "exits", savedRoom.getExits(),
-            "roomId", savedRoom.getId(),
-            "items", getRoomItems(savedRoom),
-            "inventory", getPlayerInventory(),
-            "playerWeight", playerWeight,
-            "playerMaxWeight", currentMaxWeight
-        );
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("success", true);
+        response.put("message", "游戏已加载");
+        response.put("description", savedRoom.getZhName());
+        response.put("longDescription", savedRoom.getShortDescription());
+        response.put("exits", savedRoom.getExits());
+        response.put("roomId", savedRoom.getId());
+        response.put("items", getRoomItems(savedRoom));
+        response.put("inventory", getPlayerInventory());
+        response.put("playerWeight", playerWeight);
+        response.put("playerMaxWeight", currentMaxWeight);
+        response.put("playerGridRow", loadResult.get("playerGridRow"));
+        response.put("playerGridCol", loadResult.get("playerGridCol"));
+        return response;
     }
 
     /**
@@ -235,6 +240,20 @@ public class SaveController {
             ));
         }
         return items;
+    }
+
+    private int getGridCoordinate(Object value) {
+        if (value instanceof Number number) {
+            return Math.max(0, Math.min(8, number.intValue()));
+        }
+        if (value instanceof String text) {
+            try {
+                return Math.max(0, Math.min(8, Integer.parseInt(text)));
+            } catch (NumberFormatException ignored) {
+                return 4;
+            }
+        }
+        return 4;
     }
 
     private List<Map<String, Object>> getPlayerInventory() {

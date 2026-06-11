@@ -29,10 +29,12 @@
         :description="description"
         :exits="exits"
         :items="items"
+        :player-grid-position="playerGridPosition"
         @move="$emit('move', $event)"
         @active-item-change="activeRoomItemId = $event"
         @active-item-name-change="activeRoomItemName = $event"
         @active-vertical-exit-change="activeVerticalExit = $event"
+        @player-position-change="$emit('player-position-change', $event)"
       />
 
       <aside class="right-rail">
@@ -132,6 +134,10 @@ export default {
     selectedInventoryId: {
       type: [String, Number],
       default: ''
+    },
+    playerGridPosition: {
+      type: Object,
+      default: null
     },
     messages: {
       type: Array,

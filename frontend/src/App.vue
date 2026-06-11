@@ -20,6 +20,7 @@
       :user-gold="userGold"
       :room-name="currentRoomName"
       :room-id="currentRoomId"
+      :player-grid-position="playerGridPosition"
       :description="longDescription"
       :exits="exits"
       :items="items"
@@ -43,6 +44,7 @@
       @open-ability="showAbilityPanel = true; fetchUserAbility()"
       @settle="showSettleConfirm = true"
       @select-inventory="selectedInventoryId = $event"
+      @player-position-change="playerGridPosition = $event"
       @back-to-menu="handleBackToMenu"
       @logout="handleLogout"
     />
@@ -123,6 +125,7 @@ export default {
       messageLog: [],
       playerWeight: 0,
       playerMaxWeight: 20,
+      playerGridPosition: { row: 4, col: 4 },
       showAbilityPanel: false,  // 是否显示能力面板
       showSettleConfirm: false,  // 是否显示结算确认对话框
       rooms: [],
@@ -249,6 +252,10 @@ export default {
       this.syncSelectedInventory();
       this.playerWeight = gameData.playerWeight || 0;
       this.playerMaxWeight = gameData.playerMaxWeight || 20;
+      this.playerGridPosition = {
+        row: gameData.playerGridRow ?? 4,
+        col: gameData.playerGridCol ?? 4
+      };
       this.displayMessage = '';
       this.isError = false;
     },
@@ -464,7 +471,7 @@ export default {
     // 手动保存游戏进度
     async handleSave() {
       try {
-        await saveGame(this.username);
+        await saveGame(this.username, this.playerGridPosition);
         this.displayMessage = '💾 游戏已保存';
         this.isError = false;
         this.appendLog(this.displayMessage);

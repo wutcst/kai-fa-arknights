@@ -63,7 +63,8 @@ public class SaveService {
      * @param roomItems   各房间物品状态
      * @return 保存的存档对象
      */
-    public GameSave saveGame(Long userId, Room currentRoom, Player player, List<Room> roomHistory, Map<String, List<Item>> roomItems) {
+    public GameSave saveGame(Long userId, Room currentRoom, Player player, List<Room> roomHistory,
+                             Map<String, List<Item>> roomItems, int playerGridRow, int playerGridCol) {
         GameSave save = gameSaveRepository.findByUserId(userId)
                 .orElse(new GameSave());
 
@@ -71,6 +72,8 @@ public class SaveService {
         save.setCurrentRoomId(currentRoom.getId());
         save.setPlayerWeight(player.getTotalWeight());
         save.setPlayerMaxWeight(player.getMaxWeight());
+        save.setPlayerGridRow(playerGridRow);
+        save.setPlayerGridCol(playerGridCol);
         save.setSavedAt(LocalDateTime.now());
 
         // 序列化背包物品
@@ -177,6 +180,8 @@ public class SaveService {
             "inventory", inventory,
             "playerWeight", save.getPlayerWeight(),
             "playerMaxWeight", save.getPlayerMaxWeight(),
+            "playerGridRow", save.getPlayerGridRow() == null ? 4 : save.getPlayerGridRow(),
+            "playerGridCol", save.getPlayerGridCol() == null ? 4 : save.getPlayerGridCol(),
             "roomHistory", history,
             "roomItems", roomItems,
             "savedAt", save.getSavedAt()
