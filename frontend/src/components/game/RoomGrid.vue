@@ -133,6 +133,12 @@ export default {
         top: `${((this.playerY + 0.5) / GRID_SIZE) * 100}%`
       };
     },
+    playerCell() {
+      return {
+        row: Math.round(this.playerY),
+        col: Math.round(this.playerX)
+      };
+    },
     cells() {
       return Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, index) => {
         const row = Math.floor(index / GRID_SIZE);
@@ -144,6 +150,10 @@ export default {
           classes.push('wall');
         } else {
           classes.push('floor');
+        }
+
+        if (row === this.playerCell.row && col === this.playerCell.col) {
+          classes.push('player-cell');
         }
 
         const direction = this.exitAt(row, col);
@@ -470,9 +480,7 @@ export default {
   grid-template-rows: repeat(9, minmax(0, 1fr));
   gap: 4px;
   aspect-ratio: 1;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(219, 168, 74, 0.18), transparent 45%),
-    #151719;
+  background: #151719;
   border: 6px solid #2a1e16;
   border-radius: 14px;
   padding: 8px;
@@ -501,6 +509,13 @@ export default {
     linear-gradient(135deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
     #3b342b;
   border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.player-cell {
+  box-shadow:
+    inset 0 0 0 2px rgba(247, 214, 123, 0.5),
+    0 0 18px rgba(247, 214, 123, 0.28);
+  filter: brightness(1.12);
 }
 
 .wall {
