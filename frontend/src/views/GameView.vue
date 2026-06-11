@@ -58,7 +58,7 @@
           @toggle-map="playOperationThen('toggle-map')"
           @help="playOperationThen('help')"
           @open-ability="playOperationThen('open-ability')"
-          @settle="playOperationThen('settle')"
+          @settle="$emit('settle')"
         />
 
         <InventoryPanel

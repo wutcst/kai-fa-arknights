@@ -16,6 +16,7 @@
       </div>
       <div
         class="player-avatar"
+        :class="{ 'facing-left': playerFacing === 'west' }"
         :style="playerStyle"
         aria-label="玩家当前位置"
       >
@@ -107,7 +108,8 @@ export default {
       idleTimer: null,
       operationTimer: null,
       checkoutTimer: null,
-      checkoutResolver: null
+      checkoutResolver: null,
+      playerFacing: 'east'
     };
   },
   computed: {
@@ -169,7 +171,7 @@ export default {
     playerStyle() {
       return {
         left: `${((this.playerX + 0.5) / GRID_SIZE) * 100}%`,
-        top: `${((this.playerY + 0.5) / GRID_SIZE) * 100}%`
+        top: `${((this.playerY - 0.6) / GRID_SIZE) * 100}%`
       };
     },
     playerCell() {
@@ -252,6 +254,7 @@ export default {
     },
     playerGridPosition: {
       deep: true,
+      immediate: true,
       handler(position) {
         if (!position) return;
         const nextY = this.clampPosition(position.row);
@@ -329,6 +332,7 @@ export default {
       if (this.activeDirections.has('south')) y += 1;
       if (this.activeDirections.has('west')) x -= 1;
       if (this.activeDirections.has('east')) x += 1;
+      this.updateFacing(x);
       const length = Math.hypot(x, y);
       if (!length) return { x: 0, y: 0 };
       return { x: x / length, y: y / length };
@@ -368,6 +372,7 @@ export default {
     },
     applyMovement(deltaX, deltaY) {
       if (!deltaX && !deltaY) return;
+      this.updateFacing(deltaX);
 
       const nextX = this.clampPosition(this.playerX + deltaX);
       const nextY = this.clampPosition(this.playerY + deltaY);
@@ -445,6 +450,7 @@ export default {
       };
       const [x, y] = vectors[direction] || [0, 0];
       if (!x && !y) return;
+      this.updateFacing(x);
 
       let remaining = frames;
       const tick = () => {
@@ -556,6 +562,14 @@ export default {
       this.checkoutResolver = null;
       if (resolve) {
         resolve();
+      }
+    },
+    updateFacing(deltaX) {
+      if (deltaX < 0) {
+        this.playerFacing = 'west';
+      }
+      if (deltaX > 0) {
+        this.playerFacing = 'east';
       }
     }
   },
@@ -669,15 +683,20 @@ export default {
 .player-avatar {
   align-items: center;
   display: flex;
-  height: calc((100% - 64px) / 9 * 1.35);
+  height: calc((100% - 64px) / 9 * 4.05);
   justify-content: center;
-  min-height: 36px;
-  min-width: 36px;
+  min-height: 108px;
+  min-width: 108px;
   pointer-events: none;
   position: absolute;
   transform: translate(-50%, -50%);
-  width: calc((100% - 64px) / 9 * 1.35);
+  transform-origin: center center;
+  width: calc((100% - 64px) / 9 * 4.05);
   z-index: 3;
+}
+
+.player-avatar.facing-left {
+  transform: translate(-50%, -50%) scaleX(-1);
 }
 
 .player-video {

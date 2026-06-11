@@ -549,6 +549,7 @@ const increment = 0.15;
     // 探索结算
     async handleSettle() {
       this.showSettleConfirm = false;
+      await this.$refs.roomView?.playCheckout();
       try {
         const response = await settleExploration(this.username);
         if (response.data.success) {
