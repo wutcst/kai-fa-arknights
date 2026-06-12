@@ -63,6 +63,7 @@ const INTERACT_DISTANCE = 0.78;
 const BASE_STEP_PER_FRAME = 0.032;
 const BUTTON_NUDGE_FRAMES = 12;
 const SLEEP_DELAY_MS = 8000;
+const MOVE_TO_SIT_DELAY_MS = 1000;
 const OPERATION_FALLBACK_MS = 1800;
 const CHECKOUT_FALLBACK_MS = 3500;
 
@@ -105,6 +106,7 @@ export default {
       lastFrameTime: 0,
       playerAnimation: 'sit',
       idleTimer: null,
+      moveEndTimer: null,
       operationTimer: null,
       checkoutTimer: null,
       checkoutResolver: null,
@@ -347,6 +349,7 @@ export default {
     },
     startMovementLoop() {
       if (this.animationFrame) return;
+      this.clearMoveEndTimer();
       this.setPlayerAnimation('move');
       this.lastFrameTime = performance.now();
       this.animationFrame = requestAnimationFrame(this.updateMovement);
@@ -358,7 +361,7 @@ export default {
       }
       this.lastFrameTime = 0;
       if (!this.activeDirections.size && this.playerAnimation === 'move') {
-        this.setPlayerAnimation('sit');
+        this.scheduleSitAfterMove();
       }
     },
     updateMovement(timestamp) {
@@ -475,7 +478,7 @@ export default {
         if (remaining > 0) {
           requestAnimationFrame(tick);
         } else if (!this.activeDirections.size && this.playerAnimation === 'move') {
-          this.setPlayerAnimation('sit');
+          this.scheduleSitAfterMove();
         }
       };
       requestAnimationFrame(tick);
@@ -494,6 +497,7 @@ export default {
       const [x, y] = entryPositions[entryDirection] || [CENTER, CENTER];
       this.activeDirections.clear();
       this.stopMovementLoop();
+      this.clearMoveEndTimer();
       this.playerX = this.clampPosition(x);
       this.playerY = this.clampPosition(y);
       this.setPlayerAnimation('sit');
@@ -501,6 +505,7 @@ export default {
     },
     playOperation() {
       if (this.playerAnimation === 'checkout') return;
+      this.clearMoveEndTimer();
       if (this.operationTimer) {
         clearTimeout(this.operationTimer);
       }
@@ -515,6 +520,7 @@ export default {
       this.activeDirections.clear();
       this.stopMovementLoop();
       this.clearIdleTimer();
+      this.clearMoveEndTimer();
       if (this.operationTimer) {
         clearTimeout(this.operationTimer);
         this.operationTimer = null;
@@ -529,6 +535,9 @@ export default {
     },
     setPlayerAnimation(animation) {
       if (this.playerAnimation === 'checkout' && animation !== 'checkout') return;
+      if (animation === 'move' || animation === 'operation' || animation === 'checkout') {
+        this.clearMoveEndTimer();
+      }
       this.playerAnimation = animation;
       this.clearIdleTimer();
       if (animation === 'sit') {
@@ -554,6 +563,20 @@ export default {
       if (this.idleTimer) {
         clearTimeout(this.idleTimer);
         this.idleTimer = null;
+      }
+    },
+    scheduleSitAfterMove() {
+      this.clearMoveEndTimer();
+      this.moveEndTimer = setTimeout(() => {
+        if (this.playerAnimation === 'move' && !this.activeDirections.size) {
+          this.setPlayerAnimation('sit');
+        }
+      }, MOVE_TO_SIT_DELAY_MS);
+    },
+    clearMoveEndTimer() {
+      if (this.moveEndTimer) {
+        clearTimeout(this.moveEndTimer);
+        this.moveEndTimer = null;
       }
     },
     handleAnimationEnded() {
@@ -599,6 +622,9 @@ export default {
     }
     if (this.operationTimer) {
       clearTimeout(this.operationTimer);
+    }
+    if (this.moveEndTimer) {
+      clearTimeout(this.moveEndTimer);
     }
     if (this.checkoutTimer) {
       clearTimeout(this.checkoutTimer);
