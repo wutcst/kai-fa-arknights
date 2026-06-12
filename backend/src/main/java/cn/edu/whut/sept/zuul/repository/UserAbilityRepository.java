@@ -11,7 +11,7 @@ import java.util.Optional;
  */
 @Repository
 public interface UserAbilityRepository extends JpaRepository<UserAbility, Long> {
-
+    
     /**
      * 根据用户ID查找用户能力.
      *

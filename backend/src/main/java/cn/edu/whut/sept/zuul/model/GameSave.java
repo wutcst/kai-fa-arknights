@@ -29,6 +29,12 @@ public class GameSave {
     @Column(name = "player_max_weight")
     private Integer playerMaxWeight = 20;
 
+    @Column(name = "player_grid_row")
+    private Integer playerGridRow = 4;
+
+    @Column(name = "player_grid_col")
+    private Integer playerGridCol = 4;
+
     @Column(name = "room_history", columnDefinition = "JSON")
     private String roomHistory;  // JSON序列化
 
@@ -91,6 +97,18 @@ public class GameSave {
 
     /** 设置玩家最大负重. */
     public void setPlayerMaxWeight(Integer playerMaxWeight) { this.playerMaxWeight = playerMaxWeight; }
+
+    /** 获取玩家网格行. */
+    public Integer getPlayerGridRow() { return playerGridRow; }
+
+    /** 设置玩家网格行. */
+    public void setPlayerGridRow(Integer playerGridRow) { this.playerGridRow = playerGridRow; }
+
+    /** 获取玩家网格列. */
+    public Integer getPlayerGridCol() { return playerGridCol; }
+
+    /** 设置玩家网格列. */
+    public void setPlayerGridCol(Integer playerGridCol) { this.playerGridCol = playerGridCol; }
 
     /** 获取房间历史（JSON格式）. */
     public String getRoomHistory() { return roomHistory; }
