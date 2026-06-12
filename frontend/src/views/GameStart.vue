@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { checkSave, loadGame, saveGame, newGame } from '@/api/game';
+import { checkSave, loadGame, saveGame, newGame } from '@/api/saveApi';
 
 export default {
   name: 'GameStart',
