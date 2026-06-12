@@ -82,6 +82,10 @@ export function usePlayerAnimation({ hasActiveDirections }) {
     }
     const resolve = checkoutResolver.value;
     checkoutResolver.value = null;
+    if (playerAnimation.value === 'checkout') {
+      playerAnimation.value = 'sit';
+      scheduleSleep();
+    }
     if (resolve) {
       resolve();
     }

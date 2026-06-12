@@ -24,6 +24,7 @@ export function usePlayerMovement({
   const bumpTimer = ref(null);
   const activeDirections = ref(new Set());
   const animationFrame = ref(null);
+  const nudgeFrame = ref(null);
   const lastFrameTime = ref(0);
 
   const playerPosition = computed(() => ({
@@ -185,12 +186,13 @@ export function usePlayerMovement({
       applyMovement(x * movementStep(16.67), y * movementStep(16.67));
       remaining -= 1;
       if (remaining > 0) {
-        requestAnimationFrame(tick);
+        nudgeFrame.value = requestAnimationFrame(tick);
       } else if (!activeDirections.value.size) {
+        nudgeFrame.value = null;
         onStopMoving?.();
       }
     };
-    requestAnimationFrame(tick);
+    nudgeFrame.value = requestAnimationFrame(tick);
   };
 
   const resetPosition = (entryDirection, onReset) => {
@@ -217,6 +219,10 @@ export function usePlayerMovement({
     if (bumpTimer.value) {
       clearTimeout(bumpTimer.value);
       bumpTimer.value = null;
+    }
+    if (nudgeFrame.value) {
+      cancelAnimationFrame(nudgeFrame.value);
+      nudgeFrame.value = null;
     }
     stopMovementLoop();
   };
