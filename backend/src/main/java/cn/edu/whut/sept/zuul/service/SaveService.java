@@ -25,6 +25,8 @@ import java.util.Optional;
 @Service
 @Transactional
 public class SaveService {
+    private static final int GRID_POSITION_SCALE = 1000;
+
     private final GameSaveRepository gameSaveRepository;
     private final ObjectMapper objectMapper;
 
@@ -63,7 +65,8 @@ public class SaveService {
      * @param roomItems   各房间物品状态
      * @return 保存的存档对象
      */
-    public GameSave saveGame(Long userId, Room currentRoom, Player player, List<Room> roomHistory, Map<String, List<Item>> roomItems) {
+    public GameSave saveGame(Long userId, Room currentRoom, Player player, List<Room> roomHistory,
+                             Map<String, List<Item>> roomItems, double playerGridRow, double playerGridCol) {
         GameSave save = gameSaveRepository.findByUserId(userId)
                 .orElse(new GameSave());
 
@@ -71,6 +74,8 @@ public class SaveService {
         save.setCurrentRoomId(currentRoom.getId());
         save.setPlayerWeight(player.getTotalWeight());
         save.setPlayerMaxWeight(player.getMaxWeight());
+        save.setPlayerGridRow(encodeGridCoordinate(playerGridRow));
+        save.setPlayerGridCol(encodeGridCoordinate(playerGridCol));
         save.setSavedAt(LocalDateTime.now());
 
         // 序列化背包物品
@@ -177,9 +182,26 @@ public class SaveService {
             "inventory", inventory,
             "playerWeight", save.getPlayerWeight(),
             "playerMaxWeight", save.getPlayerMaxWeight(),
+            "playerGridRow", decodeGridCoordinate(save.getPlayerGridRow()),
+            "playerGridCol", decodeGridCoordinate(save.getPlayerGridCol()),
             "roomHistory", history,
             "roomItems", roomItems,
             "savedAt", save.getSavedAt()
         );
+    }
+
+    private int encodeGridCoordinate(double coordinate) {
+        return (int) Math.round(coordinate * GRID_POSITION_SCALE);
+    }
+
+    private double decodeGridCoordinate(Integer storedCoordinate) {
+        if (storedCoordinate == null) {
+            return 4.0;
+        }
+        // 旧存档保存的是 0..8 整数格子；新存档保存的是放大后的连续坐标。
+        if (storedCoordinate >= 0 && storedCoordinate <= 8) {
+            return storedCoordinate.doubleValue();
+        }
+        return storedCoordinate.doubleValue() / GRID_POSITION_SCALE;
     }
 }
