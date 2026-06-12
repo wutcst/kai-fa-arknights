@@ -6,14 +6,11 @@
     </div>
 
     <div class="room-grid" :class="{ bump: isBumping }" ref="grid">
-      <div
+      <RoomCell
         v-for="cell in cells"
         :key="cell.key"
-        class="room-cell"
-        :class="cell.classes"
-      >
-        <span v-if="cell.label" class="cell-label">{{ cell.label }}</span>
-      </div>
+        :cell="cell"
+      />
       <div
         class="player-avatar"
         :class="{ 'facing-left': playerFacing === 'west' }"
@@ -54,6 +51,7 @@ import moveVideo from '@/assets/characters/维什戴尔-绝对主角-Move.webm';
 import operationVideo from '@/assets/characters/维什戴尔-绝对主角-Operation.webm';
 import sitVideo from '@/assets/characters/维什戴尔-绝对主角-Sit.webm';
 import sleepVideo from '@/assets/characters/维什戴尔-绝对主角-Sleep.webm';
+import RoomCell from '@/components/game/RoomCell.vue';
 
 const GRID_SIZE = 9;
 const CENTER = 4;
@@ -69,6 +67,9 @@ const CHECKOUT_FALLBACK_MS = 3500;
 
 export default {
   name: 'RoomGrid',
+  components: {
+    RoomCell
+  },
   props: {
     roomName: {
       type: String,
@@ -773,12 +774,6 @@ export default {
   box-shadow:
     0 0 0 3px rgba(143, 226, 180, 0.22),
     0 0 28px rgba(143, 226, 180, 0.62);
-}
-
-.cell-label {
-  font-size: clamp(12px, 2vw, 20px);
-  line-height: 1;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 .room-description {

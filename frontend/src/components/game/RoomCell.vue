@@ -1,0 +1,25 @@
+<template>
+  <div class="room-cell" :class="cell.classes">
+    <span v-if="cell.label" class="cell-label">{{ cell.label }}</span>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'RoomCell',
+  props: {
+    cell: {
+      type: Object,
+      required: true
+    }
+  }
+};
+</script>
+
+<style scoped>
+.cell-label {
+  font-size: clamp(12px, 2vw, 20px);
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+</style>
