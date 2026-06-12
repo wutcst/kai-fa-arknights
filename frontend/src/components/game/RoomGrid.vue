@@ -11,24 +11,13 @@
         :key="cell.key"
         :cell="cell"
       />
-      <div
-        class="player-avatar"
-        :class="{ 'facing-left': playerFacing === 'west' }"
-        :style="playerStyle"
-        aria-label="玩家当前位置"
-      >
-        <video
-          ref="playerVideo"
-          class="player-video"
-          :key="playerAnimation"
-          :src="playerVideoSrc"
-          :loop="isLoopingAnimation"
-          autoplay
-          muted
-          playsinline
-          @ended="handleAnimationEnded"
-        />
-      </div>
+      <PlayerAvatar
+        :animation="playerAnimation"
+        :facing="playerFacing"
+        :player-style="playerStyle"
+        :looping="isLoopingAnimation"
+        @ended="handleAnimationEnded"
+      />
     </div>
 
     <div v-if="activeRoomItem" class="pickup-hint">
@@ -46,11 +35,7 @@
 </template>
 
 <script>
-import checkoutVideo from '@/assets/characters/维什戴尔-绝对主角-checkout.webm';
-import moveVideo from '@/assets/characters/维什戴尔-绝对主角-Move.webm';
-import operationVideo from '@/assets/characters/维什戴尔-绝对主角-Operation.webm';
-import sitVideo from '@/assets/characters/维什戴尔-绝对主角-Sit.webm';
-import sleepVideo from '@/assets/characters/维什戴尔-绝对主角-Sleep.webm';
+import PlayerAvatar from '@/components/game/PlayerAvatar.vue';
 import RoomCell from '@/components/game/RoomCell.vue';
 
 const GRID_SIZE = 9;
@@ -68,6 +53,7 @@ const CHECKOUT_FALLBACK_MS = 3500;
 export default {
   name: 'RoomGrid',
   components: {
+    PlayerAvatar,
     RoomCell
   },
   props: {
@@ -115,18 +101,6 @@ export default {
     };
   },
   computed: {
-    playerVideos() {
-      return {
-        checkout: checkoutVideo,
-        move: moveVideo,
-        operation: operationVideo,
-        sit: sitVideo,
-        sleep: sleepVideo
-      };
-    },
-    playerVideoSrc() {
-      return this.playerVideos[this.playerAnimation] || sitVideo;
-    },
     isLoopingAnimation() {
       return !['operation', 'checkout'].includes(this.playerAnimation);
     },
@@ -544,13 +518,6 @@ export default {
       if (animation === 'sit') {
         this.scheduleSleep();
       }
-      this.$nextTick(() => {
-        const video = this.$refs.playerVideo;
-        if (video) {
-          video.currentTime = 0;
-          video.play?.().catch(() => {});
-        }
-      });
     },
     scheduleSleep() {
       this.clearIdleTimer();
@@ -720,32 +687,6 @@ export default {
   border: 1px solid #ffd280;
   color: #fff3cf;
   font-weight: 800;
-}
-
-.player-avatar {
-  align-items: center;
-  display: flex;
-  height: calc((100% - 64px) / 9 * 4.05);
-  justify-content: center;
-  min-height: 108px;
-  min-width: 108px;
-  pointer-events: none;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  transform-origin: center center;
-  width: calc((100% - 64px) / 9 * 4.05);
-  z-index: 3;
-}
-
-.player-avatar.facing-left {
-  transform: translate(-50%, -50%) scaleX(-1);
-}
-
-.player-video {
-  display: block;
-  height: 100%;
-  object-fit: contain;
-  width: 100%;
 }
 
 .item {
