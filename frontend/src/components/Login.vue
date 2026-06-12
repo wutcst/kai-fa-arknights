@@ -119,7 +119,7 @@ export default {
         this.authError = '用户名不能为空';
         return;
       }
-      if (!this.password.trim()) {
+      if (this.mode !== 'changePassword' && !this.password.trim()) {
         this.authError = '密码不能为空';
         return;
       }
