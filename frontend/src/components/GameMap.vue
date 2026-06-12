@@ -1,6 +1,6 @@
 <template>
   <div class="game-map" v-if="rooms && rooms.length">
-    <svg :viewBox="isInTheater ? '100 30 700 750' : '0 0 1100 1050'" class="map-svg">
+    <svg :viewBox="viewBox" class="map-svg">
       <!-- 连接线 -->
       <line
         v-for="(conn, index) in connections"
@@ -76,6 +76,15 @@
  * 游戏地图可视化组件.
  * 使用 SVG 展示房间及连接关系.
  */
+import {
+  MAP_VIEW_TYPES,
+  getMapViewBox,
+  getMapViewType,
+  getRoomPositions,
+  shouldDisplayConnection,
+  shouldDisplayRoom
+} from '@/config/mapLayout';
+
 export default {
   name: 'GameMap',
   props: {
@@ -88,95 +97,45 @@ export default {
       required: true
     }
   },
-  data() {
-    return {
-      // 外部地图房间位置
-      externalRoomPositions: {
-        'portal': { x: 500, y: 50 },
-        'outside': { x: 500, y: 200 },
-        'theater': { x: 800, y: 200 },
-        'library': { x: 800, y: 50 },
-        'pub': { x: 200, y: 200 },
-        'gym': { x: 200, y: 350 },
-        'lab': { x: 500, y: 400 },
-        'office': { x: 800, y: 400 },
-        'cafeteria': { x: 200, y: 500 },
-        'garden': { x: 500, y: 600 },
-        'bookstore': { x: 50, y: 600 },
-        'dormitory': { x: 500, y: 800 }
-      },
-      // 教学楼内部地图房间位置 - 分层显示
-      internalRoomPositions: {
-        // 一楼 (y: 50-260)
-        'theater': { x: 400, y: 50 },
-        'theater_lobby': { x: 400, y: 150 },
-        'theater_classroom_101': { x: 200, y: 150 },
-        'theater_classroom_102': { x: 600, y: 150 },
-        'theater_stairway_1f': { x: 400, y: 260 },
-        // 二楼 (y: 320-480)
-        'theater_stairway_2f': { x: 400, y: 370 },
-        'theater_classroom_201': { x: 200, y: 370 },
-        'theater_classroom_202': { x: 600, y: 370 },
-        'theater_office': { x: 400, y: 450 },
-        // 三楼 (y: 520-700)
-        'theater_stairway_3f': { x: 400, y: 590 },
-        'theater_classroom_301': { x: 200, y: 590 },
-        'theater_classroom_302': { x: 600, y: 590 },
-        'theater_lab': { x: 400, y: 670 }
-      }
-    };
-  },
   methods: {
     getRoomPosition(roomId) {
-      const positions = this.isInTheater ? this.internalRoomPositions : this.externalRoomPositions;
-      return positions[roomId] || { x: 0, y: 0 };
+      return this.positions[roomId] || { x: 0, y: 0 };
     }
   },
   computed: {
+    mapViewType() {
+      return getMapViewType(this.currentRoomId);
+    },
+    viewBox() {
+      return getMapViewBox(this.mapViewType);
+    },
+    positions() {
+      return getRoomPositions(this.mapViewType);
+    },
     isInTheater() {
-      return this.currentRoomId.startsWith('theater_');
+      return this.mapViewType === MAP_VIEW_TYPES.INTERNAL;
     },
     filteredRooms() {
-      if (this.isInTheater) {
-        // 教学楼内部：显示内部房间 + 教学楼入口作为参考
-        return this.rooms.filter(room =>
-          room.id.startsWith('theater_') || room.id === 'theater'
-        );
-      } else {
-        // 外部：显示外部房间（排除内部房间）
-        return this.rooms.filter(room => !room.id.startsWith('theater_'));
-      }
+      return this.rooms.filter(room => shouldDisplayRoom(room.id, this.mapViewType));
     },
     connections() {
       const conns = [];
       const added = new Set();
 
-      // 根据当前位置决定显示哪些连接
-      const showInternal = this.isInTheater;
-      const positions = showInternal ? this.internalRoomPositions : this.externalRoomPositions;
-
-      if (!positions || !this.filteredRooms) return conns;
+      if (!this.positions || !this.filteredRooms) return conns;
 
       for (const room of this.filteredRooms) {
-        const pos = positions[room.id];
+        const pos = this.positions[room.id];
         if (!pos || !room.connectedRooms) continue;
 
         for (const connectedId of room.connectedRooms) {
-          // 如果是教学楼内部视图，只显示内部房间之间的连接
-          // 但 theater 到 theater_lobby 的连接需要显示
-          if (showInternal) {
-            if (room.id !== 'theater' && connectedId !== 'theater' &&
-                !connectedId.startsWith('theater_')) continue;
-            if (room.id === 'theater' && connectedId !== 'theater_lobby') continue;
-          }
-          // 如果是外部视图，不显示内部房间的连接
-          if (!showInternal && connectedId.startsWith('theater_')) continue;
+          if (!shouldDisplayConnection(room.id, connectedId, this.mapViewType)) continue;
 
           const key = [room.id, connectedId].sort().join('-');
           if (added.has(key)) continue;
           added.add(key);
 
-          const targetPos = positions[connectedId];
+          const targetPos = this.positions[connectedId];
           if (!targetPos) continue;
 
           conns.push({

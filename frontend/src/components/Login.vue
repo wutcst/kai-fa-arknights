@@ -6,15 +6,15 @@
       <div class="auth-tabs">
         <button
           :class="{ active: mode === 'login' }"
-          @click="mode = 'login'"
+          @click="switchMode('login')"
         >登录</button>
         <button
           :class="{ active: mode === 'register' }"
-          @click="mode = 'register'"
+          @click="switchMode('register')"
         >注册</button>
         <button
           :class="{ active: mode === 'changePassword' }"
-          @click="mode = 'changePassword'"
+          @click="switchMode('changePassword')"
         >修改密码</button>
       </div>
 
@@ -83,7 +83,7 @@
         <div class="success-msg" v-if="authSuccess">{{ authSuccess }}</div>
 
         <button class="btn-submit" @click="handleAuth" :disabled="authLoading">
-          {{ authLoading ? '处理中...' : (mode === 'login' ? '登录' : mode === 'register' ? '注册' : '修改密码') }}
+          {{ submitText }}
         </button>
       </div>
     </div>
@@ -92,6 +92,11 @@
 
 <script>
 import { login, register, changePassword } from '@/api/authApi';
+import {
+  validateLoginForm,
+  validateRegisterForm,
+  validateChangePasswordForm
+} from '@/utils/authValidators';
 
 export default {
   name: 'UserLogin',
@@ -110,91 +115,120 @@ export default {
       authLoading: false
     };
   },
+  computed: {
+    submitText() {
+      if (this.authLoading) return '处理中...';
+      if (this.mode === 'login') return '登录';
+      if (this.mode === 'register') return '注册';
+      return '修改密码';
+    }
+  },
   methods: {
+    switchMode(mode) {
+      this.mode = mode;
+      this.authError = '';
+      this.authSuccess = '';
+    },
     async handleAuth() {
       this.authError = '';
       this.authSuccess = '';
 
-      if (!this.username.trim()) {
-        this.authError = '用户名不能为空';
-        return;
-      }
-      if (this.mode !== 'changePassword' && !this.password.trim()) {
-        this.authError = '密码不能为空';
+      if (this.mode === 'login') {
+        await this.handleLogin();
         return;
       }
 
       if (this.mode === 'register') {
-        if (this.password !== this.confirmPassword) {
-          this.authError = '两次密码输入不一致';
-          return;
+        await this.handleRegister();
+        return;
+      }
+
+      if (this.mode === 'changePassword') {
+        await this.handleChangePassword();
+      }
+    },
+    async handleLogin() {
+      const error = validateLoginForm({
+        username: this.username,
+        password: this.password
+      });
+      if (error) {
+        this.authError = error;
+        return;
+      }
+
+      this.authLoading = true;
+      try {
+        const response = await login(this.username, this.password);
+        if (response.data.success) {
+          this.$emit('login-success', this.username);
+          this.password = '';
+        } else {
+          this.authError = response.data.message;
         }
-        this.authLoading = true;
-        try {
-          const response = await register(this.username, this.password);
-          if (response.data.success) {
-            this.authSuccess = '注册成功，请登录';
-            this.mode = 'login';
-            this.password = '';
-            this.confirmPassword = '';
-          } else {
-            this.authError = response.data.message;
-          }
-        } catch (e) {
-          this.authError = '注册失败：' + (e.response?.data?.message || e.message);
-        } finally {
-          this.authLoading = false;
+      } catch (e) {
+        this.authError = '登录失败：' + (e.response?.data?.message || e.message);
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    async handleRegister() {
+      const error = validateRegisterForm({
+        username: this.username,
+        password: this.password,
+        confirmPassword: this.confirmPassword
+      });
+      if (error) {
+        this.authError = error;
+        return;
+      }
+
+      this.authLoading = true;
+      try {
+        const response = await register(this.username, this.password);
+        if (response.data.success) {
+          this.authSuccess = '注册成功，请登录';
+          this.mode = 'login';
+          this.password = '';
+          this.confirmPassword = '';
+        } else {
+          this.authError = response.data.message;
         }
-      } else if (this.mode === 'changePassword') {
-        if (!this.oldPassword.trim()) {
-          this.authError = '旧密码不能为空';
-          return;
+      } catch (e) {
+        this.authError = '注册失败：' + (e.response?.data?.message || e.message);
+      } finally {
+        this.authLoading = false;
+      }
+    },
+    async handleChangePassword() {
+      const error = validateChangePasswordForm({
+        username: this.username,
+        oldPassword: this.oldPassword,
+        newPassword: this.newPassword,
+        confirmNewPassword: this.confirmNewPassword
+      });
+      if (error) {
+        this.authError = error;
+        return;
+      }
+
+      this.authLoading = true;
+      try {
+        const response = await changePassword(this.username, this.oldPassword, this.newPassword);
+        if (response.data.success) {
+          this.authSuccess = '密码修改成功，请使用新密码登录';
+          this.mode = 'login';
+          this.password = '';
+          this.oldPassword = '';
+          this.newPassword = '';
+          this.confirmNewPassword = '';
+        } else {
+          this.authError = response.data.message;
         }
-        if (!this.newPassword.trim()) {
-          this.authError = '新密码不能为空';
-          return;
-        }
-        if (this.newPassword !== this.confirmNewPassword) {
-          this.authError = '两次新密码输入不一致';
-          return;
-        }
-        if (this.newPassword === this.oldPassword) {
-          this.authError = '新密码不能与旧密码相同';
-          return;
-        }
-        this.authLoading = true;
-        try {
-          const response = await changePassword(this.username, this.oldPassword, this.newPassword);
-          if (response.data.success) {
-            this.authSuccess = '密码修改成功，请使用新密码登录';
-            this.mode = 'login';
-            this.password = '';
-            this.oldPassword = '';
-            this.newPassword = '';
-            this.confirmNewPassword = '';
-          } else {
-            this.authError = response.data.message;
-          }
-        } catch (e) {
-          this.authError = '修改密码失败：' + (e.response?.data?.message || e.message);
-        } finally {
-          this.authLoading = false;
-        }
-      } else if (this.mode === 'login') {
-        this.authLoading = true;
-        try {
-          const response = await login(this.username, this.password);
-          if (response.data.success) {
-            this.$emit('login-success', this.username);
-            this.password = '';
-          } else {
-            this.authError = response.data.message;
-          }
-        } catch (e) {
-          this.authError = '登录失败：' + (e.response?.data?.message || e.message);
-        } finally {
-          this.authLoading = false;
-        }
+      } catch (e) {
+        this.authError = '修改密码失败：' + (e.response?.data?.message || e.message);
+      } finally {
+        this.authLoading = false;
       }
     }
   }
