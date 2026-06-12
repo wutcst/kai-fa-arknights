@@ -60,7 +60,6 @@ const CENTER = 4;
 const MIN_POSITION = 0.5;
 const MAX_POSITION = GRID_SIZE - 1.5;
 const INTERACT_DISTANCE = 0.78;
-const DOOR_TRIGGER_DISTANCE = 0.42;
 const BASE_STEP_PER_FRAME = 0.032;
 const BUTTON_NUDGE_FRAMES = 12;
 const SLEEP_DELAY_MS = 8000;
@@ -176,8 +175,8 @@ export default {
     },
     playerCell() {
       return {
-        row: Math.round(this.playerY),
-        col: Math.round(this.playerX)
+        row: this.coordinateToCell(this.playerY),
+        col: this.coordinateToCell(this.playerX)
       };
     },
     cells() {
@@ -267,6 +266,11 @@ export default {
     }
   },
   methods: {
+    coordinateToCell(position) {
+      if (position <= MIN_POSITION) return 0;
+      if (position >= MAX_POSITION) return GRID_SIZE - 1;
+      return Math.round(position);
+    },
     clampPosition(value) {
       const number = Number(value);
       if (!Number.isFinite(number)) return CENTER;
@@ -395,19 +399,30 @@ export default {
       }
     },
     exitDirectionForMovement(deltaX, deltaY) {
-      if (deltaY < 0 && this.playerY <= MIN_POSITION + DOOR_TRIGGER_DISTANCE && this.isNearDoor('north')) {
+      if (deltaY < 0 && this.isStandingOnDoor('north')) {
         return 'north';
       }
-      if (deltaY > 0 && this.playerY >= MAX_POSITION - DOOR_TRIGGER_DISTANCE && this.isNearDoor('south')) {
+      if (deltaY > 0 && this.isStandingOnDoor('south')) {
         return 'south';
       }
-      if (deltaX < 0 && this.playerX <= MIN_POSITION + DOOR_TRIGGER_DISTANCE && this.isNearDoor('west')) {
+      if (deltaX < 0 && this.isStandingOnDoor('west')) {
         return 'west';
       }
-      if (deltaX > 0 && this.playerX >= MAX_POSITION - DOOR_TRIGGER_DISTANCE && this.isNearDoor('east')) {
+      if (deltaX > 0 && this.isStandingOnDoor('east')) {
         return 'east';
       }
       return '';
+    },
+    isStandingOnDoor(direction) {
+      if (!this.hasExit(direction)) return false;
+      const doorCells = {
+        north: { row: 0, col: CENTER },
+        south: { row: GRID_SIZE - 1, col: CENTER },
+        west: { row: CENTER, col: 0 },
+        east: { row: CENTER, col: GRID_SIZE - 1 }
+      };
+      const doorCell = doorCells[direction];
+      return this.playerCell.row === doorCell.row && this.playerCell.col === doorCell.col;
     },
     isNearAnyDoor() {
       return ['north', 'south', 'west', 'east'].some(direction => this.isNearDoor(direction));
@@ -469,10 +484,10 @@ export default {
       const upEntry = this.stairPositions.down;
       const downEntry = this.stairPositions.up;
       const entryPositions = {
-        north: [CENTER, MAX_POSITION - 0.25],
-        south: [CENTER, MIN_POSITION + 0.25],
-        west: [MAX_POSITION - 0.25, CENTER],
-        east: [MIN_POSITION + 0.25, CENTER],
+        north: [CENTER, GRID_SIZE - 2],
+        south: [CENTER, 1],
+        west: [GRID_SIZE - 2, CENTER],
+        east: [1, CENTER],
         up: [upEntry[0], upEntry[1]],
         down: [downEntry[0], downEntry[1]]
       };
