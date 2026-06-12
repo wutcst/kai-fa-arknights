@@ -41,7 +41,7 @@ jobs:
         run: mvn -B test
 
       - name: Package backend
-        run: mvn -B package
+        run: mvn -B package -DskipTests
 
       - name: Upload backend jar
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
