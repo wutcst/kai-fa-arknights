@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { getMap, getGameStatus, move as apiMove, look as apiLook, goBack as apiGoBack, takeItem, dropItem, getItems, eatCookie as apiEatCookie, saveGame, loadGame } from '@/api/game';
 
 export function useGameState(options) {
-  const { appendLog, getRoomViewRef, fetchUserAbility } = options;
+  const { appendLog, resetRoomPosition, fetchUserAbility } = options;
 
   const message = ref('欢迎来到文字冒险世界！');
   const displayMessage = ref('');
@@ -102,10 +102,7 @@ export function useGameState(options) {
     } finally {
       isMoving.value = false;
       setTimeout(() => {
-        const roomView = getRoomViewRef?.();
-        if (roomView) {
-          roomView.resetPosition(direction);
-        }
+        resetRoomPosition?.(direction);
       }, 50);
     }
   };

@@ -175,8 +175,8 @@ const {
   handleLoad: _handleLoad
 } = useGameState({
   appendLog,
-  getRoomViewRef,
-  fetchUserAbility: () => fetchUserAbility(username.value)
+  resetRoomPosition: (direction) => roomView.value?.resetPosition(direction),
+  fetchUserAbility
 });
 
 const getHelp = () => {
@@ -229,7 +229,7 @@ const handleStartGame = (gameData) => {
   updateGameState(gameData);
   appendLog('开始新的探索');
   fetchMap();
-  fetchUserAbility(username.value);
+  fetchUserAbility();
 };
 
 const handleContinueGame = (gameData) => {
@@ -237,7 +237,7 @@ const handleContinueGame = (gameData) => {
   updateGameState(gameData);
   appendLog('读取已有存档，继续探索');
   fetchMap(gameData.roomId);
-  fetchUserAbility(username.value);
+  fetchUserAbility();
 };
 
 const handleLogout = () => {
@@ -273,7 +273,7 @@ const handleSettle = async () => {
       playerWeight.value = 0;
       playerMaxWeight.value = response.data.playerMaxWeight;
       isError.value = false;
-      await fetchUserAbility(username.value);
+      await fetchUserAbility();
       await newGame(username.value);
       showGameStart.value = true;
       appendLog(displayMessage.value);
