@@ -21,8 +21,8 @@
     </div>
 
     <div v-if="activeRoomItem" class="pickup-hint">
-      可拾取：<strong>{{ activeRoomItem.name }}</strong>
-      <span>靠近物品后按“拾取附近物品”放入背包</span>
+      当前格物品：<strong>{{ activeRoomItem.name }}</strong>
+      <span>站到物品所在格后按“拾取当前格物品”放入背包</span>
     </div>
     <div v-if="hasVerticalExit" class="floor-hint">
       楼层出口：
