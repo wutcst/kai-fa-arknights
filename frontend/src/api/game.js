@@ -63,8 +63,12 @@ export function checkSave(username) {
 }
 
 // 保存游戏
-export function saveGame(username) {
-  return axios.post(`${SAVE_API_BASE_URL}/save`, { username });
+export function saveGame(username, playerGridPosition = null) {
+  return axios.post(`${SAVE_API_BASE_URL}/save`, {
+    username,
+    playerGridRow: playerGridPosition?.row,
+    playerGridCol: playerGridPosition?.col
+  });
 }
 
 // 加载游戏

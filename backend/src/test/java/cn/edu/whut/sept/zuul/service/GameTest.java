@@ -260,8 +260,9 @@ public class GameTest {
 
         if (game.isJustTeleported()) {
             assertNotEquals(portal, game.getCurrentRoom());
-            assertNotEquals(beforeTeleport, game.getCurrentRoom());
+            assertTrue(game.getRooms().containsValue(game.getCurrentRoom()));
             assertNotNull(game.getTeleportedFrom());
+            assertEquals(beforeTeleport.getZhName(), game.getTeleportedFrom());
         }
     }
 
