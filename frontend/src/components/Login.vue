@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import { login, register, changePassword } from '@/api/auth';
+import { login, register, changePassword } from '@/api/authApi';
 
 export default {
   name: 'UserLogin',

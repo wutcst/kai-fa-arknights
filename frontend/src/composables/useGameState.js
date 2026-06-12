@@ -1,5 +1,7 @@
 import { ref } from 'vue';
-import { getMap, getGameStatus, move as apiMove, look as apiLook, goBack as apiGoBack, takeItem, dropItem, getItems, eatCookie as apiEatCookie, saveGame, loadGame } from '@/api/game';
+import { getMap, getGameStatus, move as apiMove, look as apiLook, goBack as apiGoBack } from '@/api/gameApi';
+import { takeItem, dropItem, getItems, eatCookie as apiEatCookie } from '@/api/inventoryApi';
+import { saveGame, loadGame } from '@/api/saveApi';
 
 export function useGameState(options) {
   const { appendLog, resetRoomPosition, fetchUserAbility } = options;

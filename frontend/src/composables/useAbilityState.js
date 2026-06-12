@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import { getUserByUsername } from '@/api/auth';
-import { getUserAbility, getAbilityConfigs, upgradeAbility, getUserStats } from '@/api/game';
+import { getUserByUsername } from '@/api/authApi';
+import { getUserAbility, getAbilityConfigs, upgradeAbility, getUserStats } from '@/api/abilityApi';
 
 export function useAbilityState(options) {
   const { appendLog, onMaxWeightUpdated } = options;

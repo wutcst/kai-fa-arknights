@@ -95,7 +95,7 @@ import { useGameState } from '@/composables/useGameState';
 import { useAbilityState } from '@/composables/useAbilityState';
 import { useKeyboardControls } from '@/composables/useKeyboardControls';
 
-import { newGame, settleExploration } from '@/api/game';
+import { newGame, settleExploration } from '@/api/saveApi';
 import GameMap from '@/components/GameMap.vue';
 import Login from '@/components/Login.vue';
 import GameStart from '@/views/GameStart.vue';
