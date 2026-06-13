@@ -41,7 +41,7 @@ mvn spring-boot:run
 
 后端默认读取 `backend/src/main/resources/application.yml` 中的数据库和服务配置。需要连接 MySQL 时，请先确认本地数据库、账号和密码与配置一致。
 
-数据库初始化只使用 [`backend/sql/ability_schema.sql`](backend/sql/ability_schema.sql)。该脚本包含用户、存档、能力配置和用户能力表；旧的部分初始化脚本已移除，避免误用不完整表结构。
+数据库初始化只使用最新的 [`backend/sql/ability_schema.sql`](backend/sql/ability_schema.sql)。该脚本包含用户、存档、能力配置和用户能力表，并与当前后端实体字段保持一致；旧的部分初始化脚本已移除，避免误用不完整表结构。
 
 ### 前端
 

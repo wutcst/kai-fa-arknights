@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
  * 存储用户的游戏进度.
  */
 @Entity
-@Table(name = "game_saves")
+@Table(name = "game_saves", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_user_id", columnNames = "user_id")
+})
 public class GameSave {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +19,7 @@ public class GameSave {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "current_room_id", nullable = false)
+    @Column(name = "current_room_id", nullable = false, length = 50)
     private String currentRoomId;
 
     @Column(name = "player_inventory", columnDefinition = "JSON")
