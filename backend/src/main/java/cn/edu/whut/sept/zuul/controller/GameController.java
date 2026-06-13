@@ -1,6 +1,7 @@
 package cn.edu.whut.sept.zuul.controller;
 
 import cn.edu.whut.sept.zuul.model.Room;
+import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
 import cn.edu.whut.sept.zuul.service.AbilityService;
@@ -216,12 +217,14 @@ public class GameController {
      * @return 拾取结果及当前状态
      */
     @PostMapping("/take")
-    public Map<String, Object> take(@RequestBody Map<String, String> request) {
-        String itemId = request.get("itemId");
+    public Map<String, Object> take(@RequestBody Map<String, Object> request) {
+        String itemId = (String) request.get("itemId");
+        double playerGridRow = getGridCoordinate(request.get("playerGridRow"));
+        double playerGridCol = getGridCoordinate(request.get("playerGridCol"));
         Map<String, Object> result = new HashMap<>();
         Room currentRoom = getCurrentRoom();
 
-        String message = game.takeItem(itemId);
+        String message = game.takeItemAtCell(itemId, playerGridRow, playerGridCol);
         result.put("message", message);
         result.put("description", currentRoom.getZhName());
         result.put("descriptionEn", currentRoom.getShortDescription());
@@ -245,12 +248,14 @@ public class GameController {
      * @return 丢弃结果及当前状态
      */
     @PostMapping("/drop")
-    public Map<String, Object> drop(@RequestBody Map<String, String> request) {
-        String itemId = request.get("itemId");
+    public Map<String, Object> drop(@RequestBody Map<String, Object> request) {
+        String itemId = (String) request.get("itemId");
+        double playerGridRow = getGridCoordinate(request.get("playerGridRow"));
+        double playerGridCol = getGridCoordinate(request.get("playerGridCol"));
         Map<String, Object> result = new HashMap<>();
         Room currentRoom = getCurrentRoom();
 
-        String message = game.dropItem(itemId);
+        String message = game.dropItemAtCell(itemId, playerGridRow, playerGridCol);
         result.put("message", message);
         result.put("description", currentRoom.getZhName());
         result.put("descriptionEn", currentRoom.getShortDescription());
@@ -262,7 +267,7 @@ public class GameController {
         result.put("playerWeight", game.getPlayer().getTotalWeight());
         result.put("playerMaxWeight", getPlayerMaxWeight());
 
-        result.put("success", !message.contains("没有"));
+        result.put("success", message.contains("丢弃了"));
         return result;
     }
 
@@ -350,9 +355,28 @@ public class GameController {
             itemInfo.put("description", item.getDescription());
             itemInfo.put("weight", item.getWeight());
             itemInfo.put("value", item.getValue());
+            GridPosition position = room.getItemPosition(item.getId());
+            if (position != null) {
+                itemInfo.put("row", position.getRow());
+                itemInfo.put("col", position.getCol());
+            }
             items.add(itemInfo);
         }
         return items;
+    }
+
+    private double getGridCoordinate(Object value) {
+        if (value instanceof Number number) {
+            return Math.max(0, Math.min(8, number.doubleValue()));
+        }
+        if (value instanceof String text) {
+            try {
+                return Math.max(0, Math.min(8, Double.parseDouble(text)));
+            } catch (NumberFormatException ignored) {
+                return 4.0;
+            }
+        }
+        return 4.0;
     }
 
     /**

@@ -28,8 +28,11 @@ CREATE TABLE IF NOT EXISTS game_saves (
     player_inventory JSON,
     player_weight INT DEFAULT 0,
     player_max_weight INT DEFAULT 20,
+    player_grid_row INT DEFAULT 4,
+    player_grid_col INT DEFAULT 4,
     room_history JSON,
     room_items JSON,
+    room_item_positions JSON,
     saved_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY uk_user_id (user_id)
