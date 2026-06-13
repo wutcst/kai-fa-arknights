@@ -1,6 +1,7 @@
 package cn.edu.whut.sept.zuul.service;
 
 import cn.edu.whut.sept.zuul.model.Room;
+import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
 
@@ -92,6 +93,16 @@ public class GameTest {
     }
 
     @Test
+    void testRoomItemsHaveGridPositions() {
+        Room outside = game.getRooms().get("outside");
+        GridPosition stonePosition = outside.getItemPosition("stone");
+
+        assertNotNull(stonePosition);
+        assertEquals(2, stonePosition.getRow());
+        assertEquals(2, stonePosition.getCol());
+    }
+
+    @Test
     void testOutsideRoomHasItems() {
         Room outside = game.getRooms().get("outside");
         List<Item> items = outside.getItems();
@@ -167,6 +178,33 @@ public class GameTest {
     }
 
     @Test
+    void testTakeItemAtWrongCellFails() {
+        Room outside = game.getRooms().get("outside");
+        Item stone = outside.getItem("stone");
+
+        String result = game.takeItemAtCell("stone", 4, 4);
+
+        assertTrue(result.contains("必须站在物品所在格"));
+        assertNotNull(outside.getItem("stone"));
+        assertFalse(game.getPlayer().hasItem(stone.getId()));
+    }
+
+    @Test
+    void testTakeItemAtSameCellSucceedsAndKeepsOtherItemPosition() {
+        Room outside = game.getRooms().get("outside");
+        GridPosition leafPosition = outside.getItemPosition("leaf");
+
+        String result = game.takeItemAtCell("stone", 2, 2);
+
+        assertTrue(result.contains("拾取了"));
+        assertNull(outside.getItem("stone"));
+        assertNull(outside.getItemPosition("stone"));
+        assertTrue(game.getPlayer().hasItem("stone"));
+        assertEquals(leafPosition.getRow(), outside.getItemPosition("leaf").getRow());
+        assertEquals(leafPosition.getCol(), outside.getItemPosition("leaf").getCol());
+    }
+
+    @Test
     void testTakeNonExistentItem() {
         String result = game.takeItem("non_existent_item");
         assertNotNull(result);
@@ -203,6 +241,32 @@ public class GameTest {
             assertFalse(game.getPlayer().hasItem("stone"));
             assertTrue(outside.getItems().contains(stone));
         }
+    }
+
+    @Test
+    void testDropItemAtOccupiedCellFails() {
+        String takeResult = game.takeItemAtCell("stone", 2, 2);
+        assertTrue(takeResult.contains("拾取了"));
+
+        String dropResult = game.dropItemAtCell("stone", 2, 6);
+
+        assertTrue(dropResult.contains("当前格已有物品"));
+        assertTrue(game.getPlayer().hasItem("stone"));
+    }
+
+    @Test
+    void testDropItemAtEmptyCellStoresPosition() {
+        Room outside = game.getRooms().get("outside");
+        String takeResult = game.takeItemAtCell("stone", 2, 2);
+        assertTrue(takeResult.contains("拾取了"));
+
+        String dropResult = game.dropItemAtCell("stone", 4, 4);
+
+        assertTrue(dropResult.contains("丢弃了"));
+        assertFalse(game.getPlayer().hasItem("stone"));
+        assertNotNull(outside.getItem("stone"));
+        assertEquals(4, outside.getItemPosition("stone").getRow());
+        assertEquals(4, outside.getItemPosition("stone").getCol());
     }
 
     @Test

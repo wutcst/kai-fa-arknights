@@ -7,7 +7,6 @@ import {
   MIN_POSITION,
   stairPositions
 } from '@/composables/roomGridConfig';
-import { useRoomItemPositions } from '@/composables/useRoomItemPositions';
 
 export function useRoomInteraction({ exits, items, playerX, playerY }) {
   const hasExit = (direction) => unref(exits).includes(direction);
@@ -50,11 +49,13 @@ export function useRoomInteraction({ exits, items, playerX, playerY }) {
     return '✦';
   };
 
-  const {
-    itemPositionMap,
-    visibleItems,
-    getItemAtCell
-  } = useRoomItemPositions(items);
+  const visibleItems = computed(() => unref(items).filter((item) => {
+    return Number.isInteger(item.row) && Number.isInteger(item.col);
+  }));
+
+  const getItemAtCell = (row, col) => visibleItems.value.find((item) => {
+    return item.row === row && item.col === col;
+  }) || null;
 
   const playerCell = computed(() => ({
     row: coordinateToCell(unref(playerY)),
@@ -161,7 +162,6 @@ export function useRoomInteraction({ exits, items, playerX, playerY }) {
     MIN_POSITION,
     MAX_POSITION,
     INTERACT_DISTANCE,
-    itemPositionMap,
     stairPositions,
     visibleItems,
     playerCell,

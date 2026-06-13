@@ -8,6 +8,7 @@
 package cn.edu.whut.sept.zuul.service;
 
 import cn.edu.whut.sept.zuul.model.Room;
+import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class Game {
     private Room currentRoom;
     private Map<String, Room> rooms;
     private Map<String, List<Item>> initialRoomItems;  // 初始房间物品快照
+    private Map<String, Map<String, GridPosition>> initialRoomItemPositions;
     private List<Room> roomHistory;  // 房间移动历史
     private boolean justTeleported;   // 是否刚触发传送
     private String teleportedFrom;    // 从哪个房间传送走的
@@ -36,10 +38,12 @@ public class Game {
     {
         rooms = new HashMap<>();
         initialRoomItems = new HashMap<>();
+        initialRoomItemPositions = new HashMap<>();
         roomHistory = new ArrayList<>();
         justTeleported = false;
         player = new Player("冒险者");
         createRooms();
+        initializeRoomItemPositions();
         saveInitialRoomItems();
     }
 
@@ -81,6 +85,14 @@ public class Game {
         return roomItems;
     }
 
+    public Map<String, Map<String, GridPosition>> getAllRoomItemPositions() {
+        Map<String, Map<String, GridPosition>> positions = new HashMap<>();
+        for (Map.Entry<String, Room> entry : rooms.entrySet()) {
+            positions.put(entry.getKey(), entry.getValue().getItemPositions());
+        }
+        return positions;
+    }
+
     /**
      * 设置所有房间的物品状态（从存档恢复）.
      */
@@ -91,6 +103,23 @@ public class Game {
                 room.setItems(new ArrayList<>(entry.getValue()));
             }
         }
+        ensureRoomItemPositions();
+    }
+
+    public void setAllRoomItemPositions(Map<String, Map<String, GridPosition>> positions) {
+        for (Map.Entry<String, Room> entry : rooms.entrySet()) {
+            Map<String, GridPosition> roomPositions = positions != null ? positions.get(entry.getKey()) : null;
+            entry.getValue().setItemPositions(roomPositions);
+        }
+        ensureRoomItemPositions();
+    }
+
+    public GridPosition getItemPosition(Room room, String itemId) {
+        return room.getItemPosition(itemId);
+    }
+
+    public boolean isCellOccupied(Room room, int row, int col) {
+        return room.hasItemAt(row, col);
     }
 
     private void createRooms()
@@ -422,6 +451,37 @@ public class Game {
         return "你拾取了 " + item.getName() + "（重量：" + item.getWeight() + "）";
     }
 
+    public String takeItemAtCell(String itemId, double playerGridRow, double playerGridCol) {
+        if (itemId == null || itemId.trim().isEmpty()) {
+            return "物品不能为空！";
+        }
+
+        Item item = currentRoom.getItem(itemId);
+        if (item == null) {
+            return "当前房间没有这个物品！";
+        }
+
+        GridPosition itemPosition = currentRoom.getItemPosition(itemId);
+        if (itemPosition == null) {
+            return "物品位置异常，无法拾取！";
+        }
+
+        int row = normalizeGridCoordinate(playerGridRow);
+        int col = normalizeGridCoordinate(playerGridCol);
+        if (itemPosition.getRow() != row || itemPosition.getCol() != col) {
+            return "必须站在物品所在格才能拾取！";
+        }
+
+        if (!player.canCarry(item)) {
+            return "物品太重了！你无法携带更多物品（当前负重：" +
+                   player.getTotalWeight() + "/" + player.getMaxWeight() + "）";
+        }
+
+        currentRoom.removeItem(itemId);
+        player.addItem(item);
+        return "你拾取了 " + item.getName() + "（重量：" + item.getWeight() + "）";
+    }
+
     /**
      * 丢弃物品.
      * @param itemId 物品ID，如果为"all"则丢弃所有物品
@@ -446,6 +506,30 @@ public class Game {
             return "你身上没有这个物品！";
         }
         currentRoom.addItem(item);
+        return "你丢弃了 " + item.getName();
+    }
+
+    public String dropItemAtCell(String itemId, double playerGridRow, double playerGridCol) {
+        if (itemId == null || itemId.trim().isEmpty()) {
+            return "物品不能为空！";
+        }
+        if ("all".equals(itemId)) {
+            return "当前模式不支持一次丢弃全部物品，请逐个丢弃。";
+        }
+
+        int row = normalizeGridCoordinate(playerGridRow);
+        int col = normalizeGridCoordinate(playerGridCol);
+        if (!player.hasItem(itemId)) {
+            return "你身上没有这个物品！";
+        }
+
+        if (currentRoom.hasItemAt(row, col)) {
+            return "当前格已有物品，不能丢弃！";
+        }
+
+        Item item = player.removeItem(itemId);
+        currentRoom.addItem(item);
+        currentRoom.setItemPosition(item.getId(), new GridPosition(row, col));
         return "你丢弃了 " + item.getName();
     }
 
@@ -556,7 +640,53 @@ public class Game {
                                       item.getWeight(), item.getValue()));
             }
             initialRoomItems.put(entry.getKey(), itemsCopy);
+            initialRoomItemPositions.put(entry.getKey(), entry.getValue().getItemPositions());
         }
+    }
+
+    private void initializeRoomItemPositions() {
+        for (Room room : rooms.values()) {
+            assignMissingItemPositions(room);
+        }
+    }
+
+    public void ensureRoomItemPositions() {
+        for (Room room : rooms.values()) {
+            assignMissingItemPositions(room);
+        }
+    }
+
+    private void assignMissingItemPositions(Room room) {
+        int[][] candidates = {
+            {2, 2}, {2, 6}, {6, 2}, {6, 6}, {5, 3}, {3, 5}
+        };
+        Map<String, GridPosition> positions = room.getItemPositions();
+        List<String> used = new ArrayList<>();
+        for (GridPosition position : positions.values()) {
+            used.add(position.getRow() + "-" + position.getCol());
+        }
+
+        int candidateIndex = 0;
+        for (Item item : room.getItems()) {
+            if (room.getItemPosition(item.getId()) != null) {
+                continue;
+            }
+            while (candidateIndex < candidates.length) {
+                int row = candidates[candidateIndex][0];
+                int col = candidates[candidateIndex][1];
+                candidateIndex++;
+                String key = row + "-" + col;
+                if (!used.contains(key)) {
+                    room.setItemPosition(item.getId(), new GridPosition(row, col));
+                    used.add(key);
+                    break;
+                }
+            }
+        }
+    }
+
+    private int normalizeGridCoordinate(double coordinate) {
+        return Math.max(0, Math.min(8, (int) Math.round(coordinate)));
     }
 
     /**
@@ -585,8 +715,10 @@ public class Game {
                     room.addItem(new Item(item.getId(), item.getName(), item.getDescription(),
                                          item.getWeight(), item.getValue()));
                 }
+                room.setItemPositions(initialRoomItemPositions.get(entry.getKey()));
             }
         }
+        ensureRoomItemPositions();
     }
 
     /**

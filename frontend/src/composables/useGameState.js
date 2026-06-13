@@ -163,7 +163,7 @@ export function useGameState(options) {
 
   const handleTake = async (itemId) => {
     try {
-      const response = await takeItem(itemId);
+      const response = await takeItem(itemId, playerGridPosition.value);
       displayMessage.value = response.data.message;
       items.value = response.data.items || [];
       inventory.value = response.data.inventory || [];
@@ -181,7 +181,7 @@ export function useGameState(options) {
 
   const handleDrop = async (itemId) => {
     try {
-      const response = await dropItem(itemId);
+      const response = await dropItem(itemId, playerGridPosition.value);
       displayMessage.value = response.data.message;
       items.value = response.data.items || [];
       inventory.value = response.data.inventory || [];

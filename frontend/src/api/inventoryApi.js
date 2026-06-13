@@ -2,12 +2,20 @@ import http from './http';
 
 const GAME_BASE = '/game';
 
-export function takeItem(itemId) {
-  return http.post(`${GAME_BASE}/take`, { itemId });
+export function takeItem(itemId, playerGridPosition) {
+  return http.post(`${GAME_BASE}/take`, {
+    itemId,
+    playerGridRow: playerGridPosition?.row,
+    playerGridCol: playerGridPosition?.col
+  });
 }
 
-export function dropItem(itemId) {
-  return http.post(`${GAME_BASE}/drop`, { itemId });
+export function dropItem(itemId, playerGridPosition) {
+  return http.post(`${GAME_BASE}/drop`, {
+    itemId,
+    playerGridRow: playerGridPosition?.row,
+    playerGridCol: playerGridPosition?.col
+  });
 }
 
 export function getItems() {

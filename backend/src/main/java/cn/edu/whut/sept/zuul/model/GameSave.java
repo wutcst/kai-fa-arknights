@@ -41,6 +41,9 @@ public class GameSave {
     @Column(name = "room_items", columnDefinition = "JSON")
     private String roomItems;  // 房间物品状态 JSON
 
+    @Column(name = "room_item_positions", columnDefinition = "JSON")
+    private String roomItemPositions;  // 房间物品坐标 JSON
+
     @Column(name = "saved_at")
     private LocalDateTime savedAt;
 
@@ -121,6 +124,12 @@ public class GameSave {
 
     /** 设置房间物品状态（JSON格式）. */
     public void setRoomItems(String roomItems) { this.roomItems = roomItems; }
+
+    /** 获取房间物品坐标（JSON格式）. */
+    public String getRoomItemPositions() { return roomItemPositions; }
+
+    /** 设置房间物品坐标（JSON格式）. */
+    public void setRoomItemPositions(String roomItemPositions) { this.roomItemPositions = roomItemPositions; }
 
     /** 获取存档时间. */
     public LocalDateTime getSavedAt() { return savedAt; }

@@ -1,6 +1,7 @@
 package cn.edu.whut.sept.zuul.service;
 
 import cn.edu.whut.sept.zuul.model.GameSave;
+import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
 import cn.edu.whut.sept.zuul.model.Room;
@@ -66,7 +67,9 @@ public class SaveService {
      * @return 保存的存档对象
      */
     public GameSave saveGame(Long userId, Room currentRoom, Player player, List<Room> roomHistory,
-                             Map<String, List<Item>> roomItems, double playerGridRow, double playerGridCol) {
+                             Map<String, List<Item>> roomItems,
+                             Map<String, Map<String, GridPosition>> roomItemPositions,
+                             double playerGridRow, double playerGridCol) {
         GameSave save = gameSaveRepository.findByUserId(userId)
                 .orElse(new GameSave());
 
@@ -104,6 +107,13 @@ public class SaveService {
             save.setRoomItems(roomItemsJson);
         } catch (JsonProcessingException e) {
             save.setRoomItems("{}");
+        }
+
+        try {
+            String roomItemPositionsJson = objectMapper.writeValueAsString(roomItemPositions);
+            save.setRoomItemPositions(roomItemPositionsJson);
+        } catch (JsonProcessingException e) {
+            save.setRoomItemPositions("{}");
         }
 
         return gameSaveRepository.save(save);
@@ -176,18 +186,31 @@ public class SaveService {
             roomItems = new HashMap<>();
         }
 
-        return Map.of(
-            "success", true,
-            "currentRoom", savedRoom,
-            "inventory", inventory,
-            "playerWeight", save.getPlayerWeight(),
-            "playerMaxWeight", save.getPlayerMaxWeight(),
-            "playerGridRow", decodeGridCoordinate(save.getPlayerGridRow()),
-            "playerGridCol", decodeGridCoordinate(save.getPlayerGridCol()),
-            "roomHistory", history,
-            "roomItems", roomItems,
-            "savedAt", save.getSavedAt()
-        );
+        Map<String, Map<String, GridPosition>> roomItemPositions = new HashMap<>();
+        try {
+            if (save.getRoomItemPositions() != null && !save.getRoomItemPositions().isEmpty()) {
+                roomItemPositions = objectMapper.readValue(
+                    save.getRoomItemPositions(),
+                    new TypeReference<Map<String, Map<String, GridPosition>>>() {}
+                );
+            }
+        } catch (JsonProcessingException e) {
+            roomItemPositions = new HashMap<>();
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("currentRoom", savedRoom);
+        result.put("inventory", inventory);
+        result.put("playerWeight", save.getPlayerWeight());
+        result.put("playerMaxWeight", save.getPlayerMaxWeight());
+        result.put("playerGridRow", decodeGridCoordinate(save.getPlayerGridRow()));
+        result.put("playerGridCol", decodeGridCoordinate(save.getPlayerGridCol()));
+        result.put("roomHistory", history);
+        result.put("roomItems", roomItems);
+        result.put("roomItemPositions", roomItemPositions);
+        result.put("savedAt", save.getSavedAt());
+        return result;
     }
 
     private int encodeGridCoordinate(double coordinate) {

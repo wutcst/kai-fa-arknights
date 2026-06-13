@@ -17,6 +17,7 @@ public class Room
     private String zhName;
     private HashMap<String, Room> exits;        // 房间出口
     private List<Item> items;                   // 房间内的物品
+    private Map<String, GridPosition> itemPositions; // 物品在房间网格中的位置
 
     public Room(String description, String id)
     {
@@ -25,6 +26,7 @@ public class Room
         this.zhName = getZhNameById(id);
         exits = new HashMap<>();
         items = new ArrayList<>();
+        itemPositions = new HashMap<>();
     }
 
     /**
@@ -39,6 +41,7 @@ public class Room
      */
     public void removeItem(String itemId) {
         items.removeIf(item -> item.getId().equals(itemId));
+        itemPositions.remove(itemId);
     }
 
     /**
@@ -54,6 +57,39 @@ public class Room
     public Item getItem(String itemId) {
         for (Item item : items) {
             if (item.getId().equals(itemId)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public void setItemPosition(String itemId, GridPosition position) {
+        itemPositions.put(itemId, position);
+    }
+
+    public GridPosition getItemPosition(String itemId) {
+        return itemPositions.get(itemId);
+    }
+
+    public Map<String, GridPosition> getItemPositions() {
+        return new HashMap<>(itemPositions);
+    }
+
+    public void setItemPositions(Map<String, GridPosition> positions) {
+        itemPositions = new HashMap<>();
+        if (positions != null) {
+            itemPositions.putAll(positions);
+        }
+    }
+
+    public boolean hasItemAt(int row, int col) {
+        return getItemAt(row, col) != null;
+    }
+
+    public Item getItemAt(int row, int col) {
+        for (Item item : items) {
+            GridPosition position = itemPositions.get(item.getId());
+            if (position != null && position.getRow() == row && position.getCol() == col) {
                 return item;
             }
         }
@@ -192,5 +228,4 @@ public class Room
         return exits.keySet();
     }
 }
-
 
