@@ -219,26 +219,19 @@ public class GameController {
     @PostMapping("/take")
     public Map<String, Object> take(@RequestBody Map<String, Object> request) {
         String itemId = (String) request.get("itemId");
-        double playerGridRow = getGridCoordinate(request.get("playerGridRow"));
-        double playerGridCol = getGridCoordinate(request.get("playerGridCol"));
-        Map<String, Object> result = new HashMap<>();
+        Double playerGridRow = parseRequiredGridCoordinate(request.get("playerGridRow"));
+        Double playerGridCol = parseRequiredGridCoordinate(request.get("playerGridCol"));
         Room currentRoom = getCurrentRoom();
 
-        String message = game.takeItemAtCell(itemId, playerGridRow, playerGridCol);
-        result.put("message", message);
-        result.put("description", currentRoom.getZhName());
-        result.put("descriptionEn", currentRoom.getShortDescription());
-        result.put("longDescription", getZhLongDescription(currentRoom));
-        result.put("exits", currentRoom.getExits());
-        result.put("roomId", currentRoom.getId());
-        result.put("items", getRoomItems(currentRoom));
-        result.put("inventory", getPlayerInventory());
-        result.put("playerWeight", game.getPlayer().getTotalWeight());
-        result.put("playerMaxWeight", getPlayerMaxWeight());
+        if (itemId == null || itemId.trim().isEmpty()) {
+            return buildGameStateResponse(currentRoom, "物品ID不能为空", false);
+        }
+        if (playerGridRow == null || playerGridCol == null) {
+            return buildGameStateResponse(currentRoom, "缺少有效的玩家位置，无法拾取物品", false);
+        }
 
-        // 检查是否拾取成功
-        result.put("success", message.contains("拾取了"));
-        return result;
+        String message = game.takeItemAtCell(itemId, playerGridRow, playerGridCol);
+        return buildGameStateResponse(currentRoom, message, message.contains("拾取了"));
     }
 
     /**
@@ -250,25 +243,19 @@ public class GameController {
     @PostMapping("/drop")
     public Map<String, Object> drop(@RequestBody Map<String, Object> request) {
         String itemId = (String) request.get("itemId");
-        double playerGridRow = getGridCoordinate(request.get("playerGridRow"));
-        double playerGridCol = getGridCoordinate(request.get("playerGridCol"));
-        Map<String, Object> result = new HashMap<>();
+        Double playerGridRow = parseRequiredGridCoordinate(request.get("playerGridRow"));
+        Double playerGridCol = parseRequiredGridCoordinate(request.get("playerGridCol"));
         Room currentRoom = getCurrentRoom();
 
-        String message = game.dropItemAtCell(itemId, playerGridRow, playerGridCol);
-        result.put("message", message);
-        result.put("description", currentRoom.getZhName());
-        result.put("descriptionEn", currentRoom.getShortDescription());
-        result.put("longDescription", getZhLongDescription(currentRoom));
-        result.put("exits", currentRoom.getExits());
-        result.put("roomId", currentRoom.getId());
-        result.put("items", getRoomItems(currentRoom));
-        result.put("inventory", getPlayerInventory());
-        result.put("playerWeight", game.getPlayer().getTotalWeight());
-        result.put("playerMaxWeight", getPlayerMaxWeight());
+        if (itemId == null || itemId.trim().isEmpty()) {
+            return buildGameStateResponse(currentRoom, "物品ID不能为空", false);
+        }
+        if (playerGridRow == null || playerGridCol == null) {
+            return buildGameStateResponse(currentRoom, "缺少有效的玩家位置，无法丢弃物品", false);
+        }
 
-        result.put("success", message.contains("丢弃了"));
-        return result;
+        String message = game.dropItemAtCell(itemId, playerGridRow, playerGridCol);
+        return buildGameStateResponse(currentRoom, message, message.contains("丢弃了"));
     }
 
     /**
@@ -365,18 +352,48 @@ public class GameController {
         return items;
     }
 
-    private double getGridCoordinate(Object value) {
+    private Map<String, Object> buildGameStateResponse(Room room, String message, boolean success) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", success);
+        result.put("message", message);
+        result.put("description", room.getZhName());
+        result.put("descriptionEn", room.getShortDescription());
+        result.put("longDescription", getZhLongDescription(room));
+        result.put("exits", room.getExits());
+        result.put("roomId", room.getId());
+        result.put("items", getRoomItems(room));
+        result.put("inventory", getPlayerInventory());
+        result.put("playerWeight", game.getPlayer().getTotalWeight());
+        result.put("playerMaxWeight", getPlayerMaxWeight());
+        return result;
+    }
+
+    private Double parseRequiredGridCoordinate(Object value) {
         if (value instanceof Number number) {
-            return Math.max(0, Math.min(8, number.doubleValue()));
+            double coordinate = number.doubleValue();
+            if (Double.isNaN(coordinate) || Double.isInfinite(coordinate)) {
+                return null;
+            }
+            if (coordinate < 0 || coordinate > 8) {
+                return null;
+            }
+            return coordinate;
         }
         if (value instanceof String text) {
             try {
-                return Math.max(0, Math.min(8, Double.parseDouble(text)));
+                double coordinate = Double.parseDouble(text);
+                if (Double.isNaN(coordinate) || Double.isInfinite(coordinate)) {
+                    return null;
+                }
+                if (coordinate < 0 || coordinate > 8) {
+                    return null;
+                }
+                return coordinate;
             } catch (NumberFormatException ignored) {
-                return 4.0;
+                return null;
             }
         }
-        return 4.0;
+        return null;
     }
 
     /**

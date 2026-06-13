@@ -431,9 +431,9 @@ public class Game {
     }
 
     /**
-     * 拾取物品.
-     * @param itemId 物品ID
-     * @return 结果信息
+     * Legacy method for old text-command compatibility.
+     * Do not use this method in REST interaction APIs because it does not validate player grid position.
+     * Use takeItemAtCell(...) instead.
      */
     public String takeItem(String itemId) {
         Item item = currentRoom.getItem(itemId);
@@ -483,29 +483,40 @@ public class Game {
     }
 
     /**
-     * 丢弃物品.
-     * @param itemId 物品ID，如果为"all"则丢弃所有物品
-     * @return 结果信息
+     * Legacy method for old text-command compatibility.
+     * Do not use this method in REST interaction APIs because dropped items need grid positions.
+     * Use dropItemAtCell(...) instead.
      */
     public String dropItem(String itemId) {
         if (itemId.equals("all")) {
             if (player.getInventory().isEmpty()) {
                 return "你身上没有任何物品！";
             }
+            if (countFreeItemPositions(currentRoom) < player.getInventory().size()) {
+                return "当前房间没有可放置的位置！";
+            }
             int count = 0;
             for (Item item : new ArrayList<>(player.getInventory())) {
+                GridPosition position = findFreeItemPosition(currentRoom);
                 currentRoom.addItem(item);
+                currentRoom.setItemPosition(item.getId(), position);
                 count++;
             }
             player.getInventory().clear();
             return "你丢弃了所有物品（" + count + "件）";
         }
 
-        Item item = player.removeItem(itemId);
-        if (item == null) {
+        if (!player.hasItem(itemId)) {
             return "你身上没有这个物品！";
         }
+        GridPosition position = findFreeItemPosition(currentRoom);
+        if (position == null) {
+            return "当前房间没有可放置的位置！";
+        }
+
+        Item item = player.removeItem(itemId);
         currentRoom.addItem(item);
+        currentRoom.setItemPosition(item.getId(), position);
         return "你丢弃了 " + item.getName();
     }
 
@@ -683,6 +694,35 @@ public class Game {
                 }
             }
         }
+    }
+
+    private int countFreeItemPositions(Room room) {
+        int count = 0;
+        int[][] candidates = getItemPositionCandidates();
+        for (int[] candidate : candidates) {
+            if (!room.hasItemAt(candidate[0], candidate[1])) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private GridPosition findFreeItemPosition(Room room) {
+        int[][] candidates = getItemPositionCandidates();
+        for (int[] candidate : candidates) {
+            int row = candidate[0];
+            int col = candidate[1];
+            if (!room.hasItemAt(row, col)) {
+                return new GridPosition(row, col);
+            }
+        }
+        return null;
+    }
+
+    private int[][] getItemPositionCandidates() {
+        return new int[][] {
+            {2, 2}, {2, 6}, {6, 2}, {6, 6}, {5, 3}, {3, 5}
+        };
     }
 
     private int normalizeGridCoordinate(double coordinate) {

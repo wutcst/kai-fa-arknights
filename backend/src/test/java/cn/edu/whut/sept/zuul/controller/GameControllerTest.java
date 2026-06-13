@@ -239,7 +239,7 @@ public class GameControllerTest {
     void testTakeNonExistentItem() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/game/take")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"itemId\":\"definitely_non_existent_item_12345\"}"))
+                        .content("{\"itemId\":\"definitely_non_existent_item_12345\",\"playerGridRow\":2,\"playerGridCol\":2}"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -247,6 +247,34 @@ public class GameControllerTest {
         JsonNode jsonNode = objectMapper.readTree(content);
 
         assertFalse(jsonNode.get("success").asBoolean());
+    }
+
+    @Test
+    void testTakeWithoutPlayerPositionFails() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/game/take")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"itemId\":\"stone\"}"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
+
+        assertFalse(jsonNode.get("success").asBoolean());
+        assertTrue(jsonNode.hasNonNull("message"));
+    }
+
+    @Test
+    void testTakeWithInvalidPlayerPositionFails() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/game/take")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"itemId\":\"stone\",\"playerGridRow\":\"abc\",\"playerGridCol\":2}"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
+
+        assertFalse(jsonNode.get("success").asBoolean());
+        assertTrue(jsonNode.hasNonNull("message"));
     }
 
     @Test
@@ -260,10 +288,12 @@ public class GameControllerTest {
 
         if (statusJson.get("items").size() > 0) {
             String itemId = statusJson.get("items").get(0).get("id").asText();
+            int row = statusJson.get("items").get(0).get("row").asInt();
+            int col = statusJson.get("items").get(0).get("col").asInt();
 
             MvcResult takeResult = mockMvc.perform(post("/api/game/take")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"itemId\":\"" + itemId + "\"}"))
+                            .content("{\"itemId\":\"" + itemId + "\",\"playerGridRow\":" + row + ",\"playerGridCol\":" + col + "}"))
                     .andExpect(status().isOk())
                     .andReturn();
 
@@ -278,7 +308,7 @@ public class GameControllerTest {
     void testDropItemWithoutInventory() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/game/drop")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"itemId\":\"stone\"}"))
+                        .content("{\"itemId\":\"stone\",\"playerGridRow\":4,\"playerGridCol\":4}"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -286,6 +316,34 @@ public class GameControllerTest {
         JsonNode jsonNode = objectMapper.readTree(content);
 
         assertFalse(jsonNode.get("success").asBoolean());
+    }
+
+    @Test
+    void testDropWithoutPlayerPositionFails() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/game/drop")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"itemId\":\"stone\"}"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
+
+        assertFalse(jsonNode.get("success").asBoolean());
+        assertTrue(jsonNode.hasNonNull("message"));
+    }
+
+    @Test
+    void testDropWithInvalidPlayerPositionFails() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/game/drop")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"itemId\":\"stone\",\"playerGridRow\":4,\"playerGridCol\":\"bad\"}"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
+
+        assertFalse(jsonNode.get("success").asBoolean());
+        assertTrue(jsonNode.hasNonNull("message"));
     }
 
     @Test
@@ -299,15 +357,17 @@ public class GameControllerTest {
 
         if (statusJson.get("items").size() > 0) {
             String itemId = statusJson.get("items").get(0).get("id").asText();
+            int row = statusJson.get("items").get(0).get("row").asInt();
+            int col = statusJson.get("items").get(0).get("col").asInt();
 
             mockMvc.perform(post("/api/game/take")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"itemId\":\"" + itemId + "\"}"))
+                    .content("{\"itemId\":\"" + itemId + "\",\"playerGridRow\":" + row + ",\"playerGridCol\":" + col + "}"))
                     .andExpect(status().isOk());
 
             MvcResult dropResult = mockMvc.perform(post("/api/game/drop")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"itemId\":\"" + itemId + "\"}"))
+                            .content("{\"itemId\":\"" + itemId + "\",\"playerGridRow\":4,\"playerGridCol\":4}"))
                     .andExpect(status().isOk())
                     .andReturn();
 
@@ -381,10 +441,12 @@ public class GameControllerTest {
 
         if (statusJson.get("items").size() > 0) {
             String itemId = statusJson.get("items").get(0).get("id").asText();
+            int row = statusJson.get("items").get(0).get("row").asInt();
+            int col = statusJson.get("items").get(0).get("col").asInt();
 
             MvcResult takeResult = mockMvc.perform(post("/api/game/take")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"itemId\":\"" + itemId + "\"}"))
+                            .content("{\"itemId\":\"" + itemId + "\",\"playerGridRow\":" + row + ",\"playerGridCol\":" + col + "}"))
                     .andExpect(status().isOk())
                     .andReturn();
 
