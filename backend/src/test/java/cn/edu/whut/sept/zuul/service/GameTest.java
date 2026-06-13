@@ -240,6 +240,7 @@ public class GameTest {
 
             assertFalse(game.getPlayer().hasItem("stone"));
             assertTrue(outside.getItems().contains(stone));
+            assertNotNull(outside.getItemPosition("stone"));
         }
     }
 
@@ -281,6 +282,7 @@ public class GameTest {
             assertNotNull(result);
 
             assertTrue(game.getPlayer().getInventory().isEmpty());
+            assertNotNull(outside.getItemPosition("stone"));
         }
     }
 
