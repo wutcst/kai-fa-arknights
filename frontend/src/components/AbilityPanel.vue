@@ -4,7 +4,7 @@
       <div class="floating-items-header">
         <h3>⬆️ 能力升级</h3>
         <div class="gold-display">
-          <span class="gold-label">💰 金币:</span>
+          <img src="@/assets/items/Lungmen_Dollars.png" class="gold-icon" alt="金币">
           <span class="gold-amount">{{ gold }}</span>
         </div>
         <button class="btn-close" @click="$emit('close')">✕</button>
@@ -132,15 +132,20 @@ export default {
 
 .gold-display {
   background: rgba(0, 0, 0, 0.3);
-  padding: 8px 15px;
+  padding: 6px 12px;
   border-radius: 20px;
   color: #ffd700;
   font-weight: bold;
   border: 1px solid rgba(255, 215, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.gold-label {
-  margin-right: 5px;
+.gold-icon {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
 }
 
 .btn-close {

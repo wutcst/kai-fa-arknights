@@ -6,7 +6,7 @@
         <h1>俯视角房间探索</h1>
       </div>
       <div class="top-actions">
-        <span class="gold-pill">金币 {{ userGold }}</span>
+        <span class="gold-pill"><img src="@/assets/items/Lungmen_Dollars.png" class="gold-icon" alt="金币">{{ userGold }}</span>
         <button @click="playCheckoutThen('back-to-menu')">返回主界面</button>
         <button class="logout" @click="playCheckoutThen('logout')">退出登录</button>
       </div>
@@ -277,6 +277,13 @@ h1 {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
+}
+
+.gold-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 6px;
 }
 
 .gold-pill,
