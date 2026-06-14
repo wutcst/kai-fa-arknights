@@ -123,30 +123,30 @@ public class Room
      */
     private String getZhNameById(String id) {
         switch(id) {
-            case "outside": return "校门口";
-            case "theater": return "教学楼";
-            case "pub": return "校园酒吧";
-            case "lab": return "计算机实验室";
-            case "office": return "办公室";
-            case "portal": return "传送门";
-            case "library": return "图书馆";
-            case "cafeteria": return "食堂";
-            case "gym": return "体育馆";
-            case "garden": return "花园";
-            case "dormitory": return "宿舍楼";
-            case "bookstore": return "书店";
-            case "theater_lobby": return "教学楼大厅";
-            case "theater_classroom_101": return "101教室";
-            case "theater_classroom_102": return "102教室";
-            case "theater_stairway_1f": return "一楼楼梯间";
-            case "theater_classroom_201": return "201教室";
-            case "theater_classroom_202": return "202教室";
-            case "theater_office": return "教师办公室";
-            case "theater_stairway_2f": return "二楼楼梯间";
-            case "theater_classroom_301": return "301教室";
-            case "theater_classroom_302": return "302教室";
-            case "theater_lab": return "计算机实验室";
-            case "theater_stairway_3f": return "三楼楼梯间";
+            case "outside": return "罗德岛入口";
+            case "theater": return "训练设施";
+            case "pub": return "公开交易所";
+            case "lab": return "加工站";
+            case "office": return "精英干员办公室";
+            case "portal": return "机密传送门";
+            case "library": return "机密档案室";
+            case "cafeteria": return "物资补给区";
+            case "gym": return "体能训练场";
+            case "garden": return "户外休闲区";
+            case "bookstore": return "资源回收站";
+            case "dormitory": return "干员宿舍区";
+            case "theater_lobby": return "设施接待大厅";
+            case "theater_classroom_101": return "基础训练室A";
+            case "theater_classroom_102": return "基础训练室B";
+            case "theater_stairway_1f": return "设施东侧通道";
+            case "theater_classroom_201": return "进阶训练室A";
+            case "theater_classroom_202": return "进阶训练室B";
+            case "theater_office": return "人事档案室";
+            case "theater_stairway_2f": return "设施中央通道";
+            case "theater_classroom_301": return "精英训练室A";
+            case "theater_classroom_302": return "精英训练室B";
+            case "theater_lab": return "制造站";
+            case "theater_stairway_3f": return "设施顶层通道";
             default: return id;
         }
     }

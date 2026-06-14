@@ -45,7 +45,7 @@
     </div>
 
     <div class="footer-info">
-      <p>教学楼探险记</p>
+      <p>罗德岛设施探险记</p>
     </div>
   </div>
 </template>

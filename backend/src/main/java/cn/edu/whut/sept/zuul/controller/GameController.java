@@ -281,7 +281,7 @@ public class GameController {
     }
 
     /**
-     * 吃魔法饼干（eat cookie命令）.
+     * 吃理智增强剂（eat cookie命令）.
      *
      * @return 吃饼干结果及当前状态
      */

@@ -175,7 +175,7 @@ public class PlayerTest {
 
     @Test
     void testMagicCookieEffect() {
-        player.addItem(new Item("magic_cookie", "魔法饼干", "增加负重", 1, 0));
+        player.addItem(new Item("magic_cookie", "理智增强剂", "增加负重", 1, 0));
         assertTrue(player.hasItem("magic_cookie"));
 
         int originalMaxWeight = player.getMaxWeight();

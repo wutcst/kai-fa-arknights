@@ -86,9 +86,9 @@ public class ItemTest {
 
     @Test
     void testMagicCookie() {
-        Item cookie = new Item("magic_cookie", "魔法饼干", "散发神奇香气的饼干，吃了可以增加负重", 1, 0);
+        Item cookie = new Item("magic_cookie", "理智增强剂", "散发神奇香气的饼干，吃了可以增加负重", 1, 0);
         assertEquals("magic_cookie", cookie.getId());
-        assertEquals("魔法饼干", cookie.getName());
+        assertEquals("理智增强剂", cookie.getName());
         assertEquals(1, cookie.getWeight());
         assertEquals(0, cookie.getValue());
     }

@@ -314,7 +314,7 @@ public class GameTest {
     void testEatCookieWhenNotHave() {
         String result = game.eatCookie();
         assertNotNull(result);
-        assertTrue(result.contains("没有魔法饼干"));
+        assertTrue(result.contains("没有理智增强剂"));
     }
 
     @Test

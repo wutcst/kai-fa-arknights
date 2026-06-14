@@ -206,7 +206,7 @@ export function useGameState(options) {
       playerMaxWeight.value = response.data.playerMaxWeight || 50;
       isError.value = !response.data.success;
       syncSelectedInventory();
-      appendLog(displayMessage.value || '使用魔法饼干', isError.value);
+      appendLog(displayMessage.value || '使用理智增强剂', isError.value);
     } catch (error) {
       displayMessage.value = '吃饼干失败：' + error.message;
       isError.value = true;
