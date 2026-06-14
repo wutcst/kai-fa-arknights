@@ -113,7 +113,7 @@ public class GameTest {
     void testPortalRoomExists() {
         Room portal = game.getRooms().get("portal");
         assertNotNull(portal);
-        assertEquals("传送门", portal.getZhName());
+        assertEquals("机密传送门", portal.getZhName());
     }
 
     @Test
@@ -314,7 +314,7 @@ public class GameTest {
     void testEatCookieWhenNotHave() {
         String result = game.eatCookie();
         assertNotNull(result);
-        assertTrue(result.contains("没有魔法饼干"));
+        assertTrue(result.contains("没有理智增强剂"));
     }
 
     @Test

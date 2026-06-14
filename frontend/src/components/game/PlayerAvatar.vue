@@ -57,7 +57,9 @@ export default {
   emits: ['ended'],
   computed: {
     playerVideoSrc() {
-      return videoMap[this.animation] || sitVideo;
+      const src = videoMap[this.animation] || sitVideo;
+      console.log('[PlayerAvatar] animation:', this.animation, 'src:', src);
+      return src;
     }
   },
   watch: {

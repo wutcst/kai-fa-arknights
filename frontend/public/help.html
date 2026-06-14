@@ -9,66 +9,74 @@
     body {
       font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
       padding: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       min-height: 100vh;
       margin: 0;
     }
     .container {
       max-width: 600px;
       margin: 0 auto;
-      background: white;
+      background: rgba(10, 20, 40, 0.95);
       padding: 30px;
       border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 40px rgba(0, 191, 255, 0.2);
+      border: 1px solid rgba(0, 191, 255, 0.3);
     }
     h1 {
-      color: #4CAF50;
+      color: #00BFFF;
       text-align: center;
       margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+      letter-spacing: 4px;
     }
     h2 {
-      color: #333;
+      color: #00BFFF;
       margin-top: 25px;
       padding-bottom: 10px;
-      border-bottom: 2px solid #4CAF50;
+      border-bottom: 1px solid rgba(0, 191, 255, 0.3);
     }
     .instruction {
-      background: #e8f5e9;
+      background: rgba(0, 191, 255, 0.1);
       padding: 20px;
       border-radius: 8px;
       margin: 15px 0;
       line-height: 1.8;
+      color: #7EC8E3;
+      border: 1px solid rgba(0, 191, 255, 0.2);
     }
     .direction {
       display: flex;
       justify-content: space-between;
       padding: 15px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid rgba(0, 191, 255, 0.1);
     }
     .direction:last-child { border-bottom: none; }
     .dir-en {
-      color: #666;
+      color: #5a7a8a;
       font-size: 14px;
     }
     .dir-zh {
-      color: #4CAF50;
+      color: #00BFFF;
       font-weight: bold;
       font-size: 16px;
     }
     .tip {
-      background: #fff3e0;
+      background: rgba(78, 205, 196, 0.1);
       padding: 20px;
       border-radius: 8px;
       margin-top: 25px;
       line-height: 1.6;
+      border: 1px solid rgba(78, 205, 196, 0.3);
     }
-    .tip strong { color: #ff9800; }
+    .tip strong { color: #4ECDC4; }
     .item-info {
-      background: #fce4ec;
+      background: rgba(0, 191, 255, 0.05);
       padding: 20px;
       border-radius: 8px;
       margin: 15px 0;
       line-height: 1.8;
+      color: #7EC8E3;
+      border: 1px solid rgba(0, 191, 255, 0.2);
     }
     .item-table {
       width: 100%;
@@ -78,46 +86,55 @@
     .item-table th, .item-table td {
       padding: 10px;
       text-align: left;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid rgba(0, 191, 255, 0.1);
     }
     .item-table th {
-      background: #f5f5f5;
-      color: #333;
+      background: rgba(0, 191, 255, 0.1);
+      color: #00BFFF;
     }
-    .item-table .weight { color: #666; }
-    .item-table .value { color: #ff9800; font-weight: bold; }
+    .item-table .weight { color: #7EC8E3; }
+    .item-table .value { color: #4ECDC4; font-weight: bold; }
     .shortcut {
       display: flex;
       justify-content: space-between;
       padding: 12px 15px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid rgba(0, 191, 255, 0.1);
     }
     .shortcut:last-child { border-bottom: none; }
     .key {
-      background: #333;
-      color: white;
+      background: rgba(0, 191, 255, 0.2);
+      color: #00BFFF;
       padding: 4px 12px;
       border-radius: 5px;
       font-family: monospace;
       font-size: 14px;
+      border: 1px solid rgba(0, 191, 255, 0.3);
     }
     .action {
-      color: #333;
+      color: #7EC8E3;
       font-size: 14px;
     }
     .cookie {
-      background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-      color: white;
+      background: linear-gradient(135deg, rgba(78, 205, 196, 0.3), rgba(0, 191, 255, 0.3));
+      color: #4ECDC4;
       padding: 20px;
       border-radius: 8px;
       margin: 15px 0;
       line-height: 1.8;
+      border: 1px solid rgba(78, 205, 196, 0.3);
+    }
+    a { color: #00BFFF; }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: rgba(126, 200, 227, 0.5);
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📖 游戏帮助</h1>
+    <h1>📖 罗德岛任务指南</h1>
 
     <h2>🎮 游戏说明</h2>
     <div class="instruction">
@@ -189,18 +206,18 @@
       </div>
     </div>
 
-    <h2>🏢 教学楼</h2>
+    <h2>🏢 训练设施</h2>
     <div class="item-info">
-      教学楼是一个多楼层建筑，包含丰富的教室和设施。<br><br>
+      训练设施是一个多楼层建筑，包含丰富的训练室和设施。<br><br>
       <strong>建筑结构：</strong>
       <ul>
-        <li><strong>一楼</strong>：大厅、101教室、102教室、一楼楼梯间</li>
-        <li><strong>二楼</strong>：二楼楼梯间、201教室、202教室、教师办公室</li>
-        <li><strong>三楼</strong>：三楼楼梯间、301教室、302教室、计算机实验室</li>
+        <li><strong>一层</strong>：大厅、基础训练室A、基础训练室B、设施东侧通道</li>
+        <li><strong>二层</strong>：设施中央通道、进阶训练室A、进阶训练室B、人事档案室</li>
+        <li><strong>三层</strong>：设施顶层通道、精英训练室A、精英训练室B、制造站</li>
       </ul>
-      <strong>进入方式：</strong> 从校门口进入教学楼后，往<strong>南</strong>走即可进入教学楼内部。<br>
-      <strong>离开方式：</strong> 在教学楼大厅往<strong>北</strong>走可返回教学楼入口。<br><br>
-      <strong>楼梯使用：</strong> 教学楼有三个楼梯间，分别位于一楼、二楼、三楼。
+      <strong>进入方式：</strong> 从罗德岛入口进入训练设施后，往<strong>南</strong>走即可进入设施内部。<br>
+      <strong>离开方式：</strong> 在设施接待大厅往<strong>北</strong>走可返回设施入口。<br><br>
+      <strong>楼梯使用：</strong> 训练设施有三个通道，分别位于一层、二层、三层。
       通过楼梯间可以使用 <strong>上楼/下楼</strong> 按钮在各楼层之间移动。
     </div>
 
@@ -232,11 +249,11 @@
       </ul>
     </div>
 
-    <h2>🍪 魔法饼干</h2>
+    <h2>🍪 理智增强剂</h2>
     <div class="cookie">
-      在校园的某些角落隐藏着神奇的<strong>魔法饼干</strong>！<br><br>
-      找到并吃掉魔法饼干可以<strong>增加5点负重上限</strong>！<br><br>
-      当你背包中有魔法饼干时，会显示"吃魔法饼干"按钮。
+      在设施的某些角落隐藏着神奇的<strong>理智增强剂</strong>！<br><br>
+      找到并吃掉理智增强剂可以<strong>增加5点负重上限</strong>！<br><br>
+      当你背包中有理智增强剂时，会显示"吃理智增强剂"按钮。
     </div>
 
     <h2>🔙 返回功能</h2>
@@ -248,7 +265,7 @@
 
     <h2>🌀 传送门</h2>
     <div class="item-info">
-      校园的北方隐藏着一个神秘的传送门房间。<br>
+      设施的北方隐藏着一个神秘的传送门房间。<br>
       <strong>注意：</strong> 进入传送门后，你会被随机传送到其他地点！
       传送是单向的，无法通过返回功能回到传送门前。
     </div>

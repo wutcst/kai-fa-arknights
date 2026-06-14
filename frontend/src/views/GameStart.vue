@@ -1,14 +1,19 @@
 <template>
   <div class="game-start-container">
     <div class="game-start-box">
-      <h1>🌍 文字冒险世界</h1>
-      <p class="welcome-text">欢迎, {{ username }}!</p>
+      <div class="logo-area">
+        <img class="rhodes-logo" src="@/assets/Logo_rhodesOverride.png" alt="Rhodes Island" />
+      </div>
+      <h1>罗德岛任务系统</h1>
+      <p class="subtitle">Arknights Mission System</p>
+      <p class="welcome-text">欢迎, <span class="operator-name">{{ username }}</span></p>
 
       <button
         class="btn-logout"
         @click="handleLogout"
       >
-        🚪 退出登录
+        <span class="btn-icon">🚪</span>
+        <span>退出登录</span>
       </button>
 
       <div class="game-options">
@@ -19,7 +24,7 @@
           :disabled="loading"
         >
           <span class="btn-icon">📂</span>
-          <span class="btn-text">继续游戏</span>
+          <span class="btn-text">继续任务</span>
           <span class="btn-desc">从上次存档继续</span>
         </button>
 
@@ -29,8 +34,8 @@
           :disabled="loading"
         >
           <span class="btn-icon">🎮</span>
-          <span class="btn-text">{{ hasSave ? '重新开始' : '开始游戏' }}</span>
-          <span class="btn-desc">{{ hasSave ? '将覆盖当前存档' : '全新冒险开始' }}</span>
+          <span class="btn-text">{{ hasSave ? '重新开始' : '开始任务' }}</span>
+          <span class="btn-desc">{{ hasSave ? '将覆盖当前存档' : '全新任务开始' }}</span>
         </button>
       </div>
 
@@ -45,7 +50,7 @@
     </div>
 
     <div class="footer-info">
-      <p>教学楼探险记</p>
+      <p>罗德岛设施探险记</p>
     </div>
   </div>
 </template>
@@ -128,46 +133,77 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   padding: 20px;
 }
 
 .game-start-box {
-  background: white;
+  background: rgba(10, 20, 40, 0.95);
   border-radius: 20px;
   padding: 40px;
-  box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+  box-shadow: 0 15px 50px rgba(0, 191, 255, 0.2), inset 0 0 60px rgba(0, 191, 255, 0.05);
   text-align: center;
   max-width: 450px;
   width: 100%;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+.logo-area {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.rhodes-logo {
+  width: 80px;
+  height: 80px;
+  filter: drop-shadow(0 0 15px rgba(0, 191, 255, 0.5));
 }
 
 .game-start-box h1 {
-  color: #4CAF50;
-  margin-bottom: 10px;
-  font-size: 28px;
+  color: #00BFFF;
+  margin-bottom: 5px;
+  font-size: 26px;
+  letter-spacing: 4px;
+  text-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+}
+
+.subtitle {
+  color: #7EC8E3;
+  margin-bottom: 20px;
+  font-size: 12px;
+  letter-spacing: 2px;
 }
 
 .welcome-text {
-  color: #666;
+  color: #7EC8E3;
   font-size: 16px;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
+}
+
+.operator-name {
+  color: #00BFFF;
+  font-weight: bold;
 }
 
 .btn-logout {
-  background: #f44336;
-  color: white;
-  border: none;
+  background: rgba(255, 107, 107, 0.1);
+  color: #FF6B6B;
+  border: 1px solid rgba(255, 107, 107, 0.3);
   border-radius: 8px;
   padding: 10px 20px;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .btn-logout:hover {
-  background: #d32f2f;
+  background: rgba(255, 107, 107, 0.2);
+  border-color: #FF6B6B;
   transform: translateY(-2px);
 }
 
@@ -182,16 +218,18 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  border: none;
+  border: 1px solid rgba(0, 191, 255, 0.3);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #f5f5f5;
+  background: rgba(0, 191, 255, 0.05);
 }
 
 .btn-option:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  background: rgba(0, 191, 255, 0.15);
+  border-color: rgba(0, 191, 255, 0.5);
+  box-shadow: 0 5px 20px rgba(0, 191, 255, 0.3);
 }
 
 .btn-option:disabled {
@@ -200,29 +238,42 @@ export default {
 }
 
 .btn-continue {
-  background: linear-gradient(135deg, #4CAF50, #8BC34A);
-  color: white;
+  border-color: rgba(78, 205, 196, 0.5);
+  background: rgba(78, 205, 196, 0.1);
+}
+
+.btn-continue:hover:not(:disabled) {
+  background: rgba(78, 205, 196, 0.2);
+  border-color: rgba(78, 205, 196, 0.7);
+  box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);
 }
 
 .btn-new {
-  background: linear-gradient(135deg, #2196F3, #64B5F6);
-  color: white;
+  border-color: rgba(0, 191, 255, 0.5);
+  background: rgba(0, 191, 255, 0.1);
+}
+
+.btn-new:hover:not(:disabled) {
+  background: rgba(0, 191, 255, 0.2);
+  border-color: rgba(0, 191, 255, 0.7);
+  box-shadow: 0 5px 20px rgba(0, 191, 255, 0.3);
 }
 
 .btn-icon {
-  font-size: 36px;
+  font-size: 32px;
   margin-bottom: 8px;
 }
 
 .btn-text {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   margin-bottom: 4px;
+  color: #fff;
 }
 
 .btn-desc {
   font-size: 13px;
-  opacity: 0.8;
+  color: #7EC8E3;
 }
 
 .loading {
@@ -236,8 +287,8 @@ export default {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(0,0,0,0.1);
-  border-top-color: #667eea;
+  border: 4px solid rgba(0, 191, 255, 0.1);
+  border-top-color: #00BFFF;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -249,15 +300,16 @@ export default {
 .error-message {
   margin-top: 15px;
   padding: 12px;
-  background: #ffebee;
-  color: #c62828;
+  background: rgba(255, 107, 107, 0.1);
+  color: #FF6B6B;
   border-radius: 8px;
   font-size: 14px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
 }
 
 .footer-info {
   margin-top: 30px;
-  color: rgba(255,255,255,0.7);
+  color: rgba(126, 200, 227, 0.5);
   font-size: 14px;
 }
 </style>

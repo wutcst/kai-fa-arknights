@@ -167,34 +167,34 @@ export default {
   computed: {
     floorLabel() {
       const floorByRoomId = {
-        theater_lobby: '教学楼一楼',
-        theater_classroom_101: '教学楼一楼',
-        theater_classroom_102: '教学楼一楼',
-        theater_stairway_1f: '教学楼一楼',
-        theater_classroom_201: '教学楼二楼',
-        theater_classroom_202: '教学楼二楼',
-        theater_office: '教学楼二楼',
-        theater_stairway_2f: '教学楼二楼',
-        theater_classroom_301: '教学楼三楼',
-        theater_classroom_302: '教学楼三楼',
-        theater_lab: '教学楼三楼',
-        theater_stairway_3f: '教学楼三楼'
+        theater_lobby: '设施一层',
+        theater_classroom_101: '设施一层',
+        theater_classroom_102: '设施一层',
+        theater_stairway_1f: '设施一层',
+        theater_classroom_201: '设施二层',
+        theater_classroom_202: '设施二层',
+        theater_office: '设施二层',
+        theater_stairway_2f: '设施二层',
+        theater_classroom_301: '设施三层',
+        theater_classroom_302: '设施三层',
+        theater_lab: '设施三层',
+        theater_stairway_3f: '设施三层'
       };
       if (floorByRoomId[this.roomId]) {
         return floorByRoomId[this.roomId];
       }
 
       const source = `${this.roomName}`.toLowerCase();
-      if (source.includes('101') || source.includes('102') || source.includes('一楼')) {
-        return '教学楼一楼';
+      if (source.includes('101') || source.includes('102') || source.includes('一楼') || source.includes('一层')) {
+        return '设施一层';
       }
-      if (source.includes('201') || source.includes('202') || source.includes('二楼')) {
-        return '教学楼二楼';
+      if (source.includes('201') || source.includes('202') || source.includes('二楼') || source.includes('二层')) {
+        return '设施二层';
       }
-      if (source.includes('301') || source.includes('302') || source.includes('三楼')) {
-        return '教学楼三楼';
+      if (source.includes('301') || source.includes('302') || source.includes('三楼') || source.includes('三层')) {
+        return '设施三层';
       }
-      return '室外区域';
+      return '设施外围';
     }
   },
   methods: {

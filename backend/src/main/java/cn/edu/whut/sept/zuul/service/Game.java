@@ -144,7 +144,7 @@ public class Game {
         bookstore = new Room("in the campus bookstore", "bookstore");
         dormitory = new Room("in the student dormitory", "dormitory");
 
-        // 教学楼内部房间
+        // 训练设施内部房间
         theaterLobby = new Room("in the theater lobby", "theater_lobby");
         theaterClassroom101 = new Room("in classroom 101", "theater_classroom_101");
         theaterClassroom102 = new Room("in classroom 102", "theater_classroom_102");
@@ -193,12 +193,12 @@ public class Game {
 
         dormitory.setExit("north", garden);
 
-        // 传送房间只连接到校门口
+        // 传送房间只连接到罗德岛入口
         portal.setExit("south", outside);
 
-        // 教学楼内部连接
+        // 训练设施内部连接
         // 一楼：south进入内部
-        theater.setExit("south", theaterLobby);  // 从外部进入教学楼内部
+        theater.setExit("south", theaterLobby);  // 从外部进入训练设施内部
         theaterLobby.setExit("north", theater);  // 回到外部
         theaterLobby.setExit("west", theaterClassroom101);
         theaterLobby.setExit("east", theaterClassroom102);
@@ -218,7 +218,7 @@ public class Game {
         theaterClassroom202.setExit("west", theaterStairway2f);
         theaterOffice.setExit("north", theaterStairway2f);
 
-        // 三楼
+        // 设施三层
         theaterStairway3f.setExit("down", theaterStairway2f);
         theaterStairway3f.setExit("west", theaterClassroom301);
         theaterStairway3f.setExit("east", theaterClassroom302);
@@ -241,7 +241,7 @@ public class Game {
         rooms.put("bookstore", bookstore);
         rooms.put("dormitory", dormitory);
 
-        // 教学楼内部房间
+        // 训练设施内部房间
         rooms.put("theater_lobby", theaterLobby);
         rooms.put("theater_classroom_101", theaterClassroom101);
         rooms.put("theater_classroom_102", theaterClassroom102);
@@ -289,9 +289,9 @@ public class Game {
         dormitory.addItem(new Item("pillow", "枕头", "柔软的枕头", 1, 20));
         dormitory.addItem(new Item("blanket", "毯子", "温暖的毯子", 2, 40));
 
-        // 教学楼内部物品
-        theaterLobby.addItem(new Item("brochure", "宣传册", "校园宣传册", 1, 0));
-        theaterLobby.addItem(new Item("floor_map", "楼层地图", "教学楼楼层分布图", 1, 0));
+        // 训练设施内部物品
+        theaterLobby.addItem(new Item("brochure", "宣传册", "设施宣传册", 1, 0));
+        theaterLobby.addItem(new Item("floor_map", "楼层地图", "设施楼层分布图", 1, 0));
 
         theaterClassroom101.addItem(new Item("desk", "课桌", "木制课桌", 10, 50));
         theaterClassroom101.addItem(new Item("eraser", "黑板擦", "粉尘黑板擦", 1, 5));
@@ -322,16 +322,16 @@ public class Game {
 
         theaterStairway3f.addItem(new Item("safety_sign", "安全标识", "消防通道指示牌", 1, 0));
 
-        // 随机在多个房间添加魔法饼干
+        // 随机在多个房间添加理智增强剂
         Random random = new Random();
         Room[] cookieRooms = {outside, pub, lab, library, gym, cafeteria, garden, bookstore,
                              theaterLobby, theaterClassroom101, theaterClassroom102,
                              theaterClassroom201, theaterClassroom202, theaterOffice,
                              theaterClassroom301, theaterClassroom302, theaterLab};
-        int cookieCount = random.nextInt(6) + 5;  // 5-10块魔法饼干
+        int cookieCount = random.nextInt(6) + 5;  // 5-10块理智增强剂
         for (int i = 0; i < cookieCount; i++) {
             Room r = cookieRooms[random.nextInt(cookieRooms.length)];
-            r.addItem(new Item("magic_cookie", "魔法饼干", "散发神奇香气的饼干，吃了可以增加负重", 1, 0));
+            r.addItem(new Item("magic_cookie", "理智增强剂", "散发神奇香气的饼干，吃了可以增加负重", 1, 0));
         }
 
         currentRoom = outside;  // start game outside
@@ -357,7 +357,7 @@ public class Game {
         if (room.getId().equals("portal")) {
             teleportedFrom = currentRoom.getZhName();  // 记录传送前的位置
             justTeleported = true;
-            // 随机传送到其他房间（除了传送房间本身和教学楼内部）
+            // 随机传送到其他房间（除了传送房间本身和训练设施内部）
             Room[] targetRooms = {
                 rooms.get("outside"), rooms.get("theater"),
                 rooms.get("pub"), rooms.get("lab"), rooms.get("office"),
@@ -545,16 +545,16 @@ public class Game {
     }
 
     /**
-     * 吃魔法饼干.
+     * 吃理智增强剂.
      * @return 结果信息
      */
     public String eatCookie() {
         Item cookie = player.removeItem("magic_cookie");
         if (cookie == null) {
-            return "你身上没有魔法饼干！";
+            return "你身上没有理智增强剂！";
         }
         player.increaseMaxWeight(5);
-        return "你吃了魔法饼干！负重上限增加了5点（当前负重上限：" +
+        return "你吃了理智增强剂！负重上限增加了5点（当前负重上限：" +
                player.getMaxWeight() + "）";
     }
 

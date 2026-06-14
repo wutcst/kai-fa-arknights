@@ -31,7 +31,7 @@
           v-if="hasMagicCookie"
           class="btn-cookie"
           @click="$emit('eat-cookie')"
-        >🍪 吃魔法饼干（+5负重）</button>
+        >🍪 吃理智增强剂（+5负重）</button>
       </div>
     </div>
   </div>

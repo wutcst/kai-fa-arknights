@@ -1,7 +1,11 @@
 <template>
   <div class="auth-container">
     <div class="auth-box">
-      <h1>🌍 文字冒险世界</h1>
+      <div class="logo-area">
+        <img class="rhodes-logo" src="@/assets/Logo_rhodesOverride.png" alt="Rhodes Island" />
+      </div>
+      <h1>罗德岛干员系统</h1>
+      <p class="subtitle">Arknights Operator System</p>
 
       <div class="auth-tabs">
         <button
@@ -241,49 +245,77 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 }
 
 .auth-box {
-  background: white;
+  background: rgba(10, 20, 40, 0.95);
   padding: 40px;
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 191, 255, 0.2), inset 0 0 60px rgba(0, 191, 255, 0.05);
   width: 100%;
   max-width: 400px;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+.logo-area {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.rhodes-logo {
+  width: 100px;
+  height: 100px;
+  filter: drop-shadow(0 0 15px rgba(0, 191, 255, 0.5));
 }
 
 .auth-box h1 {
-  color: #4CAF50;
+  color: #00BFFF;
+  margin-bottom: 5px;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+  font-size: 24px;
+  letter-spacing: 4px;
+}
+
+.subtitle {
+  color: #7EC8E3;
   margin-bottom: 30px;
   text-align: center;
+  font-size: 12px;
+  letter-spacing: 2px;
 }
 
 .auth-tabs {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 25px;
 }
 
 .auth-tabs button {
   flex: 1;
   padding: 12px;
-  border: none;
-  background: #e0e0e0;
-  color: #666;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+  background: transparent;
+  color: #7EC8E3;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: bold;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 .auth-tabs button.active {
-  background: #4CAF50;
-  color: white;
+  background: rgba(0, 191, 255, 0.2);
+  color: #00BFFF;
+  border-color: #00BFFF;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
 }
 
 .auth-tabs button:hover:not(.active) {
-  background: #bdbdbd;
+  background: rgba(0, 191, 255, 0.1);
+  border-color: rgba(0, 191, 255, 0.5);
 }
 
 .form-group {
@@ -294,63 +326,79 @@ export default {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #333;
+  color: #7EC8E3;
   font-weight: bold;
+  font-size: 13px;
 }
 
 .form-group input {
   width: 100%;
   padding: 12px 15px;
-  border: 2px solid #ddd;
+  border: 1px solid rgba(0, 191, 255, 0.3);
   border-radius: 8px;
   font-size: 15px;
-  transition: border-color 0.2s;
+  background: rgba(0, 191, 255, 0.05);
+  color: #fff;
+  transition: all 0.3s;
+}
+
+.form-group input::placeholder {
+  color: #5a7a8a;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #00BFFF;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+  background: rgba(0, 191, 255, 0.1);
 }
 
 .error-msg {
-  color: #e74c3c;
-  background: #fde8e8;
+  color: #FF6B6B;
+  background: rgba(255, 107, 107, 0.1);
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 15px;
   text-align: center;
   font-size: 14px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
 }
 
 .success-msg {
-  color: #27ae60;
-  background: #e8f8f0;
+  color: #4ECDC4;
+  background: rgba(78, 205, 196, 0.1);
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 15px;
   text-align: center;
   font-size: 14px;
+  border: 1px solid rgba(78, 205, 196, 0.3);
 }
 
 .btn-submit {
   width: 100%;
   padding: 14px;
-  background: #4CAF50;
-  color: white;
+  background: linear-gradient(135deg, #00BFFF 0%, #0099CC 100%);
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: #388E3C;
+  background: linear-gradient(135deg, #33CCFF 0%, #00BFFF 100%);
+  box-shadow: 0 6px 20px rgba(0, 191, 255, 0.5);
+  transform: translateY(-2px);
 }
 
 .btn-submit:disabled {
-  background: #a5d6a7;
+  background: linear-gradient(135deg, #4a7a8a 0%, #3a6a7a 100%);
   cursor: not-allowed;
+  box-shadow: none;
 }
 </style>
