@@ -96,7 +96,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(10, 20, 40, 0.9);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -104,13 +104,14 @@ export default {
 }
 
 .floating-items-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a2a4a 0%, #0f1f3a 100%);
   border-radius: 15px;
   padding: 20px;
   width: 400px;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 191, 255, 0.2);
+  border: 1px solid rgba(0, 191, 255, 0.3);
 }
 
 .floating-items-header {
@@ -119,21 +120,23 @@ export default {
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 10px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  border-bottom: 2px solid rgba(0, 191, 255, 0.3);
 }
 
 .floating-items-header h3 {
   margin: 0;
-  color: white;
+  color: #00BFFF;
   font-size: 18px;
+  text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
 }
 
 .gold-display {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   padding: 8px 15px;
   border-radius: 20px;
   color: #ffd700;
   font-weight: bold;
+  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .gold-label {
@@ -141,9 +144,9 @@ export default {
 }
 
 .btn-close {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 191, 255, 0.3);
+  color: #00BFFF;
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -152,7 +155,7 @@ export default {
 }
 
 .btn-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 191, 255, 0.2);
 }
 
 .ability-list {
@@ -162,12 +165,13 @@ export default {
 }
 
 .ability-card {
-  background: white;
+  background: rgba(0, 191, 255, 0.1);
   border-radius: 10px;
   padding: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border: 1px solid rgba(0, 191, 255, 0.2);
 }
 
 .ability-info {
@@ -177,19 +181,19 @@ export default {
 .ability-name {
   font-size: 16px;
   font-weight: bold;
-  color: #333;
+  color: #e0efff;
   margin-bottom: 5px;
 }
 
 .ability-desc {
   font-size: 12px;
-  color: #666;
+  color: #7EC8E3;
   margin-bottom: 10px;
 }
 
 .ability-level-bar {
   height: 8px;
-  background: #e0e0e0;
+  background: rgba(0, 191, 255, 0.2);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 5px;
@@ -197,19 +201,20 @@ export default {
 
 .ability-level-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  background: linear-gradient(90deg, #00BFFF, #4ECDC4);
   transition: width 0.3s;
+  box-shadow: 0 0 8px rgba(0, 191, 255, 0.5);
 }
 
 .ability-stats {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: #7EC8E3;
 }
 
 .btn-upgrade {
-  background: linear-gradient(135deg, #4CAF50, #8BC34A);
+  background: linear-gradient(135deg, #00BFFF, #4ECDC4);
   border: none;
   color: white;
   padding: 10px 15px;
@@ -217,15 +222,18 @@ export default {
   cursor: pointer;
   font-size: 14px;
   font-weight: bold;
+  box-shadow: 0 2px 10px rgba(0, 191, 255, 0.3);
 }
 
 .btn-upgrade:hover {
   transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.5);
 }
 
 .max-level-tag {
-  color: #ff9800;
+  color: #4ECDC4;
   font-weight: bold;
   font-size: 14px;
+  text-shadow: 0 0 5px rgba(78, 205, 196, 0.5);
 }
 </style>
