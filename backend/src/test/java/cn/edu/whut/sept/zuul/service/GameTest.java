@@ -113,7 +113,7 @@ public class GameTest {
     void testPortalRoomExists() {
         Room portal = game.getRooms().get("portal");
         assertNotNull(portal);
-        assertEquals("传送门", portal.getZhName());
+        assertEquals("机密传送门", portal.getZhName());
     }
 
     @Test
