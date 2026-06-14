@@ -9,7 +9,7 @@
         :y1="conn.y1"
         :x2="conn.x2"
         :y2="conn.y2"
-        stroke="#4CAF50"
+        :stroke="conn.stroke"
         stroke-width="3"
       />
 
@@ -28,15 +28,15 @@
           width="120"
           height="60"
           rx="8"
-          :fill="room.id === currentRoomId ? '#4CAF50' : '#f5f5f5'"
-          :stroke="room.id === currentRoomId ? '#388E3C' : '#ddd'"
+          :fill="room.id === currentRoomId ? '#00BFFF' : 'rgba(20, 40, 60, 0.8)'"
+          :stroke="room.id === currentRoomId ? '#00BFFF' : '#3a5a7a'"
           stroke-width="3"
         />
         <text
           x="60"
           y="24"
           text-anchor="middle"
-          :fill="room.id === currentRoomId ? 'white' : '#333'"
+          :fill="room.id === currentRoomId ? 'white' : '#7EC8E3'"
           font-size="13"
           font-weight="bold"
         >
@@ -46,7 +46,7 @@
           x="60"
           y="44"
           text-anchor="middle"
-          :fill="room.id === currentRoomId ? '#e8f5e9' : '#666'"
+          :fill="room.id === currentRoomId ? 'rgba(255,255,255,0.8)' : 'rgba(126, 200, 227, 0.5)'"
           font-size="11"
         >
           {{ room.id }}
@@ -60,7 +60,7 @@
           x="860"
           y="275"
           text-anchor="middle"
-          fill="#2196F3"
+          fill="#4ECDC4"
           font-size="12"
           font-weight="bold"
         >
@@ -100,6 +100,32 @@ export default {
   methods: {
     getRoomPosition(roomId) {
       return this.positions[roomId] || { x: 0, y: 0 };
+    },
+    getBorderPoint(pos1, pos2) {
+      const w = 120, h = 60;
+      const cx1 = pos1.x + w / 2, cy1 = pos1.y + h / 2;
+      const cx2 = pos2.x + w / 2, cy2 = pos2.y + h / 2;
+      const dx = cx2 - cx1, dy = cy2 - cy1;
+      let p1 = { x: cx1, y: cy1 }, p2 = { x: cx2, y: cy2 };
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) {
+          p1.x = pos1.x + w; p1.y = cy1;
+          p2.x = pos2.x; p2.y = cy2;
+        } else {
+          p1.x = pos1.x; p1.y = cy1;
+          p2.x = pos2.x + w; p2.y = cy2;
+        }
+      } else {
+        if (dy > 0) {
+          p1.x = cx1; p1.y = pos1.y + h;
+          p2.x = cx2; p2.y = pos2.y;
+        } else {
+          p1.x = cx1; p1.y = pos1.y;
+          p2.x = cx2; p2.y = pos2.y + h;
+        }
+      }
+      return { p1, p2 };
     }
   },
   computed: {
@@ -121,6 +147,7 @@ export default {
     connections() {
       const conns = [];
       const added = new Set();
+      const colors = ['#4ECDC4', '#FF6B6B', '#FFE66D', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3'];
 
       if (!this.positions || !this.filteredRooms) return conns;
 
@@ -138,12 +165,14 @@ export default {
           const targetPos = this.positions[connectedId];
           if (!targetPos) continue;
 
+          const { p1, p2 } = this.getBorderPoint(pos, targetPos);
           conns.push({
             key: key,
-            x1: pos.x + 60,
-            y1: pos.y + 30,
-            x2: targetPos.x + 60,
-            y2: targetPos.y + 30
+            x1: p1.x,
+            y1: p1.y,
+            x2: p2.x,
+            y2: p2.y,
+            stroke: colors[added.size % colors.length]
           });
         }
       }
@@ -166,9 +195,10 @@ export default {
   width: 100%;
   height: auto;
   max-width: 100%;
-  background: #fafafa;
+  background: rgba(10, 20, 40, 0.95);
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 15px rgba(78, 205, 196, 0.15);
+  border: 1px solid rgba(78, 205, 196, 0.3);
 }
 
 .room {
@@ -181,6 +211,6 @@ export default {
 }
 
 .room.active rect {
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+  filter: drop-shadow(0 0 8px rgba(0, 191, 255, 0.6));
 }
 </style>
