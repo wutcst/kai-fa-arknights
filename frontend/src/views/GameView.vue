@@ -72,17 +72,9 @@
           @settle="$emit('settle')"
         />
 
-        <InventoryPanel
-          :inventory="inventory"
-          :selected-id="selectedInventoryId"
-          :player-weight="playerWeight"
-          :player-max-weight="playerMaxWeight"
-          @select="$emit('select-inventory', $event)"
-        />
+        <MessageLog :messages="messages" />
       </aside>
     </div>
-
-    <MessageLog :messages="messages" />
   </main>
 </template>
 
@@ -90,7 +82,6 @@
 import RoomGrid from '@/components/game/RoomGrid.vue';
 import GameStatusBar from '@/components/game/GameStatusBar.vue';
 import ActionPanel from '@/components/game/ActionPanel.vue';
-import InventoryPanel from '@/components/game/InventoryPanel.vue';
 import InventoryHotbar from '@/components/game/InventoryHotbar.vue';
 import MessageLog from '@/components/game/MessageLog.vue';
 
@@ -100,7 +91,6 @@ export default {
     RoomGrid,
     GameStatusBar,
     ActionPanel,
-    InventoryPanel,
     InventoryHotbar,
     MessageLog
   },
@@ -348,8 +338,7 @@ button:hover {
   gap: 16px;
 }
 
-.game-view > .status-shell,
-.game-view > .message-log {
+.game-view > .status-shell {
   margin-left: auto;
   margin-right: auto;
   max-width: 1480px;
