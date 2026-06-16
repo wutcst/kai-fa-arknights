@@ -4,7 +4,7 @@
       <div class="floating-items-header">
         <h3>⬆️ 能力升级</h3>
         <div class="gold-display">
-          <img src="@/assets/items/Lungmen_Dollars.png" class="gold-icon" alt="金币">
+          <img src="@/assets/items/Lungmen_Dollars.png" class="gold-icon" alt="龙门币">
           <span class="gold-amount">{{ gold }}</span>
         </div>
         <button class="btn-close" @click="$emit('close')">✕</button>
@@ -31,7 +31,7 @@
                 class="btn-upgrade"
                 @click="$emit('upgrade', config.abilityCode)"
               >
-                升级 ({{ getCost(config) }}金币)
+                升级 ({{ getCost(config) }}龙门币)
               </button>
             </template>
           </div>

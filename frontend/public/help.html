@@ -3,331 +3,360 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>游戏帮助</title>
+  <title>罗德岛任务指南</title>
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
-      padding: 20px;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       min-height: 100vh;
-      margin: 0;
+      padding: 20px;
     }
     .container {
-      max-width: 600px;
+      max-width: 900px;
       margin: 0 auto;
       background: rgba(10, 20, 40, 0.95);
-      padding: 30px;
       border-radius: 15px;
       box-shadow: 0 10px 40px rgba(0, 191, 255, 0.2);
       border: 1px solid rgba(0, 191, 255, 0.3);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      padding: 15px 20px;
+      border-bottom: 2px solid rgba(0, 191, 255, 0.3);
+      text-align: center;
     }
     h1 {
       color: #00BFFF;
-      text-align: center;
-      margin-bottom: 30px;
-      text-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
-      letter-spacing: 4px;
+      font-size: 20px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
     }
+    .body-row {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+    .nav {
+      width: 130px;
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-right: 1px solid rgba(0, 191, 255, 0.2);
+      padding: 15px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+    .nav-btn {
+      background: rgba(0, 191, 255, 0.08);
+      border: 1px solid rgba(0, 191, 255, 0.2);
+      color: #7EC8E3;
+      padding: 9px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: rgba(0, 191, 255, 0.18);
+      color: #00BFFF;
+    }
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(0, 191, 255, 0.3), rgba(78, 205, 196, 0.3));
+      color: #ffffff;
+      border-color: #00BFFF;
+      box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
+    }
+    .content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      max-height: 70vh;
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+
     h2 {
       color: #00BFFF;
-      margin-top: 25px;
-      padding-bottom: 10px;
+      font-size: 15px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
       border-bottom: 1px solid rgba(0, 191, 255, 0.3);
     }
     .instruction {
       background: rgba(0, 191, 255, 0.1);
-      padding: 20px;
-      border-radius: 8px;
-      margin: 15px 0;
-      line-height: 1.8;
-      color: #e0efff;
-      border: 1px solid rgba(0, 191, 255, 0.2);
-    }
-    .direction {
-      display: flex;
-      justify-content: space-between;
       padding: 15px;
-      border-bottom: 1px solid rgba(0, 191, 255, 0.1);
-    }
-    .direction:last-child { border-bottom: none; }
-    .dir-en {
-      color: #5a8ab0;
-      font-size: 14px;
-    }
-    .dir-zh {
-      color: #00BFFF;
-      font-weight: bold;
-      font-size: 16px;
-    }
-    .tip {
-      background: rgba(78, 205, 196, 0.1);
-      padding: 20px;
       border-radius: 8px;
-      margin-top: 25px;
-      line-height: 1.6;
-      border: 1px solid rgba(78, 205, 196, 0.3);
-      color: #c0e8f0;
-    }
-    .tip strong { color: #4ECDC4; }
-    .tip p { color: #c0e8f0; }
-    .item-info {
-      background: rgba(0, 191, 255, 0.05);
-      padding: 20px;
-      border-radius: 8px;
-      margin: 15px 0;
       line-height: 1.8;
       color: #e0efff;
       border: 1px solid rgba(0, 191, 255, 0.2);
     }
-    .item-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    .item-table th, .item-table td {
-      padding: 10px;
-      text-align: left;
-      border-bottom: 1px solid rgba(0, 191, 255, 0.1);
-    }
-    .item-table th {
-      background: rgba(0, 191, 255, 0.1);
-      color: #00BFFF;
-    }
-    .item-table td { color: #b8d8e8; }
-    .item-table .weight { color: #8ec8e8; }
-    .item-table .value { color: #4ECDC4; font-weight: bold; }
     .shortcut {
       display: flex;
       justify-content: space-between;
-      padding: 12px 15px;
+      padding: 9px 10px;
       border-bottom: 1px solid rgba(0, 191, 255, 0.1);
     }
     .shortcut:last-child { border-bottom: none; }
     .key {
       background: rgba(0, 191, 255, 0.25);
       color: #ffffff;
-      padding: 4px 12px;
-      border-radius: 5px;
+      padding: 2px 8px;
+      border-radius: 4px;
       font-family: monospace;
-      font-size: 14px;
+      font-size: 12px;
       border: 1px solid rgba(0, 191, 255, 0.4);
     }
-    .action {
-      color: #ffffff;
-      font-size: 14px;
+    .action { color: #ffffff; font-size: 13px; }
+    .direction-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
+    .dir-card {
+      background: rgba(0, 191, 255, 0.1);
+      border: 1px solid rgba(0, 191, 255, 0.2);
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+    .dir-zh { color: #00BFFF; font-weight: bold; font-size: 13px; }
+    .dir-en { color: #5a8ab0; font-size: 11px; margin-top: 3px; }
+    .item-info {
+      background: rgba(0, 191, 255, 0.05);
+      padding: 12px;
+      border-radius: 8px;
+      line-height: 1.8;
+      color: #e0efff;
+      border: 1px solid rgba(0, 191, 255, 0.2);
+    }
+    .item-info ul { margin: 8px 0 0 18px; }
+    .item-info li { margin-bottom: 5px; color: #b8d8e8; }
+    .item-info strong { color: #00BFFF; }
     .cookie {
       background: linear-gradient(135deg, rgba(78, 205, 196, 0.25), rgba(0, 191, 255, 0.25));
       color: #ffffff;
-      padding: 20px;
+      padding: 12px;
       border-radius: 8px;
-      margin: 15px 0;
       line-height: 1.8;
       border: 1px solid rgba(78, 205, 196, 0.4);
     }
-    a { color: #00BFFF; }
+    .cookie strong { color: #4ECDC4; }
+    .tip {
+      background: rgba(78, 205, 196, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      line-height: 1.6;
+      border: 1px solid rgba(78, 205, 196, 0.3);
+      color: #c0e8f0;
+    }
+    .tip strong { color: #4ECDC4; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .grid-2 .item-info { margin: 0; }
     footer {
       text-align: center;
-      margin-top: 30px;
+      padding: 12px;
       color: rgba(126, 200, 227, 0.7);
-      font-size: 12px;
+      font-size: 11px;
+      border-top: 1px solid rgba(0, 191, 255, 0.1);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📖 罗德岛任务指南</h1>
-
-    <h2>🎮 游戏说明</h2>
-    <div class="instruction">
-      这是一款文字冒险游戏。你需要通过选择不同的方向在各个房间中探索。
-      点击地图上的方向按钮或在下方选择方向来移动角色。
+    <div class="header">
+      <h1>📖 罗德岛任务指南</h1>
     </div>
 
-    <h2>⌨️ 键盘快捷键</h2>
-    <div class="item-info">
-      <div class="shortcut">
-        <span class="key">↑ ↓ ← → / W A S D</span>
-        <span class="action">移动角色</span>
-      </div>
-      <div class="shortcut">
-        <span class="key">F</span>
-        <span class="action">查看当前房间物品</span>
-      </div>
-      <div class="shortcut">
-        <span class="key">B</span>
-        <span class="action">查看背包物品</span>
-      </div>
-      <div class="shortcut">
-        <span class="key">M</span>
-        <span class="action">显示/隐藏地图</span>
-      </div>
-      <div class="shortcut">
-        <span class="key">H</span>
-        <span class="action">打开帮助</span>
-      </div>
-      <div class="shortcut">
-        <span class="key">R</span>
-        <span class="action">保存游戏进度</span>
-      </div>
-      <div class="shortcut">
-        <span class="key">⌫ Backspace / Esc</span>
-        <span class="action">返回上一个房间</span>
-      </div>
-      <div class="shortcut">
-        <span class="key">🖱️ 上楼/下楼按钮</span>
-        <span class="action">在楼梯间专用按钮，移动到其他楼层</span>
+    <div class="body-row">
+      <nav class="nav">
+        <button class="nav-btn active" onclick="showSection('intro')">游戏说明</button>
+        <button class="nav-btn" onclick="showSection('keys')">快捷键</button>
+        <button class="nav-btn" onclick="showSection('directions')">方向</button>
+        <button class="nav-btn" onclick="showSection('building')">训练设施</button>
+        <button class="nav-btn" onclick="showSection('items')">物品系统</button>
+        <button class="nav-btn" onclick="showSection('bag')">背包负重</button>
+        <button class="nav-btn" onclick="showSection('cookie')">理智增强剂</button>
+        <button class="nav-btn" onclick="showSection('portal')">传送门</button>
+        <button class="nav-btn" onclick="showSection('map')">游戏地图</button>
+        <button class="nav-btn" onclick="showSection('save')">存档结算</button>
+        <button class="nav-btn" onclick="showSection('ability')">能力升级</button>
+      </nav>
+
+      <div class="content">
+        <!-- 游戏说明 -->
+        <div id="intro" class="section active">
+          <h2>🎮 游戏说明</h2>
+          <div class="instruction">
+            这是一款文字冒险游戏。你需要通过选择不同的方向在各个房间中探索。
+            点击地图上的方向按钮或在下方选择方向来移动角色。
+          </div>
+        </div>
+
+        <!-- 键盘快捷键 -->
+        <div id="keys" class="section">
+          <h2>⌨️ 键盘快捷键</h2>
+          <div class="item-info">
+            <div class="shortcut"><span class="key">↑ ↓ ← → / W A S D</span><span class="action">移动角色</span></div>
+            <div class="shortcut"><span class="key">F</span><span class="action">查看当前房间物品</span></div>
+            <div class="shortcut"><span class="key">B</span><span class="action">查看背包物品</span></div>
+            <div class="shortcut"><span class="key">M</span><span class="action">显示/隐藏地图</span></div>
+            <div class="shortcut"><span class="key">H</span><span class="action">打开帮助</span></div>
+            <div class="shortcut"><span class="key">R</span><span class="action">保存游戏进度</span></div>
+            <div class="shortcut"><span class="key">⌫ / Esc</span><span class="action">返回上一个房间</span></div>
+            <div class="shortcut"><span class="key">上下楼按钮</span><span class="action">在楼梯间专用</span></div>
+          </div>
+        </div>
+
+        <!-- 可用方向 -->
+        <div id="directions" class="section">
+          <h2>🧭 可用方向</h2>
+          <div class="direction-grid">
+            <div class="dir-card"><div class="dir-zh">北方</div><div class="dir-en">north</div></div>
+            <div class="dir-card"><div class="dir-zh">南方</div><div class="dir-en">south</div></div>
+            <div class="dir-card"><div class="dir-zh">东方</div><div class="dir-en">east</div></div>
+            <div class="dir-card"><div class="dir-zh">西方</div><div class="dir-en">west</div></div>
+            <div class="dir-card"><div class="dir-zh">上楼</div><div class="dir-en">up</div></div>
+            <div class="dir-card"><div class="dir-zh">下楼</div><div class="dir-en">down</div></div>
+          </div>
+        </div>
+
+        <!-- 训练设施 -->
+        <div id="building" class="section">
+          <h2>🏢 训练设施</h2>
+          <div class="item-info">
+            训练设施是一个多楼层建筑，包含丰富的训练室和设施。<br><br>
+            <strong>建筑结构：</strong>
+            <ul>
+              <li><strong>一层</strong>：大厅、基础训练室A/B、设施东侧通道</li>
+              <li><strong>二层</strong>：设施中央通道、进阶训练室A/B、人事档案室</li>
+              <li><strong>三层</strong>：设施顶层通道、精英训练室A/B、制造站</li>
+            </ul>
+            <strong>进入：</strong> 从训练设施往<strong>南</strong>走<br>
+            <strong>离开：</strong> 在设施接待大厅往<strong>北</strong>走
+          </div>
+        </div>
+
+        <!-- 物品系统 -->
+        <div id="items" class="section">
+          <h2>🎒 物品系统</h2>
+          <div class="item-info">
+            每个房间都可能有物品，点击"查看"按钮可以查看当前房间内的物品。<br><br>
+            <strong>物品属性：</strong>
+            <ul>
+              <li><strong>名称</strong>：物品的名称</li>
+              <li><strong>描述</strong>：物品的详细介绍</li>
+              <li><strong>重量</strong>：影响携带</li>
+              <li><strong>价值</strong>：物品的价值</li>
+            </ul>
+            <strong>操作：</strong>
+            <ul>
+              <li><strong>拾取</strong>：将物品加入背包</li>
+              <li><strong>丢弃</strong>：将物品放回当前房间</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 背包与负重 -->
+        <div id="bag" class="section">
+          <h2>🎽 背包与负重</h2>
+          <div class="grid-2">
+            <div class="item-info">
+              <strong>负重上限</strong><br><br>
+              背包初始负重上限为 <strong>20</strong><br>
+              所有物品的总重量不能超过负重上限
+            </div>
+            <div class="item-info">
+              <strong>理智增强剂</strong><br><br>
+              吃掉理智增强剂可以<strong>增加5点</strong>负重上限！
+            </div>
+          </div>
+        </div>
+
+        <!-- 理智增强剂 -->
+        <div id="cookie" class="section">
+          <h2>🍪 理智增强剂</h2>
+          <div class="cookie">
+            在设施的某些角落隐藏着神奇的<strong>理智增强剂</strong>！<br><br>
+            找到并吃掉理智增强剂可以<strong>增加5点负重上限</strong>！<br><br>
+            当你背包中有理智增强剂时，会显示"吃理智增强剂"按钮。
+          </div>
+        </div>
+
+        <!-- 传送门 -->
+        <div id="portal" class="section">
+          <h2>🌀 传送门</h2>
+          <div class="item-info">
+            设施的北方隐藏着一个神秘的传送门房间。<br><br>
+            <strong>注意：</strong> 进入传送门后，你会被随机传送到其他地点！<br><br>
+            传送是单向的，无法通过返回功能回到传送门前。
+          </div>
+          <div class="tip" style="margin-top: 12px;">
+            <strong>💡 返回功能：</strong> 点击"返回"按钮可以回到上一个房间。重复使用可以逐层回退。
+          </div>
+        </div>
+
+        <!-- 游戏地图 -->
+        <div id="map" class="section">
+          <h2>🗺️ 游戏地图</h2>
+          <div class="tip">
+            <strong>💡 提示：</strong> 地图上蓝青色高亮的房间是你当前所在的位置。点击方向按钮即可移动到相邻的房间。
+          </div>
+        </div>
+
+        <!-- 存档与结算 -->
+        <div id="save" class="section">
+          <h2>💾 存档与结算</h2>
+          <div class="grid-2">
+            <div class="item-info">
+              <strong>💾 存档</strong><br><br>
+              点击<strong>存档</strong>按钮手动保存当前进度。<br><br>
+              <strong>存档内容：</strong>当前房间、背包物品、负重、移动历史
+            </div>
+            <div class="item-info">
+              <strong>💎 结算</strong><br><br>
+              将背包中的物品转换为金币。<br><br>
+              结算后背包清空，负重归零。
+            </div>
+          </div>
+        </div>
+
+        <!-- 能力升级 -->
+        <div id="ability" class="section">
+          <h2>⬆️ 能力升级</h2>
+          <div class="item-info">
+            累积的金币可以用于提升你的探索能力！点击<strong>升级</strong>按钮打开能力面板。<br><br>
+            <strong>可升级的能力：</strong>
+            <ul>
+              <li><strong>负重上限</strong>：每级+5</li>
+              <li><strong>金币加成</strong>：结算时额外获得金币百分比，每级+10%</li>
+              <li><strong>移动速度</strong>：提升房间内移动的速度，每级+1</li>
+            </ul>
+            <br>
+            <strong>升级规则：</strong>等级越高，升级所需金币越多。每个能力都有最大等级限制。
+          </div>
+        </div>
       </div>
     </div>
 
-    <h2>🧭 可用方向</h2>
-    <div class="direction-list">
-      <div class="direction">
-        <span class="dir-en">north</span>
-        <span class="dir-zh">北方</span>
-      </div>
-      <div class="direction">
-        <span class="dir-en">south</span>
-        <span class="dir-zh">南方</span>
-      </div>
-      <div class="direction">
-        <span class="dir-en">east</span>
-        <span class="dir-zh">东方</span>
-      </div>
-      <div class="direction">
-        <span class="dir-en">west</span>
-        <span class="dir-zh">西方</span>
-      </div>
-      <div class="direction">
-        <span class="dir-en">up</span>
-        <span class="dir-zh">上楼（楼梯间专用）</span>
-      </div>
-      <div class="direction">
-        <span class="dir-en">down</span>
-        <span class="dir-zh">下楼（楼梯间专用）</span>
-      </div>
-    </div>
-
-    <h2>🏢 训练设施</h2>
-    <div class="item-info">
-      训练设施是一个多楼层建筑，包含丰富的训练室和设施。<br><br>
-      <strong>建筑结构：</strong>
-      <ul>
-        <li><strong>一层</strong>：大厅、基础训练室A、基础训练室B、设施东侧通道</li>
-        <li><strong>二层</strong>：设施中央通道、进阶训练室A、进阶训练室B、人事档案室</li>
-        <li><strong>三层</strong>：设施顶层通道、精英训练室A、精英训练室B、制造站</li>
-      </ul>
-      <strong>进入方式：</strong> 从罗德岛入口进入训练设施后，往<strong>南</strong>走即可进入设施内部。<br>
-      <strong>离开方式：</strong> 在设施接待大厅往<strong>北</strong>走可返回设施入口。<br><br>
-      <strong>楼梯使用：</strong> 训练设施有三个通道，分别位于一层、二层、三层。
-      通过楼梯间可以使用 <strong>上楼/下楼</strong> 按钮在各楼层之间移动。
-    </div>
-
-    <h2>🎒 物品系统</h2>
-    <div class="item-info">
-      每个房间都可能有物品，点击"查看"按钮可以查看当前房间内的物品。<br>
-      物品包含以下属性：
-      <ul>
-        <li><strong>名称</strong>：物品的名称</li>
-        <li><strong>描述</strong>：物品的详细介绍</li>
-        <li><strong>重量</strong>：物品的重量，影响携带</li>
-        <li><strong>价值</strong>：物品的价值</li>
-      </ul>
-      <strong>操作：</strong>
-      <ul>
-        <li><strong>拾取</strong>：点击物品旁的"拾取"按钮将物品加入背包</li>
-        <li><strong>丢弃</strong>：在背包中点击"丢弃"按钮将物品放回当前房间</li>
-      </ul>
-    </div>
-
-    <h2>🎽 背包与负重</h2>
-    <div class="item-info">
-      你有一个背包，可以随身携带物品。<br>
-      <ul>
-        <li>背包初始负重上限为 <strong>20</strong></li>
-        <li>所有物品的总重量不能超过负重上限</li>
-        <li>如果物品太重，拾取时会显示提示</li>
-        <li>点击"背包"标签可查看当前负重情况</li>
-      </ul>
-    </div>
-
-    <h2>🍪 理智增强剂</h2>
-    <div class="cookie">
-      在设施的某些角落隐藏着神奇的<strong>理智增强剂</strong>！<br><br>
-      找到并吃掉理智增强剂可以<strong>增加5点负重上限</strong>！<br><br>
-      当你背包中有理智增强剂时，会显示"吃理智增强剂"按钮。
-    </div>
-
-    <h2>🔙 返回功能</h2>
-    <div class="item-info">
-      点击"返回"按钮可以回到上一个房间。<br>
-      重复使用可以逐层回退，直到回到你进入当前房间前的所有地点。<br><br>
-      <strong>注意：</strong>如果你进入了传送门被随机传送到其他地点，返回功能将以传送后的位置为新起点重新记录路径。
-    </div>
-
-    <h2>🌀 传送门</h2>
-    <div class="item-info">
-      设施的北方隐藏着一个神秘的传送门房间。<br>
-      <strong>注意：</strong> 进入传送门后，你会被随机传送到其他地点！
-      传送是单向的，无法通过返回功能回到传送门前。
-    </div>
-
-    <h2>🗺️ 游戏地图</h2>
-    <div class="tip">
-      <strong>💡 提示：</strong> 地图上蓝青色高亮的房间是你当前所在的位置。
-      点击方向按钮即可移动到相邻的房间。
-    </div>
-
-    <h2>💾 存档与读档</h2>
-    <div class="item-info">
-      游戏需要手动保存进度！<br><br>
-      <ul>
-        <li><strong>继续游戏</strong>：从上次存档的地方继续冒险</li>
-        <li><strong>重新开始</strong>：清空存档，从头开始新游戏（会覆盖原有存档）</li>
-      </ul>
-      <br>
-      <strong>存档方法：</strong> 点击界面中的<strong>💾 存档</strong>按钮手动保存当前进度。<br><br>
-      <strong>存档内容包括：</strong>
-      <ul>
-        <li>当前所在房间</li>
-        <li>背包中的所有物品</li>
-        <li>当前负重和最大负重</li>
-        <li>移动历史记录</li>
-      </ul>
-    </div>
-
-    <h2>💎 探索结算</h2>
-    <div class="item-info">
-      当你收集了足够的物品后，可以选择<strong>结算</strong>来将背包中的物品转换为金币。<br><br>
-      <ul>
-        <li>点击界面中的<strong>💎 结算</strong>按钮进行结算</li>
-        <li>背包中所有物品的价值将累加，转换为金币存入你的账户</li>
-        <li>结算后背包清空，负重归零</li>
-        <li>结算不会影响房间内的物品，它们保持原样</li>
-      </ul>
-      <br>
-      <strong>提示：</strong>建议在背包满或探索结束时进行结算，金币可以用于升级能力！
-    </div>
-
-    <h2>⬆️ 能力升级</h2>
-    <div class="item-info">
-      累积的金币可以用于提升你的探索能力！<br><br>
-      点击界面中的<strong>⬆️ 升级</strong>按钮打开能力面板。<br><br>
-      <strong>可升级的能力：</strong>
-      <ul>
-        <li><strong>负重上限</strong>：增加背包可携带的物品重量，每级+5</li>
-        <li><strong>金币加成</strong>：结算时额外获得金币百分比，每级+10%</li>
-        <li><strong>移动速度</strong>：提升房间内移动的速度，每级+1</li>
-      </ul>
-      <br>
-      <strong>升级规则：</strong>
-      <ul>
-        <li>每次升级需要消耗金币</li>
-        <li>等级越高，升级所需金币越多</li>
-        <li>每个能力都有最大等级限制</li>
-      </ul>
-    </div>
+    <footer>罗德岛设施探险记 · Arknights Theme</footer>
   </div>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
 </body>
 </html>
