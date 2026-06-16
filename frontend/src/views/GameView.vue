@@ -23,20 +23,29 @@
     />
 
     <div class="game-layout">
-      <RoomGrid
-        ref="roomGrid"
-        :room-name="roomName"
-        :description="description"
-        :exits="exits"
-        :items="items"
-        :player-grid-position="playerGridPosition"
-        :move-speed="moveSpeed"
-        @move="$emit('move', $event)"
-        @active-item-change="activeRoomItemId = $event"
-        @active-item-name-change="activeRoomItemName = $event"
-        @active-vertical-exit-change="activeVerticalExit = $event"
-        @player-position-change="$emit('player-position-change', $event)"
-      />
+      <section class="main-play-area">
+        <RoomGrid
+          ref="roomGrid"
+          :room-name="roomName"
+          :description="description"
+          :exits="exits"
+          :items="items"
+          :player-grid-position="playerGridPosition"
+          :move-speed="moveSpeed"
+          @move="$emit('move', $event)"
+          @active-item-change="activeRoomItemId = $event"
+          @active-item-name-change="activeRoomItemName = $event"
+          @active-vertical-exit-change="activeVerticalExit = $event"
+          @player-position-change="$emit('player-position-change', $event)"
+        />
+
+        <InventoryHotbar
+          class="bottom-hotbar"
+          :inventory="inventory"
+          :selected-id="selectedInventoryId"
+          @select="$emit('select-inventory', $event)"
+        />
+      </section>
 
       <aside class="right-rail">
         <ActionPanel
@@ -80,6 +89,7 @@ import RoomGrid from '@/components/game/RoomGrid.vue';
 import GameStatusBar from '@/components/game/GameStatusBar.vue';
 import ActionPanel from '@/components/game/ActionPanel.vue';
 import InventoryPanel from '@/components/game/InventoryPanel.vue';
+import InventoryHotbar from '@/components/game/InventoryHotbar.vue';
 import MessageLog from '@/components/game/MessageLog.vue';
 
 export default {
@@ -89,6 +99,7 @@ export default {
     GameStatusBar,
     ActionPanel,
     InventoryPanel,
+    InventoryHotbar,
     MessageLog
   },
   props: {
@@ -316,6 +327,17 @@ button:hover {
   gap: 16px;
   margin: 16px auto;
   max-width: 1480px;
+}
+
+.main-play-area {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.bottom-hotbar {
+  justify-self: center;
+  width: min(100%, 760px);
 }
 
 .right-rail {
