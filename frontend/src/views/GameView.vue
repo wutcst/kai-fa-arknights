@@ -43,6 +43,8 @@
           class="bottom-hotbar"
           :inventory="inventory"
           :selected-id="selectedInventoryId"
+          :player-weight="playerWeight"
+          :player-max-weight="playerMaxWeight"
           @select="$emit('select-inventory', $event)"
         />
       </section>

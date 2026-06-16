@@ -1,5 +1,14 @@
 <template>
   <section class="inventory-hotbar" aria-label="底部物品栏">
+    <header class="weight-row">
+      <div class="weight-track" aria-hidden="true">
+        <div class="weight-fill" :class="{ overweight: isOverweight }" :style="{ width: weightPercent + '%' }"></div>
+      </div>
+      <span class="weight-value" :class="{ overweight: isOverweight }">
+        {{ playerWeight }} / {{ playerMaxWeight }}
+      </span>
+    </header>
+
     <p v-if="!inventory.length" class="empty-hint">暂无携带物品</p>
 
     <div v-else class="hotbar-items">
@@ -32,6 +41,23 @@ export default {
     selectedId: {
       type: [String, Number],
       default: ''
+    },
+    playerWeight: {
+      type: Number,
+      default: 0
+    },
+    playerMaxWeight: {
+      type: Number,
+      default: 20
+    }
+  },
+  computed: {
+    weightPercent() {
+      if (!this.playerMaxWeight) return 0;
+      return Math.min(100, Math.round((this.playerWeight / this.playerMaxWeight) * 100));
+    },
+    isOverweight() {
+      return this.playerWeight > this.playerMaxWeight;
     }
   },
   emits: ['select']
@@ -48,6 +74,46 @@ export default {
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.34);
   color: #f6ead2;
   padding: 12px;
+}
+
+.weight-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.weight-value {
+  border: 1px solid rgba(247, 214, 123, 0.3);
+  border-radius: 999px;
+  color: #f7d67b;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.weight-value.overweight {
+  border-color: rgba(225, 104, 79, 0.7);
+  color: #ff9b82;
+}
+
+.weight-track {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+  flex: 1;
+  height: 7px;
+  overflow: hidden;
+}
+
+.weight-fill {
+  background: linear-gradient(90deg, #58b985, #d7a84d);
+  height: 100%;
+  transition: width 0.2s ease;
+}
+
+.weight-fill.overweight {
+  background: linear-gradient(90deg, #e1684f, #ffb088);
 }
 
 .empty-hint {
