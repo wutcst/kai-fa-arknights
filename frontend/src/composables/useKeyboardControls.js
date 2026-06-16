@@ -8,10 +8,12 @@ export function useKeyboardControls(options) {
     playPlayerOperation,
     goBack,
     look,
-    showInventory,
     getHelp,
     handleSave,
     toggleMap,
+    toggleInventoryDetail,
+    closeInventoryDetail,
+    isInventoryDetailOpen,
     getRoomViewRef
   } = options;
 
@@ -29,6 +31,14 @@ export function useKeyboardControls(options) {
     
     // 只有在已登录且不在开始界面才处理游戏快捷键
     if (!isLoggedIn.value || showGameStart.value) return;
+
+    if (isInventoryDetailOpen?.value) {
+      e.preventDefault();
+      if (e.key === 'b' || e.key === 'B' || e.key === 'Escape') {
+        closeInventoryDetail?.();
+      }
+      return;
+    }
     
     // 防止重复处理
     if (isMoving.value) return;
@@ -50,8 +60,8 @@ export function useKeyboardControls(options) {
 
     // B 键查看背包
     if (e.key === 'b' || e.key === 'B') {
-      playPlayerOperation?.();
-      showInventory?.();
+      e.preventDefault();
+      toggleInventoryDetail?.();
       return;
     }
     
