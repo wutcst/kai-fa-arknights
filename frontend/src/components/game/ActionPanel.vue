@@ -17,6 +17,7 @@
       <button :disabled="!activeRoomItemId || busy" @click="$emit('take', activeRoomItemId)">
         {{ activeRoomItemName ? `拾取当前格：${activeRoomItemName}` : '拾取当前格物品' }}
       </button>
+      <button :disabled="busy" @click="$emit('open-inventory-detail')">查看背包详情</button>
       <button :disabled="!selectedInventoryId || busy" @click="$emit('drop', selectedInventoryId)">丢弃选中物品</button>
       <button :disabled="!hasMagicCookie || busy" @click="$emit('eat-cookie')">使用理智增强剂</button>
       <button :disabled="busy" @click="$emit('save')">保存游戏</button>

@@ -69,6 +69,7 @@
           @toggle-map="playOperationThen('toggle-map')"
           @help="playOperationThen('help')"
           @open-ability="playOperationThen('open-ability')"
+          @open-inventory-detail="playOperationThen('open-inventory-detail')"
           @settle="$emit('settle')"
         />
 

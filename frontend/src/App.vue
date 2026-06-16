@@ -43,6 +43,7 @@
       @toggle-map="showMap = !showMap"
       @help="getHelp"
       @open-ability="showAbilityPanel = true; fetchUserAbility()"
+      @open-inventory-detail="openInventoryDetail"
       @settle="showSettleConfirm = true"
       @select-inventory="selectedInventoryId = $event"
       @player-position-change="playerGridPosition = $event"
