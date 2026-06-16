@@ -60,8 +60,23 @@ export default {
 .hotbar-items {
   display: flex;
   gap: 10px;
+  justify-content: center;
   overflow-x: auto;
-  padding-bottom: 2px;
+  padding: 2px 4px 4px;
+  scrollbar-color: rgba(247, 214, 123, 0.36) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+}
+
+.hotbar-items::before,
+.hotbar-items::after {
+  content: '';
+  flex: 0 0 0;
+}
+
+@supports selector(:has(*)) {
+  .hotbar-items:has(.hotbar-item:nth-child(7)) {
+    justify-content: flex-start;
+  }
 }
 
 .hotbar-item {
@@ -114,6 +129,10 @@ export default {
   .hotbar-item {
     flex-basis: 104px;
     min-height: 60px;
+  }
+
+  .hotbar-items {
+    justify-content: flex-start;
   }
 }
 </style>
