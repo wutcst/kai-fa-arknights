@@ -43,11 +43,25 @@
       @toggle-map="showMap = !showMap"
       @help="getHelp"
       @open-ability="showAbilityPanel = true; fetchUserAbility()"
+      @open-inventory-detail="openInventoryDetail"
       @settle="showSettleConfirm = true"
       @select-inventory="selectedInventoryId = $event"
       @player-position-change="playerGridPosition = $event"
       @back-to-menu="handleBackToMenu"
       @logout="handleLogout"
+    />
+
+    <InventoryDetailOverlay
+      :show="showInventoryDetail"
+      :inventory="inventory"
+      :selected-id="selectedInventoryId"
+      :player-weight="playerWeight"
+      :player-max-weight="playerMaxWeight"
+      :total-value="inventoryTotalValue"
+      @close="closeInventoryDetail"
+      @select="selectedInventoryId = $event"
+      @drop="handleDrop"
+      @eat-cookie="handleEatCookie"
     />
 
     <!-- 悬浮地图 -->
@@ -102,10 +116,12 @@ import GameStart from '@/views/GameStart.vue';
 import GameView from '@/views/GameView.vue';
 import AbilityPanel from '@/components/AbilityPanel.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import InventoryDetailOverlay from '@/components/game/InventoryDetailOverlay.vue';
 
 const roomView = ref(null);
 const showAbilityPanel = ref(false);
 const showSettleConfirm = ref(false);
+const showInventoryDetail = ref(false);
 
 const { messageLog, appendLog, clearLog } = useMessageLog();
 
@@ -120,9 +136,11 @@ const {
 } = useAuthState({
   onLogout: () => {
     clearLog();
+    showInventoryDetail.value = false;
     if (selectedInventoryId) selectedInventoryId.value = '';
   },
   onBackToMenu: () => {
+    showInventoryDetail.value = false;
     if (selectedInventoryId) selectedInventoryId.value = '';
   }
 });
@@ -191,6 +209,23 @@ const toggleMap = () => {
   showMap.value = !showMap.value;
 };
 
+const closeInventoryDetail = () => {
+  showInventoryDetail.value = false;
+};
+
+const openInventoryDetail = async () => {
+  await showInventory();
+  showInventoryDetail.value = true;
+};
+
+const toggleInventoryDetail = async () => {
+  if (showInventoryDetail.value) {
+    closeInventoryDetail();
+    return;
+  }
+  await openInventoryDetail();
+};
+
 const handleSave = () => {
   _handleSave(username.value);
 };
@@ -213,10 +248,12 @@ useKeyboardControls({
   playPlayerOperation,
   goBack,
   look,
-  showInventory,
   getHelp,
   handleSave,
   toggleMap,
+  toggleInventoryDetail,
+  closeInventoryDetail,
+  isInventoryDetailOpen: showInventoryDetail,
   getRoomViewRef
 });
 
@@ -241,10 +278,12 @@ const handleContinueGame = (gameData) => {
 };
 
 const handleLogout = () => {
+  closeInventoryDetail();
   baseLogout();
 };
 
 const handleBackToMenu = () => {
+  closeInventoryDetail();
   baseBackToMenu();
 };
 
@@ -270,6 +309,7 @@ const handleSettle = async () => {
       userGold.value = response.data.totalGold;
       inventory.value = [];
       selectedInventoryId.value = '';
+      closeInventoryDetail();
       playerWeight.value = 0;
       playerMaxWeight.value = response.data.playerMaxWeight;
       isError.value = false;
