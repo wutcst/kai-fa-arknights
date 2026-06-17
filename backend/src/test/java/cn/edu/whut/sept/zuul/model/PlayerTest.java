@@ -94,11 +94,11 @@ public class PlayerTest {
     @Test
     void testCanCarry() {
         assertTrue(player.canCarry(lightItem));
-        assertFalse(player.canCarry(mediumItem));
+        assertFalse(player.canCarry(heavyItem));
 
         player.addItem(lightItem);
-        assertTrue(player.canCarry(mediumItem));
-        assertFalse(player.canCarry(new Item("extra", "额外", "描述", 5, 0)));
+        assertFalse(player.canCarry(mediumItem));
+        assertFalse(player.canCarry(heavyItem));
     }
 
     @Test
