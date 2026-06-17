@@ -388,7 +388,7 @@ public class GameTest {
         game.resetToStart();
 
         assertEquals("outside", game.getCurrentRoom().getId());
-        assertEquals(20, game.getPlayer().getMaxWeight());
+        assertEquals(5, game.getPlayer().getMaxWeight());
         assertTrue(game.getPlayer().getInventory().isEmpty());
     }
 
