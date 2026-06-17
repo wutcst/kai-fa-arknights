@@ -38,9 +38,7 @@ export function useAbilityState(options) {
       const speedConfig = configsResp.data.find(c => c.abilityCode === 'move_speed');
       if (speedConfig) {
         const speedLevel = abilityResp.data.moveSpeedLevel || 1;
-        const baseSpeed = 0.5;
-        const increment = 0.15;
-        currentMoveSpeed.value = baseSpeed + (speedLevel - 1) * increment;
+        currentMoveSpeed.value = speedConfig.baseValue + speedConfig.incrementPerLevel * (speedLevel - 1);
       }
     } catch (error) {
       console.error('获取能力信息失败:', error);

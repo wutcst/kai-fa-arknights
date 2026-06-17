@@ -29,7 +29,7 @@ public class GameSave {
     private Integer playerWeight = 0;
 
     @Column(name = "player_max_weight")
-    private Integer playerMaxWeight = 20;
+    private Integer playerMaxWeight = 5;
 
     @Column(name = "player_grid_row")
     private Integer playerGridRow = 4;
@@ -63,7 +63,7 @@ public class GameSave {
         this.userId = userId;
         this.currentRoomId = currentRoomId;
         this.playerWeight = 0;
-        this.playerMaxWeight = 20;
+        this.playerMaxWeight = 5;
         this.savedAt = LocalDateTime.now();
     }
 

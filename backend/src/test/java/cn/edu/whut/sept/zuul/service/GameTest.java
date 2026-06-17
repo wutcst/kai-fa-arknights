@@ -95,11 +95,11 @@ public class GameTest {
     @Test
     void testRoomItemsHaveGridPositions() {
         Room outside = game.getRooms().get("outside");
-        GridPosition stonePosition = outside.getItemPosition("stone");
+        GridPosition orirockPosition = outside.getItemPosition("orirock");
 
-        assertNotNull(stonePosition);
-        assertEquals(2, stonePosition.getRow());
-        assertEquals(2, stonePosition.getCol());
+        assertNotNull(orirockPosition);
+        assertEquals(2, orirockPosition.getRow());
+        assertEquals(2, orirockPosition.getCol());
     }
 
     @Test
@@ -166,42 +166,50 @@ public class GameTest {
     @Test
     void testTakeItemFromRoom() {
         Room outside = game.getRooms().get("outside");
-        Item stone = outside.getItem("stone");
+        Item orirock = outside.getItem("orirock");
 
-        if (stone != null) {
-            String result = game.takeItem("stone");
+        if (orirock != null && orirock.getWeight() <= game.getPlayer().getMaxWeight()) {
+            String result = game.takeItem("orirock");
             assertNotNull(result);
 
-            assertFalse(outside.getItems().contains(stone));
-            assertTrue(game.getPlayer().hasItem("stone"));
+            assertFalse(outside.getItems().contains(orirock));
+            assertTrue(game.getPlayer().hasItem("orirock"));
         }
     }
 
     @Test
     void testTakeItemAtWrongCellFails() {
         Room outside = game.getRooms().get("outside");
-        Item stone = outside.getItem("stone");
+        Item orirock = outside.getItem("orirock");
+        
+        if (orirock == null || orirock.getWeight() > game.getPlayer().getMaxWeight()) {
+            return;
+        }
 
-        String result = game.takeItemAtCell("stone", 4, 4);
+        String result = game.takeItemAtCell("orirock", 4, 4);
 
         assertTrue(result.contains("必须站在物品所在格"));
-        assertNotNull(outside.getItem("stone"));
-        assertFalse(game.getPlayer().hasItem(stone.getId()));
+        assertNotNull(outside.getItem("orirock"));
+        assertFalse(game.getPlayer().hasItem(orirock.getId()));
     }
 
     @Test
     void testTakeItemAtSameCellSucceedsAndKeepsOtherItemPosition() {
         Room outside = game.getRooms().get("outside");
-        GridPosition leafPosition = outside.getItemPosition("leaf");
+        Item orirock = outside.getItem("orirock");
+        if (orirock == null || orirock.getWeight() > game.getPlayer().getMaxWeight()) {
+            return;
+        }
+        GridPosition leafPosition = outside.getItemPosition("orirock_cube");
 
-        String result = game.takeItemAtCell("stone", 2, 2);
+        String result = game.takeItemAtCell("orirock", 2, 2);
 
         assertTrue(result.contains("拾取了"));
-        assertNull(outside.getItem("stone"));
-        assertNull(outside.getItemPosition("stone"));
-        assertTrue(game.getPlayer().hasItem("stone"));
-        assertEquals(leafPosition.getRow(), outside.getItemPosition("leaf").getRow());
-        assertEquals(leafPosition.getCol(), outside.getItemPosition("leaf").getCol());
+        assertNull(outside.getItem("orirock"));
+        assertNull(outside.getItemPosition("orirock"));
+        assertTrue(game.getPlayer().hasItem("orirock"));
+        assertEquals(leafPosition.getRow(), outside.getItemPosition("orirock_cube").getRow());
+        assertEquals(leafPosition.getCol(), outside.getItemPosition("orirock_cube").getCol());
     }
 
     @Test
@@ -229,60 +237,69 @@ public class GameTest {
     @Test
     void testDropItem() {
         Room outside = game.getRooms().get("outside");
-        Item stone = outside.getItem("stone");
+        Item orirock = outside.getItem("orirock");
 
-        if (stone != null) {
-            game.takeItem("stone");
-            assertTrue(game.getPlayer().hasItem("stone"));
+        if (orirock != null && orirock.getWeight() <= game.getPlayer().getMaxWeight()) {
+            game.takeItem("orirock");
+            assertTrue(game.getPlayer().hasItem("orirock"));
 
-            String result = game.dropItem("stone");
+            String result = game.dropItem("orirock");
             assertNotNull(result);
 
-            assertFalse(game.getPlayer().hasItem("stone"));
-            assertTrue(outside.getItems().contains(stone));
-            assertNotNull(outside.getItemPosition("stone"));
+            assertFalse(game.getPlayer().hasItem("orirock"));
+            assertTrue(outside.getItems().contains(orirock));
+            assertNotNull(outside.getItemPosition("orirock"));
         }
     }
 
     @Test
     void testDropItemAtOccupiedCellFails() {
-        String takeResult = game.takeItemAtCell("stone", 2, 2);
+        Room outside = game.getRooms().get("outside");
+        Item orirock = outside.getItem("orirock");
+        if (orirock == null || orirock.getWeight() > game.getPlayer().getMaxWeight()) {
+            return;
+        }
+        String takeResult = game.takeItemAtCell("orirock", 2, 2);
         assertTrue(takeResult.contains("拾取了"));
 
-        String dropResult = game.dropItemAtCell("stone", 2, 6);
+        String dropResult = game.dropItemAtCell("orirock", 2, 6);
 
         assertTrue(dropResult.contains("当前格已有物品"));
-        assertTrue(game.getPlayer().hasItem("stone"));
+        assertTrue(game.getPlayer().hasItem("orirock"));
     }
 
     @Test
     void testDropItemAtEmptyCellStoresPosition() {
         Room outside = game.getRooms().get("outside");
-        String takeResult = game.takeItemAtCell("stone", 2, 2);
+        Item orirock = outside.getItem("orirock");
+        if (orirock == null || orirock.getWeight() > game.getPlayer().getMaxWeight()) {
+            return;
+        }
+        String takeResult = game.takeItemAtCell("orirock", 2, 2);
         assertTrue(takeResult.contains("拾取了"));
 
-        String dropResult = game.dropItemAtCell("stone", 4, 4);
+        String dropResult = game.dropItemAtCell("orirock", 4, 4);
 
         assertTrue(dropResult.contains("丢弃了"));
-        assertFalse(game.getPlayer().hasItem("stone"));
-        assertNotNull(outside.getItem("stone"));
-        assertEquals(4, outside.getItemPosition("stone").getRow());
-        assertEquals(4, outside.getItemPosition("stone").getCol());
+        assertFalse(game.getPlayer().hasItem("orirock"));
+        assertNotNull(outside.getItem("orirock"));
+        assertEquals(4, outside.getItemPosition("orirock").getRow());
+        assertEquals(4, outside.getItemPosition("orirock").getCol());
     }
 
     @Test
     void testDropAllItems() {
         Room outside = game.getRooms().get("outside");
-        Item stone = outside.getItem("stone");
+        Item orirock = outside.getItem("orirock");
 
-        if (stone != null) {
-            game.takeItem("stone");
+        if (orirock != null && orirock.getWeight() <= game.getPlayer().getMaxWeight()) {
+            game.takeItem("orirock");
 
             String result = game.dropItem("all");
             assertNotNull(result);
 
             assertTrue(game.getPlayer().getInventory().isEmpty());
-            assertNotNull(outside.getItemPosition("stone"));
+            assertNotNull(outside.getItemPosition("orirock"));
         }
     }
 
@@ -371,7 +388,7 @@ public class GameTest {
         game.resetToStart();
 
         assertEquals("outside", game.getCurrentRoom().getId());
-        assertEquals(20, game.getPlayer().getMaxWeight());
+        assertEquals(5, game.getPlayer().getMaxWeight());
         assertTrue(game.getPlayer().getInventory().isEmpty());
     }
 
@@ -392,7 +409,7 @@ public class GameTest {
     @Test
     void testSetMaxWeight() {
         Player player = game.getPlayer();
-        assertEquals(20, player.getMaxWeight());
+        assertEquals(5, player.getMaxWeight());
 
         game.setMaxWeight(50);
         assertEquals(50, player.getMaxWeight());

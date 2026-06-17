@@ -32,8 +32,8 @@ public class PlayerTest {
     void testPlayerCreation() {
         assertEquals("测试冒险者", player.getName());
         assertEquals(testRoom, player.getCurrentRoom());
-        assertEquals(20, player.getBaseMaxWeight());
-        assertEquals(20, player.getMaxWeight());
+        assertEquals(5, player.getBaseMaxWeight());
+        assertEquals(5, player.getMaxWeight());
     }
 
     @Test
@@ -60,62 +60,56 @@ public class PlayerTest {
     @Test
     void testAddMultipleItemsWithinLimit() {
         assertTrue(player.addItem(lightItem));
-        assertTrue(player.addItem(mediumItem));
-        assertEquals(2, player.getInventory().size());
-        assertEquals(6, player.getTotalWeight());
+        assertEquals(1, player.getInventory().size());
+        assertEquals(1, player.getTotalWeight());
     }
 
     @Test
     void testAddItemExceedingWeightLimit() {
         player.addItem(mediumItem);
-        player.addItem(mediumItem);
-        boolean result = player.addItem(heavyItem);
+        boolean result = player.addItem(new Item("heavy", "重物", "描述", 1, 0));
 
-        assertTrue(result);
-        assertEquals(3, player.getInventory().size());
+        assertFalse(result);
+        assertEquals(1, player.getInventory().size());
     }
 
     @Test
     void testAddItemExceedingWeightLimitTruly() {
         player.addItem(mediumItem);
-        player.addItem(mediumItem);
-        boolean result = player.addItem(new Item("very_heavy", "超重物品", "描述", 11, 0));
+        boolean result = player.addItem(heavyItem);
 
         assertFalse(result);
-        assertEquals(2, player.getInventory().size());
+        assertEquals(1, player.getInventory().size());
     }
 
     @Test
     void testAddItemExactlyAtWeightLimit() {
-        player.addItem(new Item("item1", "物品1", "描述", 19, 0));
+        player.addItem(new Item("item1", "物品1", "描述", 4, 0));
         boolean result = player.addItem(new Item("item2", "物品2", "描述", 1, 0));
 
         assertTrue(result);
-        assertEquals(20, player.getTotalWeight());
+        assertEquals(5, player.getTotalWeight());
     }
 
     @Test
     void testCanCarry() {
         assertTrue(player.canCarry(lightItem));
-        assertTrue(player.canCarry(mediumItem));
+        assertFalse(player.canCarry(heavyItem));
 
-        player.addItem(mediumItem);
-        player.addItem(mediumItem);
-        assertTrue(player.canCarry(heavyItem));
-
-        player.addItem(heavyItem);
-        assertFalse(player.canCarry(new Item("super_heavy", "超重", "描述", 1, 0)));
+        player.addItem(lightItem);
+        assertFalse(player.canCarry(mediumItem));
+        assertFalse(player.canCarry(heavyItem));
     }
 
     @Test
     void testRemoveItem() {
         player.addItem(lightItem);
-        player.addItem(mediumItem);
 
         Item removed = player.removeItem("feather");
         assertNotNull(removed);
         assertEquals("feather", removed.getId());
-        assertEquals(1, player.getInventory().size());
+        assertEquals(0, player.getInventory().size());
+        assertEquals(0, player.getTotalWeight());
         assertFalse(player.hasItem("feather"));
     }
 
@@ -137,8 +131,6 @@ public class PlayerTest {
         assertEquals(0, player.getTotalWeight());
         player.addItem(lightItem);
         assertEquals(1, player.getTotalWeight());
-        player.addItem(mediumItem);
-        assertEquals(6, player.getTotalWeight());
     }
 
     @Test
@@ -146,20 +138,18 @@ public class PlayerTest {
         assertEquals(0, player.getTotalValue());
         player.addItem(lightItem);
         assertEquals(5, player.getTotalValue());
-        player.addItem(mediumItem);
-        assertEquals(55, player.getTotalValue());
     }
 
     @Test
     void testIncreaseMaxWeight() {
-        assertEquals(20, player.getMaxWeight());
+        assertEquals(5, player.getMaxWeight());
         player.increaseMaxWeight(10);
-        assertEquals(30, player.getMaxWeight());
+        assertEquals(15, player.getMaxWeight());
 
         player.addItem(mediumItem);
-        player.addItem(mediumItem);
+        player.addItem(lightItem);
         boolean result = player.addItem(heavyItem);
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @Test
