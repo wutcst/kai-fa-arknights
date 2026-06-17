@@ -22,7 +22,7 @@ public class Player {
     public Player(String name) {
         this.name = name;
         this.inventory = new ArrayList<>();
-        this.baseMaxWeight = 20;        // 基础负重20
+        this.baseMaxWeight = 5;        // 基础负重5
         this.maxWeight = baseMaxWeight;
     }
 

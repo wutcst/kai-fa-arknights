@@ -736,7 +736,7 @@ public class Game {
         this.currentRoom = rooms.get("outside");
         this.roomHistory.clear();
         this.player.getInventory().clear();
-        this.player.setMaxWeight(20);
+        this.player.setMaxWeight(5);
         this.justTeleported = false;
         this.teleportedFrom = null;
         // 恢复房间物品到初始状态
