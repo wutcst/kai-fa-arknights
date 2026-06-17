@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS ability_config (
 -- 插入默认能力配置
 INSERT INTO ability_config (ability_code, ability_name, base_value, increment_per_level, base_cost, cost_multiplier, max_level, description) VALUES
 ('max_weight', '负重上限', 20, 5, 50, 1.8, 10, '背包最大负重，每级增加5'),
-('gold_bonus', '金币加成', 0, 10, 80, 2.0, 10, '结算时额外获得金币百分比，每级增加10%'),
+('gold_bonus', '龙门币加成', 0, 10, 80, 2.0, 10, '结算时额外获得龙门币百分比，每级增加10%'),
 ('move_speed', '移动速度', 5, 1, 100, 2.2, 5, '房间内移动速度，每级增加1')
 ON DUPLICATE KEY UPDATE ability_name = ability_name;
 
