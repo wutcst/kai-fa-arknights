@@ -1,0 +1,779 @@
+[
+  {
+    "itemId": "3003",
+    "name": "赤金",
+    "itemType": "MATERIAL",
+    "sortId": 10005,
+    "rarity": 3,
+    "groupID": null,
+    "spriteCoord": [
+      0,
+      2
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30011",
+    "name": "源岩",
+    "itemType": "MATERIAL",
+    "sortId": 100015,
+    "rarity": 0,
+    "groupID": "orirock",
+    "spriteCoord": [
+      4,
+      0
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30012",
+    "name": "固源岩",
+    "itemType": "MATERIAL",
+    "sortId": 100014,
+    "rarity": 1,
+    "groupID": "orirock",
+    "spriteCoord": [
+      5,
+      0
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30013",
+    "name": "固源岩组",
+    "itemType": "MATERIAL",
+    "sortId": 100013,
+    "rarity": 2,
+    "groupID": "orirock",
+    "spriteCoord": [
+      0,
+      1
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30014",
+    "name": "提纯源岩",
+    "itemType": "MATERIAL",
+    "sortId": 100012,
+    "rarity": 3,
+    "groupID": "orirock",
+    "spriteCoord": [
+      1,
+      1
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30061",
+    "name": "破损装置",
+    "itemType": "MATERIAL",
+    "sortId": 100019,
+    "rarity": 0,
+    "groupID": "device",
+    "spriteCoord": [
+      1,
+      4
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30062",
+    "name": "装置",
+    "itemType": "MATERIAL",
+    "sortId": 100018,
+    "rarity": 1,
+    "groupID": "device",
+    "spriteCoord": [
+      2,
+      4
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30063",
+    "name": "全新装置",
+    "itemType": "MATERIAL",
+    "sortId": 100017,
+    "rarity": 2,
+    "groupID": "device",
+    "spriteCoord": [
+      3,
+      4
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30064",
+    "name": "改量装置",
+    "itemType": "MATERIAL",
+    "sortId": 100016,
+    "rarity": 3,
+    "groupID": "device",
+    "spriteCoord": [
+      4,
+      4
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30031",
+    "name": "酯原料",
+    "itemType": "MATERIAL",
+    "sortId": 100023,
+    "rarity": 0,
+    "groupID": "ester",
+    "spriteCoord": [
+      1,
+      2
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30032",
+    "name": "聚酸酯",
+    "itemType": "MATERIAL",
+    "sortId": 100022,
+    "rarity": 1,
+    "groupID": "ester",
+    "spriteCoord": [
+      2,
+      2
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30033",
+    "name": "聚酸酯组",
+    "itemType": "MATERIAL",
+    "sortId": 100021,
+    "rarity": 2,
+    "groupID": "ester",
+    "spriteCoord": [
+      3,
+      2
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30034",
+    "name": "聚酸酯块",
+    "itemType": "MATERIAL",
+    "sortId": 100020,
+    "rarity": 3,
+    "groupID": "ester",
+    "spriteCoord": [
+      4,
+      2
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30021",
+    "name": "代糖",
+    "itemType": "MATERIAL",
+    "sortId": 100027,
+    "rarity": 0,
+    "groupID": "sugar",
+    "spriteCoord": [
+      2,
+      1
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30022",
+    "name": "糖",
+    "itemType": "MATERIAL",
+    "sortId": 100026,
+    "rarity": 1,
+    "groupID": "sugar",
+    "spriteCoord": [
+      3,
+      1
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30023",
+    "name": "糖组",
+    "itemType": "MATERIAL",
+    "sortId": 100025,
+    "rarity": 2,
+    "groupID": "sugar",
+    "spriteCoord": [
+      4,
+      1
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30024",
+    "name": "糖聚块",
+    "itemType": "MATERIAL",
+    "sortId": 100024,
+    "rarity": 3,
+    "groupID": "sugar",
+    "spriteCoord": [
+      5,
+      1
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30041",
+    "name": "异铁碎片",
+    "itemType": "MATERIAL",
+    "sortId": 100031,
+    "rarity": 0,
+    "groupID": "oriron",
+    "spriteCoord": [
+      5,
+      2
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30042",
+    "name": "异铁",
+    "itemType": "MATERIAL",
+    "sortId": 100030,
+    "rarity": 1,
+    "groupID": "oriron",
+    "spriteCoord": [
+      0,
+      3
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30043",
+    "name": "异铁组",
+    "itemType": "MATERIAL",
+    "sortId": 100029,
+    "rarity": 2,
+    "groupID": "oriron",
+    "spriteCoord": [
+      1,
+      3
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30044",
+    "name": "异铁块",
+    "itemType": "MATERIAL",
+    "sortId": 100028,
+    "rarity": 3,
+    "groupID": "oriron",
+    "spriteCoord": [
+      2,
+      3
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30051",
+    "name": "双酮",
+    "itemType": "MATERIAL",
+    "sortId": 100035,
+    "rarity": 0,
+    "groupID": "keton",
+    "spriteCoord": [
+      3,
+      3
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30052",
+    "name": "酮凝集",
+    "itemType": "MATERIAL",
+    "sortId": 100034,
+    "rarity": 1,
+    "groupID": "keton",
+    "spriteCoord": [
+      4,
+      3
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30053",
+    "name": "酮凝集组",
+    "itemType": "MATERIAL",
+    "sortId": 100033,
+    "rarity": 2,
+    "groupID": "keton",
+    "spriteCoord": [
+      5,
+      3
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30054",
+    "name": "酮阵列",
+    "itemType": "MATERIAL",
+    "sortId": 100032,
+    "rarity": 3,
+    "groupID": "keton",
+    "spriteCoord": [
+      0,
+      4
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30073",
+    "name": "扭转醇",
+    "itemType": "MATERIAL",
+    "sortId": 100005,
+    "rarity": 2,
+    "groupID": "kohl",
+    "spriteCoord": [
+      5,
+      4
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30074",
+    "name": "白马醇",
+    "itemType": "MATERIAL",
+    "sortId": 100004,
+    "rarity": 3,
+    "groupID": "kohl",
+    "spriteCoord": [
+      0,
+      5
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30083",
+    "name": "轻锰矿",
+    "itemType": "MATERIAL",
+    "sortId": 100007,
+    "rarity": 2,
+    "groupID": "manganese",
+    "spriteCoord": [
+      1,
+      5
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30084",
+    "name": "三水锰矿",
+    "itemType": "MATERIAL",
+    "sortId": 100006,
+    "rarity": 3,
+    "groupID": "manganese",
+    "spriteCoord": [
+      2,
+      5
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30093",
+    "name": "研磨石",
+    "itemType": "MATERIAL",
+    "sortId": 100009,
+    "rarity": 2,
+    "groupID": "grindstone",
+    "spriteCoord": [
+      3,
+      5
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30094",
+    "name": "五水研磨石",
+    "itemType": "MATERIAL",
+    "sortId": 100008,
+    "rarity": 3,
+    "groupID": "grindstone",
+    "spriteCoord": [
+      4,
+      5
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30103",
+    "name": "RMA70-12",
+    "itemType": "MATERIAL",
+    "sortId": 100011,
+    "rarity": 2,
+    "groupID": "rma",
+    "spriteCoord": [
+      5,
+      5
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "30104",
+    "name": "RMA70-24",
+    "itemType": "MATERIAL",
+    "sortId": 100010,
+    "rarity": 3,
+    "groupID": "rma",
+    "spriteCoord": [
+      0,
+      6
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "3112",
+    "name": "碳",
+    "itemType": "MATERIAL",
+    "sortId": 200008,
+    "rarity": 1,
+    "groupID": "carbon",
+    "spriteCoord": [
+      1,
+      6
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "3113",
+    "name": "碳素",
+    "itemType": "MATERIAL",
+    "sortId": 200007,
+    "rarity": 2,
+    "groupID": "carbon",
+    "spriteCoord": [
+      2,
+      6
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "3114",
+    "name": "碳素组",
+    "itemType": "MATERIAL",
+    "sortId": 200006,
+    "rarity": 3,
+    "groupID": "carbon",
+    "spriteCoord": [
+      3,
+      6
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "3301",
+    "name": "技巧概要·卷1",
+    "itemType": "MATERIAL",
+    "sortId": 300003,
+    "rarity": 1,
+    "groupID": "skillbook",
+    "spriteCoord": [
+      4,
+      6
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "3302",
+    "name": "技巧概要·卷2",
+    "itemType": "MATERIAL",
+    "sortId": 300002,
+    "rarity": 2,
+    "groupID": "skillbook",
+    "spriteCoord": [
+      5,
+      6
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "3303",
+    "name": "技巧概要·卷3",
+    "itemType": "MATERIAL",
+    "sortId": 300001,
+    "rarity": 3,
+    "groupID": "skillbook",
+    "spriteCoord": [
+      0,
+      7
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31013",
+    "name": "凝胶",
+    "itemType": "MATERIAL",
+    "sortId": 100037,
+    "rarity": 2,
+    "groupID": "gel",
+    "spriteCoord": [
+      1,
+      8
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31014",
+    "name": "聚合凝胶",
+    "itemType": "MATERIAL",
+    "sortId": 100036,
+    "rarity": 3,
+    "groupID": "gel",
+    "spriteCoord": [
+      2,
+      8
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31023",
+    "name": "炽合金",
+    "itemType": "MATERIAL",
+    "sortId": 100039,
+    "rarity": 2,
+    "groupID": "alloy",
+    "spriteCoord": [
+      3,
+      8
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31024",
+    "name": "炽合金块",
+    "itemType": "MATERIAL",
+    "sortId": 100038,
+    "rarity": 3,
+    "groupID": "alloy",
+    "spriteCoord": [
+      4,
+      8
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31033",
+    "name": "晶体元件",
+    "itemType": "MATERIAL",
+    "sortId": 100042,
+    "rarity": 2,
+    "groupID": "crystal",
+    "spriteCoord": [
+      1,
+      13
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31034",
+    "name": "晶体电路",
+    "itemType": "MATERIAL",
+    "sortId": 100041,
+    "rarity": 3,
+    "groupID": "crystal",
+    "spriteCoord": [
+      2,
+      13
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31043",
+    "name": "半自然溶剂",
+    "itemType": "MATERIAL",
+    "sortId": 100044,
+    "rarity": 2,
+    "groupID": "solvent",
+    "spriteCoord": [
+      0,
+      15
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31044",
+    "name": "精炼溶剂",
+    "itemType": "MATERIAL",
+    "sortId": 100043,
+    "rarity": 3,
+    "groupID": "solvent",
+    "spriteCoord": [
+      1,
+      15
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31053",
+    "name": "化合切削液",
+    "itemType": "MATERIAL",
+    "sortId": 100046,
+    "rarity": 2,
+    "groupID": "cutting_fluid",
+    "spriteCoord": [
+      2,
+      15
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31054",
+    "name": "切削原液",
+    "itemType": "MATERIAL",
+    "sortId": 100045,
+    "rarity": 3,
+    "groupID": "cutting_fluid",
+    "spriteCoord": [
+      3,
+      15
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31063",
+    "name": "转质盐组",
+    "itemType": "MATERIAL",
+    "sortId": 100049,
+    "rarity": 2,
+    "groupID": "salt",
+    "spriteCoord": [
+      0,
+      16
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31064",
+    "name": "转质盐聚块",
+    "itemType": "MATERIAL",
+    "sortId": 100048,
+    "rarity": 3,
+    "groupID": "salt",
+    "spriteCoord": [
+      1,
+      16
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31073",
+    "name": "褐素纤维",
+    "itemType": "MATERIAL",
+    "sortId": 100051,
+    "rarity": 2,
+    "groupID": "fiber",
+    "spriteCoord": [
+      1,
+      17
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31074",
+    "name": "固化纤维板",
+    "itemType": "MATERIAL",
+    "sortId": 100050,
+    "rarity": 3,
+    "groupID": "fiber",
+    "spriteCoord": [
+      2,
+      17
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31083",
+    "name": "环烃聚质",
+    "itemType": "MATERIAL",
+    "sortId": 100053,
+    "rarity": 2,
+    "groupID": "hydrocarbon",
+    "spriteCoord": [
+      3,
+      17
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31084",
+    "name": "环烃预制体",
+    "itemType": "MATERIAL",
+    "sortId": 100052,
+    "rarity": 3,
+    "groupID": "hydrocarbon",
+    "spriteCoord": [
+      4,
+      17
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31093",
+    "name": "类凝结核",
+    "itemType": "MATERIAL",
+    "sortId": 100056,
+    "rarity": 2,
+    "groupID": "core",
+    "spriteCoord": [
+      5,
+      17
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31094",
+    "name": "手性屈光体",
+    "itemType": "MATERIAL",
+    "sortId": 100055,
+    "rarity": 3,
+    "groupID": "core",
+    "spriteCoord": [
+      0,
+      18
+    ],
+    "cnExist": true
+  },
+  {
+    "itemId": "31103",
+    "name": "液化高能气体",
+    "itemType": "MATERIAL",
+    "sortId": 100060,
+    "rarity": 2,
+    "groupID": "gas",
+    "cnExist": true
+  },
+  {
+    "itemId": "31104",
+    "name": "液化醚吸聚体",
+    "itemType": "MATERIAL",
+    "sortId": 100059,
+    "rarity": 3,
+    "groupID": "gas",
+    "cnExist": true
+  },
+  {
+    "itemId": "31113",
+    "name": "电极单元",
+    "itemType": "MATERIAL",
+    "sortId": 100058,
+    "rarity": 2,
+    "groupID": "elec",
+    "cnExist": true
+  },
+  {
+    "itemId": "31114",
+    "name": "聚能动力单元",
+    "itemType": "MATERIAL",
+    "sortId": 100057,
+    "rarity": 3,
+    "groupID": "elec",
+    "cnExist": true
+  }
+]

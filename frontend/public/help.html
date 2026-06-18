@@ -8,31 +8,34 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background: rgba(5, 8, 8, 0.72);
       min-height: 100vh;
       padding: 20px;
+      backdrop-filter: blur(6px);
     }
     .container {
       max-width: 900px;
       margin: 0 auto;
-      background: rgba(10, 20, 40, 0.95);
-      border-radius: 15px;
-      box-shadow: 0 10px 40px rgba(0, 191, 255, 0.2);
-      border: 1px solid rgba(0, 191, 255, 0.3);
+      background:
+        radial-gradient(circle at top left, rgba(215, 168, 77, 0.18), transparent 38%),
+        linear-gradient(180deg, rgba(27, 33, 31, 0.98), rgba(12, 15, 15, 0.98));
+      border: 1px solid rgba(215, 168, 77, 0.42);
+      border-radius: 22px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
     .header {
       padding: 15px 20px;
-      border-bottom: 2px solid rgba(0, 191, 255, 0.3);
+      border-bottom: 2px solid rgba(215, 168, 77, 0.42);
       text-align: center;
     }
     h1 {
-      color: #00BFFF;
+      color: #f6ead2;
       font-size: 20px;
       letter-spacing: 3px;
-      text-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+      text-shadow: 0 0 15px rgba(215, 168, 77, 0.5);
     }
     .body-row {
       display: flex;
@@ -43,7 +46,7 @@
       width: 130px;
       flex-shrink: 0;
       background: rgba(0, 0, 0, 0.3);
-      border-right: 1px solid rgba(0, 191, 255, 0.2);
+      border-right: 1px solid rgba(215, 168, 77, 0.2);
       padding: 15px 10px;
       display: flex;
       flex-direction: column;
@@ -51,9 +54,9 @@
       overflow-y: auto;
     }
     .nav-btn {
-      background: rgba(0, 191, 255, 0.08);
-      border: 1px solid rgba(0, 191, 255, 0.2);
-      color: #7EC8E3;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(215, 168, 77, 0.3);
+      color: #f6ead2;
       padding: 9px 10px;
       border-radius: 8px;
       cursor: pointer;
@@ -62,14 +65,14 @@
       transition: all 0.2s;
     }
     .nav-btn:hover {
-      background: rgba(0, 191, 255, 0.18);
-      color: #00BFFF;
+      background: rgba(247, 214, 123, 0.14);
+      color: #f7d67b;
     }
     .nav-btn.active {
-      background: linear-gradient(135deg, rgba(0, 191, 255, 0.3), rgba(78, 205, 196, 0.3));
-      color: #ffffff;
-      border-color: #00BFFF;
-      box-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
+      background: linear-gradient(180deg, rgba(247, 214, 123, 0.18), rgba(143, 102, 45, 0.16));
+      color: #f7d67b;
+      border-color: rgba(215, 168, 77, 0.6);
+      box-shadow: 0 0 8px rgba(215, 168, 77, 0.3);
     }
     .content {
       flex: 1;
@@ -81,80 +84,89 @@
     .section.active { display: block; }
 
     h2 {
-      color: #00BFFF;
+      color: #f6ead2;
       font-size: 15px;
       margin-bottom: 12px;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(0, 191, 255, 0.3);
+      border-bottom: 1px solid rgba(215, 168, 77, 0.3);
     }
     .instruction {
-      background: rgba(0, 191, 255, 0.1);
+      background: rgba(255, 255, 255, 0.055);
       padding: 15px;
       border-radius: 8px;
       line-height: 1.8;
-      color: #e0efff;
-      border: 1px solid rgba(0, 191, 255, 0.2);
+      color: #f6ead2;
+      border: 1px solid rgba(215, 168, 77, 0.2);
     }
     .shortcut {
       display: flex;
       justify-content: space-between;
       padding: 9px 10px;
-      border-bottom: 1px solid rgba(0, 191, 255, 0.1);
+      border-bottom: 1px solid rgba(215, 168, 77, 0.1);
     }
     .shortcut:last-child { border-bottom: none; }
     .key {
-      background: rgba(0, 191, 255, 0.25);
-      color: #ffffff;
+      background: rgba(215, 168, 77, 0.25);
+      color: #f6ead2;
       padding: 2px 8px;
       border-radius: 4px;
       font-family: monospace;
       font-size: 12px;
-      border: 1px solid rgba(0, 191, 255, 0.4);
+      border: 1px solid rgba(215, 168, 77, 0.4);
     }
-    .action { color: #ffffff; font-size: 13px; }
+    .action { color: #f6ead2; font-size: 13px; }
     .direction-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
     }
     .dir-card {
-      background: rgba(0, 191, 255, 0.1);
-      border: 1px solid rgba(0, 191, 255, 0.2);
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(215, 168, 77, 0.2);
       border-radius: 6px;
       padding: 10px;
       text-align: center;
     }
-    .dir-zh { color: #00BFFF; font-weight: bold; font-size: 13px; }
-    .dir-en { color: #5a8ab0; font-size: 11px; margin-top: 3px; }
+    .dir-zh { color: #f7d67b; font-weight: bold; font-size: 13px; }
+    .dir-en { color: #b8a070; font-size: 11px; margin-top: 3px; }
     .item-info {
-      background: rgba(0, 191, 255, 0.05);
+      background: rgba(255, 255, 255, 0.055);
       padding: 12px;
       border-radius: 8px;
       line-height: 1.8;
-      color: #e0efff;
-      border: 1px solid rgba(0, 191, 255, 0.2);
+      color: #f6ead2;
+      border: 1px solid rgba(215, 168, 77, 0.2);
     }
     .item-info ul { margin: 8px 0 0 18px; }
-    .item-info li { margin-bottom: 5px; color: #b8d8e8; }
-    .item-info strong { color: #00BFFF; }
+    .item-info li { margin-bottom: 5px; color: #d4c4a2; }
+    .item-info strong { color: #f7d67b; }
     .cookie {
-      background: linear-gradient(135deg, rgba(78, 205, 196, 0.25), rgba(0, 191, 255, 0.25));
-      color: #ffffff;
+      background:
+        radial-gradient(circle at top left, rgba(215, 168, 77, 0.18), transparent 38%),
+        rgba(27, 33, 31, 0.98);
+      color: #f6ead2;
       padding: 12px;
       border-radius: 8px;
       line-height: 1.8;
-      border: 1px solid rgba(78, 205, 196, 0.4);
+      border: 1px solid rgba(215, 168, 77, 0.42);
     }
-    .cookie strong { color: #4ECDC4; }
+    .cookie strong { color: #f7d67b; }
+    .cookie img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 12px;
+    }
     .tip {
-      background: rgba(78, 205, 196, 0.1);
+      background: rgba(255, 255, 255, 0.055);
       padding: 12px;
       border-radius: 8px;
       line-height: 1.6;
-      border: 1px solid rgba(78, 205, 196, 0.3);
-      color: #c0e8f0;
+      border: 1px solid rgba(215, 168, 77, 0.3);
+      color: #f6ead2;
     }
-    .tip strong { color: #4ECDC4; }
+    .tip strong { color: #f7d67b; }
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -164,9 +176,9 @@
     footer {
       text-align: center;
       padding: 12px;
-      color: rgba(126, 200, 227, 0.7);
+      color: rgba(246, 234, 210, 0.7);
       font-size: 11px;
-      border-top: 1px solid rgba(0, 191, 255, 0.1);
+      border-top: 1px solid rgba(215, 168, 77, 0.1);
     }
   </style>
 </head>
@@ -271,7 +283,7 @@
           <div class="grid-2">
             <div class="item-info">
               <strong>负重上限</strong><br><br>
-              背包初始负重上限为 <strong>20</strong><br>
+              背包初始负重上限为 <strong>5</strong><br>
               所有物品的总重量不能超过负重上限
             </div>
             <div class="item-info">
@@ -283,8 +295,9 @@
 
         <!-- 理智增强剂 -->
         <div id="cookie" class="section">
-          <h2>🍪 理智增强剂</h2>
+          <h2>理智增强剂</h2>
           <div class="cookie">
+            <img src="ap_supply.png" alt="理智增强剂" />
             在设施的某些角落隐藏着神奇的<strong>理智增强剂</strong>！<br><br>
             找到并吃掉理智增强剂可以<strong>增加5点负重上限</strong>！<br><br>
             当你背包中有理智增强剂时，会显示"吃理智增强剂"按钮。
@@ -308,7 +321,7 @@
         <div id="map" class="section">
           <h2>🗺️ 游戏地图</h2>
           <div class="tip">
-            <strong>💡 提示：</strong> 地图上蓝青色高亮的房间是你当前所在的位置。点击方向按钮即可移动到相邻的房间。
+            <strong>💡 提示：</strong> 地图上高亮的房间是你当前所在的位置。点击方向按钮即可移动到相邻的房间。
           </div>
         </div>
 
