@@ -1,6 +1,7 @@
 <template>
   <div class="room-cell" :class="cell.classes">
-    <span v-if="cell.label" class="cell-label">{{ cell.label }}</span>
+    <img v-if="cell.itemImage" :src="cell.itemImage" class="cell-item-image" />
+    <span v-else-if="cell.label" class="cell-label">{{ cell.label }}</span>
   </div>
 </template>
 
@@ -21,5 +22,11 @@ export default {
   font-size: clamp(12px, 2vw, 20px);
   line-height: 1;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.cell-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 </style>

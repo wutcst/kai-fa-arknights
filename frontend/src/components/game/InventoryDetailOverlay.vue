@@ -42,18 +42,21 @@
             @keydown.enter.prevent="$emit('select', item.id)"
             @keydown.space.prevent="$emit('select', item.id)"
           >
-            <div class="item-main">
-              <div>
-                <h3>{{ item.name }}</h3>
-                <p>{{ item.description || '暂无描述' }}</p>
+            <div class="item-content">
+              <div class="item-main">
+                <div>
+                  <h3>{{ item.name }}</h3>
+                  <p>{{ item.description || '暂无描述' }}</p>
+                </div>
+                <span v-if="item.id === selectedId" class="selected-badge">已选中</span>
               </div>
-              <span v-if="item.id === selectedId" class="selected-badge">已选中</span>
+              <div class="item-meta">
+                <span>重量 {{ item.weight || 0 }}</span>
+                <span>价值 {{ item.value || 0 }}</span>
+              </div>
+              <button class="drop-button" type="button" @click.stop="$emit('drop', item.id)">丢弃</button>
             </div>
-            <div class="item-meta">
-              <span>重量 {{ item.weight || 0 }}</span>
-              <span>价值 {{ item.value || 0 }}</span>
-            </div>
-            <button class="drop-button" type="button" @click.stop="$emit('drop', item.id)">丢弃</button>
+            <img v-if="getItemImage(item)" :src="getItemImage(item)" class="item-icon" />
           </article>
         </template>
       </div>
@@ -73,6 +76,8 @@
 </template>
 
 <script>
+import apSupplyImg from '@/assets/items/ap_supply.png';
+
 export default {
   name: 'InventoryDetailOverlay',
   props: {
@@ -112,6 +117,14 @@ export default {
     },
     hasMagicCookie() {
       return this.inventory.some(item => item.id === 'magic_cookie');
+    }
+  },
+  methods: {
+    getItemImage(item) {
+      const imageMap = {
+        magic_cookie: apSupplyImg
+      };
+      return imageMap[item.id] || null;
     }
   }
 };
@@ -264,7 +277,8 @@ h2 {
   border-radius: 16px;
   color: #f6ead2;
   cursor: pointer;
-  display: grid;
+  display: flex;
+  align-items: stretch;
   gap: 12px;
   padding: 14px;
   text-align: left;
@@ -281,6 +295,21 @@ h2 {
   background: linear-gradient(180deg, rgba(247, 214, 123, 0.18), rgba(143, 102, 45, 0.16));
   border-color: #f7d67b;
   box-shadow: inset 0 0 0 1px rgba(247, 214, 123, 0.2);
+}
+
+.item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 .item-main {

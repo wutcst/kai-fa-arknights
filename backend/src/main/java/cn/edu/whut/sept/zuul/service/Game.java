@@ -331,7 +331,7 @@ public class Game {
         int cookieCount = random.nextInt(6) + 5;  // 5-10块理智增强剂
         for (int i = 0; i < cookieCount; i++) {
             Room r = cookieRooms[random.nextInt(cookieRooms.length)];
-            r.addItem(new Item("magic_cookie", "理智增强剂", "罗德岛开发的特殊药剂，注射可以增加负重", 1, 0));
+            r.addItem(new Item("magic_cookie", "理智增强剂", "罗德岛开发的特殊药剂，注射f可以增加负重", 1, 0));
         }
 
         currentRoom = outside;  // start game outside

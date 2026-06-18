@@ -1,4 +1,5 @@
 import { computed, unref } from 'vue';
+import apSupplyImg from '@/assets/items/ap_supply.png';
 import {
   CENTER,
   GRID_SIZE,
@@ -43,10 +44,14 @@ export function useRoomInteraction({ exits, items, playerX, playerY }) {
   }) || '';
 
   const itemLabel = (item) => {
-    if (item.id === 'magic_cookie') return '🍪';
     if ((item.name || '').includes('钥匙')) return '⚿';
     if ((item.name || '').includes('金币')) return '◎';
     return '✦';
+  };
+
+  const itemImage = (item) => {
+    if (item.id === 'magic_cookie') return apSupplyImg;
+    return null;
   };
 
   const visibleItems = computed(() => unref(items).filter((item) => {
@@ -138,6 +143,13 @@ export function useRoomInteraction({ exits, items, playerX, playerY }) {
         classes.push('near-active');
       }
       label = itemLabel(cellItem);
+      const img = itemImage(cellItem);
+      return {
+        key: `${row}-${col}`,
+        classes,
+        label,
+        itemImage: img
+      };
     }
 
     const stairDirection = stairAt(row, col);
@@ -175,6 +187,7 @@ export function useRoomInteraction({ exits, items, playerX, playerY }) {
     exitLabel,
     stairAt,
     itemLabel,
+    itemImage,
     distanceTo,
     isNearDoor,
     isStandingOnDoor,

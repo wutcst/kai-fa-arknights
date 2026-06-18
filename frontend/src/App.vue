@@ -959,7 +959,8 @@ h1 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(5, 8, 8, 0.72);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -967,8 +968,12 @@ h1 {
 }
 
 .floating-map-content {
-  background: white;
-  border-radius: 10px;
+  background:
+    radial-gradient(circle at top left, rgba(215, 168, 77, 0.18), transparent 38%),
+    linear-gradient(180deg, rgba(27, 33, 31, 0.98), rgba(12, 15, 15, 0.98));
+  border: 1px solid rgba(215, 168, 77, 0.42);
+  border-radius: 22px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
   padding: 20px;
   width: 95vw;
   height: 90vh;
