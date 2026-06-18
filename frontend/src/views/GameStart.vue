@@ -1,5 +1,8 @@
 <template>
   <div class="game-start-container">
+    <!-- 明日方舟风格背景 -->
+    <ArknightsBackground />
+
     <div class="game-start-box">
       <div class="logo-area">
         <img class="rhodes-logo" src="@/assets/Logo_rhodesOverride.png" alt="Rhodes Island" />
@@ -57,6 +60,7 @@
 
 <script>
 import { checkSave, loadGame, saveGame, newGame } from '@/api/saveApi';
+import ArknightsBackground from '@/components/ArknightsBackground.vue';
 
 export default {
   name: 'GameStart',
@@ -65,6 +69,9 @@ export default {
       type: String,
       required: true
     }
+  },
+  components: {
+    ArknightsBackground
   },
   data() {
     return {
@@ -138,6 +145,8 @@ export default {
 }
 
 .game-start-box {
+  position: relative;
+  z-index: 10;
   background: rgba(10, 20, 40, 0.95);
   border-radius: 20px;
   padding: 40px;

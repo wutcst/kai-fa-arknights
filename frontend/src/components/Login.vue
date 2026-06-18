@@ -1,5 +1,8 @@
 <template>
   <div class="auth-container">
+    <!-- 明日方舟风格背景 -->
+    <ArknightsBackground />
+
     <div class="auth-box">
       <div class="logo-area">
         <img class="rhodes-logo" src="@/assets/Logo_rhodesOverride.png" alt="Rhodes Island" />
@@ -101,10 +104,14 @@ import {
   validateRegisterForm,
   validateChangePasswordForm
 } from '@/utils/authValidators';
+import ArknightsBackground from './ArknightsBackground.vue';
 
 export default {
   name: 'UserLogin',
   emits: ['login-success'],
+  components: {
+    ArknightsBackground
+  },
   data() {
     return {
       username: '',
@@ -249,6 +256,8 @@ export default {
 }
 
 .auth-box {
+  position: relative;
+  z-index: 10;
   background: rgba(10, 20, 40, 0.95);
   padding: 40px;
   border-radius: 15px;
