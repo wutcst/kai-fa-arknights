@@ -9,7 +9,7 @@
         :y1="conn.y1"
         :x2="conn.x2"
         :y2="conn.y2"
-        :stroke="conn.stroke"
+        stroke="rgba(215, 168, 77, 0.5)"
         stroke-width="3"
       />
 
@@ -28,15 +28,15 @@
           width="120"
           height="60"
           rx="8"
-          :fill="room.id === currentRoomId ? '#00BFFF' : 'rgba(20, 40, 60, 0.8)'"
-          :stroke="room.id === currentRoomId ? '#00BFFF' : '#3a5a7a'"
+          :fill="room.id === currentRoomId ? '#f7d67b' : 'rgba(27, 33, 31, 0.95)'"
+          :stroke="room.id === currentRoomId ? '#f7d67b' : 'rgba(215, 168, 77, 0.4)'"
           stroke-width="3"
         />
         <text
           x="60"
           y="24"
           text-anchor="middle"
-          :fill="room.id === currentRoomId ? 'white' : '#7EC8E3'"
+          :fill="room.id === currentRoomId ? '#1a1a1a' : '#f6ead2'"
           font-size="13"
           font-weight="bold"
         >
@@ -46,7 +46,7 @@
           x="60"
           y="44"
           text-anchor="middle"
-          :fill="room.id === currentRoomId ? 'rgba(255,255,255,0.8)' : 'rgba(126, 200, 227, 0.5)'"
+          :fill="room.id === currentRoomId ? 'rgba(0,0,0,0.6)' : 'rgba(246, 234, 210, 0.5)'"
           font-size="11"
         >
           {{ room.id }}
@@ -60,7 +60,7 @@
           x="860"
           y="275"
           text-anchor="middle"
-          fill="#4ECDC4"
+          fill="#f7d67b"
           font-size="12"
           font-weight="bold"
         >
@@ -195,10 +195,12 @@ export default {
   width: 100%;
   height: auto;
   max-width: 100%;
-  background: rgba(10, 20, 40, 0.95);
-  border-radius: 6px;
-  box-shadow: 0 2px 15px rgba(78, 205, 196, 0.15);
-  border: 1px solid rgba(78, 205, 196, 0.3);
+  background:
+    radial-gradient(circle at top left, rgba(215, 168, 77, 0.18), transparent 38%),
+    linear-gradient(180deg, rgba(27, 33, 31, 0.98), rgba(12, 15, 15, 0.98));
+  border-radius: 16px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(215, 168, 77, 0.42);
 }
 
 .room {
@@ -211,6 +213,6 @@ export default {
 }
 
 .room.active rect {
-  filter: drop-shadow(0 0 8px rgba(0, 191, 255, 0.6));
+  filter: drop-shadow(0 0 8px rgba(247, 214, 123, 0.8));
 }
 </style>
