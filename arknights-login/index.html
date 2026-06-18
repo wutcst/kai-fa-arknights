@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="author" content="Bemuse">
+        <meta name="description" content="Arknights Wallpaper for Wallpaper Engine(WE)">
+        <meta name="keywords" content="html, css, js, vue.js, three.js">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="js/vue.min.js"></script>
+        <script src="js/throttle.js"></script>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body>
+        <div id="wrap">
+            <transition name="opening-hide">
+                <div id="opening" v-show="shows.opening">
+                    <div id="loading-wrap">
+                        <div id="loading-bar">
+                            <div :style="styles.loading.div"></div>
+                            <div :style="styles.loading.div"></div>
+                        </div>
+                        <div id="loading-percentage">
+                            <span :style="styles.loading.span.a">{{loading.progress}}%</span>
+                            <span :style="styles.loading.span.b">{{loading.progress}}%</span>
+                            <span :style="styles.loading.span.c">{{loading.complete}}</span>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+            <div id="main">
+                <div id="background-wrap">
+                    <div id="background-frame">
+                        <div :style="styles.background.frame"></div>
+                    </div>
+                    <div id="background-image">
+                        <div :style="styles.background.image"></div>
+                        <video v-show="shows.video" ref="videobg" src="" muted loop id="background-video"></video>
+                    </div>
+                    <div id="background-cross">
+                        <div v-for="cross in arrays.cross" :key="cross.id"></div>
+                    </div>
+                    <div id="background-square" @mousemove="mouseMove">
+                        <div v-for="square in arrays.square" :key="square.id"></div>
+                    </div>
+                </div>
+                <div id="end">
+                    <div id="change-bg" @click="displayOverlay">
+                        <div></div>
+                    </div>
+                    <transition name="overlay-hide">
+                        <div id="overlay" v-show="shows.overlay" @click="hideOverlay">
+                            <div id="overlay-wrap">
+                                <div id="overlay-image">
+                                    <div @click="changeBG(true, 0)"></div>
+                                    <div @click="changeBG(true, 1)"></div>
+                                    <div @click="changeBG(true, 2)"></div>
+                                    <div @click="changeBG(true, 3)"></div>
+                                    <div @click="changeBG(true, 4)"></div>
+                                </div>
+                                <div id="overlay-video">
+                                    <div @click="changeBG(false, 0)"></div>
+                                    <div @click="changeBG(false, 1)"></div>
+                                    <div @click="changeBG(false, 2)"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>  
+            </div>
+        </div>
+
+        <script src="js/main.js"></script>
+    </body>
+</html>

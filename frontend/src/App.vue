@@ -102,12 +102,13 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useAuthState } from '@/composables/useAuthState';
 import { useMessageLog } from '@/composables/useMessageLog';
 import { useGameState } from '@/composables/useGameState';
 import { useAbilityState } from '@/composables/useAbilityState';
 import { useKeyboardControls } from '@/composables/useKeyboardControls';
+import { useBackgroundMusic } from '@/composables/useBackgroundMusic';
 
 import { newGame, settleExploration } from '@/api/saveApi';
 import GameMap from '@/components/GameMap.vue';
@@ -122,8 +123,37 @@ const roomView = ref(null);
 const showAbilityPanel = ref(false);
 const showSettleConfirm = ref(false);
 const showInventoryDetail = ref(false);
+const isInGame = ref(false); // 是否正在游戏中
+const userInteracted = ref(false); // 用户是否已交互
 
 const { messageLog, appendLog, clearLog } = useMessageLog();
+
+// 背景音乐控制
+const { playMusic } = useBackgroundMusic();
+
+// 用户首次交互后播放音乐
+const handleFirstInteraction = () => {
+  if (!userInteracted.value) {
+    userInteracted.value = true;
+    if (!isInGame.value) {
+      playMusic('LOBBY');
+    }
+    // 移除监听器
+    document.removeEventListener('click', handleFirstInteraction);
+    document.removeEventListener('keydown', handleFirstInteraction);
+  }
+};
+
+// 监听游戏状态切换音乐
+watch(isInGame, (inGame) => {
+  if (inGame && userInteracted.value) {
+    // 进入游戏，播放游戏背景音乐
+    playMusic('GAME');
+  } else if (!inGame && userInteracted.value) {
+    // 退出游戏，播放大厅背景音乐
+    playMusic('LOBBY');
+  }
+});
 
 const {
   isLoggedIn,
@@ -259,10 +289,14 @@ useKeyboardControls({
 
 onMounted(() => {
   initAuthFromStorage();
+  // 添加用户交互监听器，等待用户首次交互后播放音乐
+  document.addEventListener('click', handleFirstInteraction);
+  document.addEventListener('keydown', handleFirstInteraction);
 });
 
 const handleStartGame = (gameData) => {
   showGameStart.value = false;
+  isInGame.value = true;
   updateGameState(gameData);
   appendLog('开始新的探索');
   fetchMap();
@@ -271,6 +305,7 @@ const handleStartGame = (gameData) => {
 
 const handleContinueGame = (gameData) => {
   showGameStart.value = false;
+  isInGame.value = true;
   updateGameState(gameData);
   appendLog('读取已有存档，继续探索');
   fetchMap(gameData.roomId);
@@ -279,11 +314,13 @@ const handleContinueGame = (gameData) => {
 
 const handleLogout = () => {
   closeInventoryDetail();
+  isInGame.value = false;
   baseLogout();
 };
 
 const handleBackToMenu = () => {
   closeInventoryDetail();
+  isInGame.value = false;
   baseBackToMenu();
 };
 
