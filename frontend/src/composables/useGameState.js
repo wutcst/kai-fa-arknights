@@ -19,6 +19,8 @@ export function useGameState(options) {
   const playerMaxWeight = ref(20);
   const playerGridPosition = ref({ row: 4, col: 4 });
   const rooms = ref([]);
+  const mapCurrentViewType = ref('');
+  const mapViewBox = ref('');
   const isError = ref(false);
   const showMap = ref(false);
   const isMoving = ref(false);
@@ -95,7 +97,9 @@ export function useGameState(options) {
   const fetchMap = async (savedRoomId = null) => {
     try {
       const response = await getMap();
-      rooms.value = response.data.rooms;
+      rooms.value = response.data.rooms || [];
+      mapCurrentViewType.value = response.data.currentViewType || '';
+      mapViewBox.value = response.data.viewBox || '';
       currentRoomId.value = savedRoomId || response.data.currentRoomId;
       if (!savedRoomId) {
         fetchStatus();
@@ -123,6 +127,7 @@ export function useGameState(options) {
       items.value = [];
       isError.value = response.data.teleported;
       appendLog(displayMessage.value || `移动到 ${currentRoomName.value}`, isError.value);
+      await fetchMap(currentRoomId.value);
     } catch (error) {
       displayMessage.value = '移动错误：' + (error.response?.data?.message || error.message);
       isError.value = true;
@@ -164,6 +169,7 @@ export function useGameState(options) {
       items.value = [];
       isError.value = !response.data.success;
       appendLog(displayMessage.value || '返回上个房间', isError.value);
+      await fetchMap(currentRoomId.value);
     } catch (error) {
       displayMessage.value = '返回错误：' + error.message;
       isError.value = true;
@@ -296,6 +302,8 @@ export function useGameState(options) {
     playerMaxWeight,
     playerGridPosition,
     rooms,
+    mapCurrentViewType,
+    mapViewBox,
     isError,
     showMap,
     isMoving,
