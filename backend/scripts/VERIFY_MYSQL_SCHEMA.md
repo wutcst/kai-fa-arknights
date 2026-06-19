@@ -18,7 +18,7 @@ mysql -h 127.0.0.1 -u root -p123456 arknights_db < backend/scripts/verify-mysql-
 
 重点确认：
 
-- `world_game_config` 只有一行强类型配置。
+- `world_game_config` 只有一行强类型配置，并通过 `ck_world_game_config_id` 强制 `id = 1`。
 - `magic_cookie` 的 `item_category` 是 `consumable`，`usable` 是 `1`。
 - `game_saves.current_room_id` 存在外键 `fk_game_saves_current_room`。
 - 世界配置表之间存在外键和基础 CHECK 约束。
@@ -38,6 +38,24 @@ VALUES ('bad_item', '坏物品', 'bad', -1, 0, 'material', false);
 
 INSERT INTO game_saves (user_id, current_room_id)
 VALUES (1, 'missing_room');
+
+INSERT INTO world_game_config (
+    id,
+    start_room_id,
+    default_max_weight,
+    default_player_grid_row,
+    default_player_grid_col,
+    spawn_random_seed,
+    portal_random_seed
+) VALUES (
+    2,
+    'outside',
+    5,
+    4,
+    4,
+    1,
+    1
+);
 
 INSERT INTO world_portal_targets (portal_room_id, target_room_id, display_order)
 VALUES ('portal', 'portal', 999);

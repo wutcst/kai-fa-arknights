@@ -155,6 +155,7 @@ CREATE TABLE world_game_config (
     spawn_random_seed BIGINT NOT NULL,
     portal_random_seed BIGINT NOT NULL,
     CONSTRAINT fk_world_game_config_start_room FOREIGN KEY (start_room_id) REFERENCES world_rooms(room_id),
+    CONSTRAINT ck_world_game_config_id CHECK (id = 1),
     CONSTRAINT ck_world_game_config_weight CHECK (default_max_weight > 0),
     CONSTRAINT ck_world_game_config_grid CHECK (default_player_grid_row BETWEEN 0 AND 8 AND default_player_grid_col BETWEEN 0 AND 8)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

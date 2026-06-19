@@ -39,6 +39,7 @@ WHERE table_schema = DATABASE()
       'uk_world_portal_target_order',
       'chk_world_portal_targets_not_self',
       'fk_world_game_config_start_room',
+      'ck_world_game_config_id',
       'fk_game_saves_current_room',
       'ck_world_items_weight',
       'ck_world_items_value',
