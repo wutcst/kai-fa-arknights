@@ -21,9 +21,14 @@ public class Room
 
     public Room(String description, String id)
     {
+        this(description, id, getZhNameById(id));
+    }
+
+    public Room(String description, String id, String zhName)
+    {
         this.description = description;
         this.id = id;
-        this.zhName = getZhNameById(id);
+        this.zhName = zhName;
         exits = new HashMap<>();
         items = new ArrayList<>();
         itemPositions = new HashMap<>();
@@ -121,7 +126,7 @@ public class Room
     /**
      * 根据房间ID获取中文名称.
      */
-    private String getZhNameById(String id) {
+    private static String getZhNameById(String id) {
         switch(id) {
             case "outside": return "罗德岛入口";
             case "theater": return "训练设施";
@@ -228,4 +233,3 @@ public class Room
         return exits.keySet();
     }
 }
-

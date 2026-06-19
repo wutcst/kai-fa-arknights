@@ -4,9 +4,13 @@ import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
+import cn.edu.whut.sept.zuul.service.world.WorldDataService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
@@ -15,13 +19,18 @@ import java.util.Map;
 /**
  * 游戏核心服务测试类.
  */
+@SpringBootTest
+@ActiveProfiles("test")
 public class GameTest {
+
+    @Autowired
+    private WorldDataService worldDataService;
 
     private Game game;
 
     @BeforeEach
     void setUp() {
-        game = new Game();
+        game = new Game(worldDataService);
     }
 
     @Test
