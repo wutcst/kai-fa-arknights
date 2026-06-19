@@ -4,7 +4,6 @@ import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
-import cn.edu.whut.sept.zuul.service.AbilityService;
 import cn.edu.whut.sept.zuul.service.Game;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -22,18 +21,12 @@ import java.util.ArrayList;
 public class GameController {
 
     private final Game game;
-    private final AbilityService abilityService;
 
-    public GameController(Game game, AbilityService abilityService) {
+    public GameController(Game game) {
         this.game = game;
-        this.abilityService = abilityService;
     }
 
     private int getPlayerMaxWeight() {
-        Long userId = game.getCurrentUserId();
-        if (userId != null) {
-            return abilityService.getMaxWeight(userId);
-        }
         return game.getPlayer().getMaxWeight();
     }
 
