@@ -81,6 +81,14 @@ public class Player {
         return baseMaxWeight;
     }
 
+    public void setBaseMaxWeight(int baseMaxWeight) {
+        this.baseMaxWeight = baseMaxWeight;
+    }
+
+    public void resetMaxWeightToBase() {
+        this.maxWeight = baseMaxWeight;
+    }
+
     /**
      * 增加最大负重（魔法饼干效果）.
      */

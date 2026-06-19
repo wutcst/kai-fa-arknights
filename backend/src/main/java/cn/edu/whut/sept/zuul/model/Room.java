@@ -21,9 +21,14 @@ public class Room
 
     public Room(String description, String id)
     {
+        this(description, id, id);
+    }
+
+    public Room(String description, String id, String zhName)
+    {
         this.description = description;
         this.id = id;
-        this.zhName = getZhNameById(id);
+        this.zhName = zhName;
         exits = new HashMap<>();
         items = new ArrayList<>();
         itemPositions = new HashMap<>();
@@ -119,39 +124,6 @@ public class Room
     }
 
     /**
-     * 根据房间ID获取中文名称.
-     */
-    private String getZhNameById(String id) {
-        switch(id) {
-            case "outside": return "罗德岛入口";
-            case "theater": return "训练设施";
-            case "pub": return "公开交易所";
-            case "lab": return "加工站";
-            case "office": return "精英干员办公室";
-            case "portal": return "机密传送门";
-            case "library": return "机密档案室";
-            case "cafeteria": return "物资补给区";
-            case "gym": return "体能训练场";
-            case "garden": return "户外休闲区";
-            case "bookstore": return "资源回收站";
-            case "dormitory": return "干员宿舍区";
-            case "theater_lobby": return "设施接待大厅";
-            case "theater_classroom_101": return "基础训练室A";
-            case "theater_classroom_102": return "基础训练室B";
-            case "theater_stairway_1f": return "设施东侧通道";
-            case "theater_classroom_201": return "进阶训练室A";
-            case "theater_classroom_202": return "进阶训练室B";
-            case "theater_office": return "人事档案室";
-            case "theater_stairway_2f": return "设施中央通道";
-            case "theater_classroom_301": return "精英训练室A";
-            case "theater_classroom_302": return "精英训练室B";
-            case "theater_lab": return "制造站";
-            case "theater_stairway_3f": return "设施顶层通道";
-            default: return id;
-        }
-    }
-
-    /**
      * 设置房间物品（用于从存档恢复）.
      *
      * @param items 物品列表
@@ -228,4 +200,3 @@ public class Room
         return exits.keySet();
     }
 }
-

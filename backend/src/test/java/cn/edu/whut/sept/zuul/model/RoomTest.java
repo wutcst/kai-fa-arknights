@@ -32,27 +32,18 @@ public class RoomTest {
     void testRoomCreation() {
         assertEquals("outside the main entrance of the university", outside.getShortDescription());
         assertEquals("outside", outside.getId());
-        assertEquals("罗德岛入口", outside.getZhName());
+        assertEquals("outside", outside.getZhName());
     }
 
     @Test
-    void testRoomChineseNameMapping() {
-        assertEquals("罗德岛入口", outside.getZhName());
-        assertEquals("训练设施", theater.getZhName());
-        assertEquals("加工站", lab.getZhName());
+    void testRoomChineseNameComesFromConstructor() {
+        Room portal = new Room("in a portal", "portal", "机密传送门");
 
-        Room portal = new Room("in a portal", "portal");
         assertEquals("机密传送门", portal.getZhName());
-
-        Room library = new Room("in the library", "library");
-        assertEquals("机密档案室", library.getZhName());
-
-        Room gym = new Room("in the gym", "gym");
-        assertEquals("体能训练场", gym.getZhName());
     }
 
     @Test
-    void testRoomChineseNameForUnknownId() {
+    void testRoomChineseNameFallbackUsesIdOnly() {
         Room unknown = new Room("unknown room", "unknown_id");
         assertEquals("unknown_id", unknown.getZhName());
     }
@@ -202,9 +193,9 @@ public class RoomTest {
 
     @Test
     void testClassroomNames() {
-        Room classroom101 = new Room("classroom 101", "theater_classroom_101");
-        Room stairway = new Room("stairway", "theater_stairway_1f");
-        Room office = new Room("teacher office", "theater_office");
+        Room classroom101 = new Room("classroom 101", "theater_classroom_101", "基础训练室A");
+        Room stairway = new Room("stairway", "theater_stairway_1f", "设施东侧通道");
+        Room office = new Room("teacher office", "theater_office", "人事档案室");
 
         assertEquals("基础训练室A", classroom101.getZhName());
         assertEquals("设施东侧通道", stairway.getZhName());

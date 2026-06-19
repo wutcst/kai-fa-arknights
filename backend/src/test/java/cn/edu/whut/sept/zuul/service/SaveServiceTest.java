@@ -6,9 +6,13 @@ import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
 import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.repository.GameSaveRepository;
+import cn.edu.whut.sept.zuul.service.world.WorldDataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,8 +29,13 @@ import static org.mockito.Mockito.when;
 /**
  * 存档服务回归测试.
  */
+@SpringBootTest
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class SaveServiceTest {
+
+    @Autowired
+    private WorldDataService worldDataService;
 
     @Mock
     private GameSaveRepository gameSaveRepository;
@@ -37,7 +46,7 @@ class SaveServiceTest {
     @BeforeEach
     void setUp() {
         saveService = new SaveService(gameSaveRepository);
-        game = new Game();
+        game = new Game(worldDataService);
     }
 
     @Test
