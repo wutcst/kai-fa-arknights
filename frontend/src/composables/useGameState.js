@@ -127,6 +127,7 @@ export function useGameState(options) {
       items.value = [];
       isError.value = response.data.teleported;
       appendLog(displayMessage.value || `移动到 ${currentRoomName.value}`, isError.value);
+      await fetchMap(currentRoomId.value);
     } catch (error) {
       displayMessage.value = '移动错误：' + (error.response?.data?.message || error.message);
       isError.value = true;
@@ -168,6 +169,7 @@ export function useGameState(options) {
       items.value = [];
       isError.value = !response.data.success;
       appendLog(displayMessage.value || '返回上个房间', isError.value);
+      await fetchMap(currentRoomId.value);
     } catch (error) {
       displayMessage.value = '返回错误：' + error.message;
       isError.value = true;

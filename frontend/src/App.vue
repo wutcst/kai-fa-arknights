@@ -40,7 +40,7 @@
       @save="handleSave"
       @load="handleLoad"
       @back="goBack"
-      @toggle-map="showMap = !showMap"
+      @toggle-map="toggleMap"
       @help="getHelp"
       @open-ability="showAbilityPanel = true; fetchUserAbility()"
       @open-inventory-detail="openInventoryDetail"
@@ -236,7 +236,10 @@ const playPlayerOperation = () => {
   roomView.value?.playOperation();
 };
 
-const toggleMap = () => {
+const toggleMap = async () => {
+  if (!showMap.value) {
+    await fetchMap(currentRoomId.value);
+  }
   showMap.value = !showMap.value;
 };
 
