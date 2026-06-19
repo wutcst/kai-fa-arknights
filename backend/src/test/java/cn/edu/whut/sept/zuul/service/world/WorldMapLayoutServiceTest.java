@@ -53,6 +53,22 @@ class WorldMapLayoutServiceTest {
     }
 
     @Test
+    void theaterMissingInternalLayoutFailsFast() {
+        jdbcTemplate.update("""
+                DELETE FROM world_room_layouts
+                WHERE room_id = 'theater' AND view_type = 'internal'
+                """);
+        try {
+            assertThrows(IllegalStateException.class, () -> worldMapLayoutService.loadLayoutSnapshot("theater"));
+        } finally {
+            jdbcTemplate.update("""
+                    INSERT INTO world_room_layouts (view_type, room_id, x, y, primary_view, display_order)
+                    VALUES ('internal','theater',400,50,false,1)
+                    """);
+        }
+    }
+
+    @Test
     void allRoomsHaveAtLeastOneLayout() {
         MapLayoutSnapshot snapshot = worldMapLayoutService.loadLayoutSnapshot("outside");
         Integer roomCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM world_rooms", Integer.class);

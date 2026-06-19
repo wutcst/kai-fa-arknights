@@ -98,6 +98,7 @@ public class WorldMapLayoutService {
             if (layouts.size() > 1 && primaryCount != 1) {
                 throw new IllegalStateException("多视图房间必须指定一个主地图布局: " + roomId);
             }
+            validateTheaterLayouts(roomId, layouts);
 
             List<RoomLayoutInfo> infos = layouts.stream()
                     .map(row -> new RoomLayoutInfo(row.getViewType(), row.getX(), row.getY(), row.isPrimaryView()))
@@ -117,6 +118,32 @@ public class WorldMapLayoutService {
         }
         if (layout.getX() == null || layout.getX() < 0 || layout.getY() == null || layout.getY() < 0) {
             throw new IllegalStateException("地图布局坐标不能为负数: " + layout.getRoomId());
+        }
+    }
+
+    private void validateTheaterLayouts(String roomId, List<WorldRoomLayout> layouts) {
+        if (!"theater".equals(roomId)) {
+            return;
+        }
+
+        boolean hasExternal = false;
+        boolean hasInternal = false;
+        for (WorldRoomLayout layout : layouts) {
+            if ("external".equals(layout.getViewType())) {
+                hasExternal = true;
+                if (!layout.isPrimaryView()) {
+                    throw new IllegalStateException("theater 的 external 布局必须是主视图");
+                }
+            } else if ("internal".equals(layout.getViewType())) {
+                hasInternal = true;
+                if (layout.isPrimaryView()) {
+                    throw new IllegalStateException("theater 的 internal 布局不能是主视图");
+                }
+            }
+        }
+
+        if (!hasExternal || !hasInternal) {
+            throw new IllegalStateException("theater 必须同时包含 external 和 internal 布局");
         }
     }
 

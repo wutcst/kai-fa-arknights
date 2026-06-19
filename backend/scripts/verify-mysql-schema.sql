@@ -80,4 +80,4 @@ WHERE l.room_id IS NULL;
 SELECT room_id, COUNT(*) AS layout_count, SUM(primary_view = TRUE) AS primary_layout_count
 FROM world_room_layouts
 GROUP BY room_id
-HAVING COUNT(*) > 1;
+HAVING SUM(primary_view = TRUE) <> 1;
