@@ -1,7 +1,6 @@
 package cn.edu.whut.sept.zuul.controller;
 
 import cn.edu.whut.sept.zuul.service.Game;
-import cn.edu.whut.sept.zuul.service.AbilityService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,6 @@ public class GameControllerTest {
 
     @Autowired
     private Game game;
-
-    @Autowired
-    private AbilityService abilityService;
 
     @BeforeEach
     void setUp() {
@@ -386,6 +382,15 @@ public class GameControllerTest {
                 .andExpect(jsonPath("$.inventory").exists())
                 .andExpect(jsonPath("$.playerWeight").exists())
                 .andExpect(jsonPath("$.playerMaxWeight").exists());
+    }
+
+    @Test
+    void testItemsReturnsCurrentRunMaxWeight() throws Exception {
+        game.getPlayer().setMaxWeight(10);
+
+        mockMvc.perform(get("/api/game/items"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.playerMaxWeight").value(10));
     }
 
     @Test

@@ -140,9 +140,6 @@ public class SaveController {
         game.setAllRoomItemPositions(roomItemPositions);
         game.setCurrentUserId(userId);
 
-        int currentMaxWeight = abilityService.getMaxWeight(userId);
-        game.setMaxWeight(currentMaxWeight);
-
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("success", true);
         response.put("message", "游戏已加载");
@@ -153,7 +150,7 @@ public class SaveController {
         response.put("items", getRoomItems(savedRoom));
         response.put("inventory", getPlayerInventory());
         response.put("playerWeight", playerWeight);
-        response.put("playerMaxWeight", currentMaxWeight);
+        response.put("playerMaxWeight", playerMaxWeight);
         response.put("playerGridRow", loadResult.get("playerGridRow"));
         response.put("playerGridCol", loadResult.get("playerGridCol"));
         return response;
@@ -230,7 +227,8 @@ public class SaveController {
         int totalGold = (int) settleResult.get("totalGold");
 
         game.getPlayer().getInventory().clear();
-        game.setMaxWeight(abilityService.getMaxWeight(userId));
+        int baseMaxWeight = abilityService.getMaxWeight(userId);
+        game.setMaxWeight(baseMaxWeight);
 
         return Map.of(
             "success", true,
@@ -239,7 +237,7 @@ public class SaveController {
             "totalGold", totalGold,
             "inventory", new ArrayList<>(),
             "playerWeight", 0,
-            "playerMaxWeight", abilityService.getMaxWeight(userId)
+            "playerMaxWeight", baseMaxWeight
         );
     }
 

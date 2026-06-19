@@ -31,8 +31,8 @@ export function useGameState(options) {
     items.value = [];
     inventory.value = gameData.inventory || [];
     syncSelectedInventory();
-    playerWeight.value = gameData.playerWeight || 0;
-    playerMaxWeight.value = gameData.playerMaxWeight || 20;
+    playerWeight.value = gameData.playerWeight ?? playerWeight.value;
+    playerMaxWeight.value = gameData.playerMaxWeight ?? playerMaxWeight.value;
     playerGridPosition.value = {
       row: gameData.playerGridRow ?? 4,
       col: gameData.playerGridCol ?? 4
@@ -149,8 +149,8 @@ export function useGameState(options) {
     try {
       const response = await getItems();
       inventory.value = response.data.inventory || [];
-      playerWeight.value = response.data.playerWeight || 0;
-      playerMaxWeight.value = response.data.playerMaxWeight || 50;
+      playerWeight.value = response.data.playerWeight ?? playerWeight.value;
+      playerMaxWeight.value = response.data.playerMaxWeight ?? playerMaxWeight.value;
       syncSelectedInventory();
       displayMessage.value = response.data.message;
       appendLog(displayMessage.value || `查看背包，共 ${inventory.value.length} 个物品`);
@@ -167,8 +167,8 @@ export function useGameState(options) {
       displayMessage.value = response.data.message;
       items.value = response.data.items || [];
       inventory.value = response.data.inventory || [];
-      playerWeight.value = response.data.playerWeight || 0;
-      playerMaxWeight.value = response.data.playerMaxWeight || 50;
+      playerWeight.value = response.data.playerWeight ?? playerWeight.value;
+      playerMaxWeight.value = response.data.playerMaxWeight ?? playerMaxWeight.value;
       isError.value = !response.data.success;
       syncSelectedInventory();
       appendLog(displayMessage.value || '拾取物品', isError.value);
@@ -185,8 +185,8 @@ export function useGameState(options) {
       displayMessage.value = response.data.message;
       items.value = response.data.items || [];
       inventory.value = response.data.inventory || [];
-      playerWeight.value = response.data.playerWeight || 0;
-      playerMaxWeight.value = response.data.playerMaxWeight || 50;
+      playerWeight.value = response.data.playerWeight ?? playerWeight.value;
+      playerMaxWeight.value = response.data.playerMaxWeight ?? playerMaxWeight.value;
       isError.value = !response.data.success;
       syncSelectedInventory();
       appendLog(displayMessage.value || '丢弃物品', isError.value);
@@ -202,8 +202,8 @@ export function useGameState(options) {
       const response = await apiEatCookie();
       displayMessage.value = response.data.message;
       inventory.value = response.data.inventory || [];
-      playerWeight.value = response.data.playerWeight || 0;
-      playerMaxWeight.value = response.data.playerMaxWeight || 50;
+      playerWeight.value = response.data.playerWeight ?? playerWeight.value;
+      playerMaxWeight.value = response.data.playerMaxWeight ?? playerMaxWeight.value;
       isError.value = !response.data.success;
       syncSelectedInventory();
       appendLog(displayMessage.value || '使用理智增强剂', isError.value);
