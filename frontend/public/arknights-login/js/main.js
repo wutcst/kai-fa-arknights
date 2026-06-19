@@ -301,9 +301,17 @@ const init = () => {
             },
             displayOverlay(){
                 this.shows.overlay = true;
+                window.parent.postMessage(
+                    { type: 'ARKNIGHTS_BG_PICKER_OPEN' },
+                    window.location.origin
+                );
             },
             hideOverlay(){
                 this.shows.overlay = false;
+                window.parent.postMessage(
+                    { type: 'ARKNIGHTS_BG_PICKER_CLOSE' },
+                    window.location.origin
+                );
             },
             watchRect(){
                 if(this.time.sec % 10 == 0){

@@ -3,7 +3,7 @@
     <!-- 明日方舟风格背景 -->
     <ArknightsBackground />
 
-    <div class="auth-box">
+    <div class="auth-box" v-show="!bgPickerVisible">
       <div class="logo-area">
         <img class="rhodes-logo" src="@/assets/Logo_rhodesOverride.png" alt="Rhodes Island" />
       </div>
@@ -123,7 +123,8 @@ export default {
       confirmNewPassword: '',
       authError: '',
       authSuccess: '',
-      authLoading: false
+      authLoading: false,
+      bgPickerVisible: false
     };
   },
   computed: {
@@ -134,7 +135,26 @@ export default {
       return '修改密码';
     }
   },
+  mounted() {
+    window.addEventListener('message', this.handleBackgroundMessage);
+  },
+  beforeUnmount() {
+    window.removeEventListener('message', this.handleBackgroundMessage);
+  },
   methods: {
+    handleBackgroundMessage(event) {
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+
+      const data = event.data || {};
+      if (data.type === 'ARKNIGHTS_BG_PICKER_OPEN') {
+        this.bgPickerVisible = true;
+      }
+      if (data.type === 'ARKNIGHTS_BG_PICKER_CLOSE') {
+        this.bgPickerVisible = false;
+      }
+    },
     switchMode(mode) {
       this.mode = mode;
       this.authError = '';
