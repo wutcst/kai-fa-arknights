@@ -21,11 +21,11 @@ public class WorldRandomSpawnRule {
     @Column(name = "max_count", nullable = false)
     private Integer maxCount;
 
-    @Column(name = "random_seed", nullable = false)
-    private Long randomSeed;
-
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
+
+    @Column(name = "display_order", nullable = false)
+    private Integer displayOrder;
 
     public String getRuleId() {
         return ruleId;
@@ -43,11 +43,11 @@ public class WorldRandomSpawnRule {
         return maxCount;
     }
 
-    public Long getRandomSeed() {
-        return randomSeed;
-    }
-
     public Boolean getEnabled() {
         return enabled;
+    }
+
+    public Integer getDisplayOrder() {
+        return displayOrder;
     }
 }

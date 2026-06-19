@@ -9,11 +9,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
 public class RandomSpawnPlanner {
-    public List<SpawnPlacement> plan(WorldRandomSpawnRule rule, List<WorldRandomSpawnCandidate> candidates) {
+    public List<SpawnPlacement> plan(long baseSeed, WorldRandomSpawnRule rule,
+                                     List<WorldRandomSpawnCandidate> candidates) {
         if (rule.getMinCount() < 0 || rule.getMaxCount() < rule.getMinCount()) {
             throw new IllegalStateException("随机物品规则数量配置非法: " + rule.getRuleId());
         }
@@ -28,7 +30,7 @@ public class RandomSpawnPlanner {
             }
         }
 
-        Random random = new Random(rule.getRandomSeed());
+        Random random = new Random(deriveRuleSeed(baseSeed, rule.getRuleId()));
         int count = rule.getMinCount() + random.nextInt(rule.getMaxCount() - rule.getMinCount() + 1);
         List<WorldRandomSpawnCandidate> shuffled = new ArrayList<>(candidates);
         Collections.shuffle(shuffled, random);
@@ -44,6 +46,10 @@ public class RandomSpawnPlanner {
         }
         placements.sort(Comparator.comparing(SpawnPlacement::getRoomId));
         return placements;
+    }
+
+    long deriveRuleSeed(long baseSeed, String ruleId) {
+        return Objects.hash(baseSeed, ruleId);
     }
 
     public static class SpawnPlacement {

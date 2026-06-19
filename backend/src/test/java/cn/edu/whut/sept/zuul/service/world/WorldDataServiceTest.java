@@ -6,6 +6,7 @@ import cn.edu.whut.sept.zuul.model.Room;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashSet;
@@ -20,12 +21,19 @@ class WorldDataServiceTest {
     @Autowired
     private WorldDataService worldDataService;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Test
     void loadWorldUsesDatabaseRoomConfig() {
         LoadedWorld world = worldDataService.loadWorld();
 
         assertEquals("outside", world.getStartRoomId());
         assertEquals(5, world.getDefaultMaxWeight());
+        assertEquals(4, world.getDefaultPlayerGridRow());
+        assertEquals(4, world.getDefaultPlayerGridCol());
+        assertEquals(20260620L, world.getSpawnRandomSeed());
+        assertEquals(20260621L, world.getPortalRandomSeed());
         assertEquals(24, world.getRooms().size());
         assertEquals("罗德岛入口", world.getRooms().get("outside").getZhName());
         assertEquals("theater", world.getRooms().get("outside").getExit("east").getId());
@@ -71,6 +79,22 @@ class WorldDataServiceTest {
         LoadedWorld world = worldDataService.loadWorld();
 
         assertEquals(5, world.getItemEffectValue("magic_cookie", WorldDataService.EFFECT_MAX_WEIGHT_BONUS));
+        Map<String, Object> magicCookie = jdbcTemplate.queryForMap(
+                "select item_category, usable from world_items where item_id = 'magic_cookie'"
+        );
+        assertEquals("consumable", magicCookie.get("item_category"));
+        assertEquals(Boolean.TRUE, magicCookie.get("usable"));
+    }
+
+    @Test
+    void portalTargetsRequirePortalRoomType() {
+        jdbcTemplate.update("update world_rooms set room_type = 'normal' where room_id = 'portal'");
+        try {
+            IllegalStateException ex = assertThrows(IllegalStateException.class, () -> worldDataService.loadWorld());
+            assertTrue(ex.getMessage().contains("传送门源房间类型必须是portal"));
+        } finally {
+            jdbcTemplate.update("update world_rooms set room_type = 'portal' where room_id = 'portal'");
+        }
     }
 
     private Set<String> cookieRooms(Map<String, Room> rooms) {

@@ -397,7 +397,10 @@ public class GameTest {
         game.resetToStart();
 
         assertEquals("outside", game.getCurrentRoom().getId());
+        assertSame(game.getCurrentRoom(), game.getPlayer().getCurrentRoom());
         assertEquals(5, game.getPlayer().getMaxWeight());
+        assertEquals(4, game.getDefaultPlayerGridRow());
+        assertEquals(4, game.getDefaultPlayerGridCol());
         assertTrue(game.getPlayer().getInventory().isEmpty());
     }
 

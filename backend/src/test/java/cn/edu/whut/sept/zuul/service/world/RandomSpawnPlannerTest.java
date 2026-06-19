@@ -15,26 +15,35 @@ class RandomSpawnPlannerTest {
 
     @Test
     void sameSeedProducesSamePlacements() {
-        WorldRandomSpawnRule rule = rule("cookie", "magic_cookie", 3, 3, 1234L);
+        WorldRandomSpawnRule rule = rule("cookie", "magic_cookie", 3, 3);
 
-        List<String> first = roomIds(planner.plan(rule, candidates(6)));
-        List<String> second = roomIds(planner.plan(rule, candidates(6)));
+        List<String> first = roomIds(planner.plan(1234L, rule, candidates(6)));
+        List<String> second = roomIds(planner.plan(1234L, rule, candidates(6)));
 
         assertEquals(first, second);
     }
 
     @Test
-    void differentSeedChangesPlacements() {
-        List<String> first = roomIds(planner.plan(rule("cookie", "magic_cookie", 3, 3, 1234L), candidates(6)));
-        List<String> second = roomIds(planner.plan(rule("cookie", "magic_cookie", 3, 3, 5678L), candidates(6)));
+    void differentBaseSeedChangesPlacements() {
+        WorldRandomSpawnRule rule = rule("cookie", "magic_cookie", 3, 3);
+        List<String> first = roomIds(planner.plan(1234L, rule, candidates(6)));
+        List<String> second = roomIds(planner.plan(5678L, rule, candidates(6)));
 
         assertNotEquals(first, second);
     }
 
     @Test
+    void sameBaseSeedUsesRuleIdAsIndependentSalt() {
+        assertNotEquals(
+                planner.deriveRuleSeed(1234L, "cookie_a"),
+                planner.deriveRuleSeed(1234L, "cookie_b")
+        );
+    }
+
+    @Test
     void countStaysWithinConfiguredRange() {
         List<RandomSpawnPlanner.SpawnPlacement> placements =
-                planner.plan(rule("cookie", "magic_cookie", 2, 5, 20240612L), candidates(8));
+                planner.plan(20260620L, rule("cookie", "magic_cookie", 2, 5), candidates(8));
 
         assertTrue(placements.size() >= 2);
         assertTrue(placements.size() <= 5);
@@ -42,20 +51,20 @@ class RandomSpawnPlannerTest {
 
     @Test
     void insufficientCandidatesThrows() {
-        WorldRandomSpawnRule rule = rule("cookie", "magic_cookie", 5, 6, 20240612L);
+        WorldRandomSpawnRule rule = rule("cookie", "magic_cookie", 5, 6);
 
-        assertThrows(IllegalStateException.class, () -> planner.plan(rule, candidates(4)));
+        assertThrows(IllegalStateException.class, () -> planner.plan(20260620L, rule, candidates(4)));
     }
 
     @Test
     void duplicateCandidateRoomThrows() {
-        WorldRandomSpawnRule rule = rule("cookie", "magic_cookie", 1, 2, 20240612L);
+        WorldRandomSpawnRule rule = rule("cookie", "magic_cookie", 1, 2);
         List<WorldRandomSpawnCandidate> candidates = List.of(
                 candidate("cookie", "room_1", 2, 2, 1),
                 candidate("cookie", "room_1", 2, 6, 2)
         );
 
-        assertThrows(IllegalStateException.class, () -> planner.plan(rule, candidates));
+        assertThrows(IllegalStateException.class, () -> planner.plan(20260620L, rule, candidates));
     }
 
     private List<String> roomIds(List<RandomSpawnPlanner.SpawnPlacement> placements) {
@@ -68,14 +77,14 @@ class RandomSpawnPlannerTest {
                 .collect(Collectors.toList());
     }
 
-    private WorldRandomSpawnRule rule(String ruleId, String itemId, int min, int max, long seed) {
+    private WorldRandomSpawnRule rule(String ruleId, String itemId, int min, int max) {
         WorldRandomSpawnRule rule = new WorldRandomSpawnRule();
         set(rule, "ruleId", ruleId);
         set(rule, "itemId", itemId);
         set(rule, "minCount", min);
         set(rule, "maxCount", max);
-        set(rule, "randomSeed", seed);
         set(rule, "enabled", true);
+        set(rule, "displayOrder", 1);
         return rule;
     }
 

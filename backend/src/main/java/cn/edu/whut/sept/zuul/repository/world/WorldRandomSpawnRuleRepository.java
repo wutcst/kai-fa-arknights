@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface WorldRandomSpawnRuleRepository extends JpaRepository<WorldRandomSpawnRule, String> {
-    List<WorldRandomSpawnRule> findByEnabledTrueOrderByRuleIdAsc();
+    List<WorldRandomSpawnRule> findByEnabledTrueOrderByDisplayOrderAsc();
 }

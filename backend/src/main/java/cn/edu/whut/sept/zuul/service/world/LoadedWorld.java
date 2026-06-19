@@ -10,20 +10,29 @@ public class LoadedWorld {
     private final Map<String, Room> rooms;
     private final String startRoomId;
     private final int defaultMaxWeight;
-    private final long portalSeed;
+    private final int defaultPlayerGridRow;
+    private final int defaultPlayerGridCol;
+    private final long spawnRandomSeed;
+    private final long portalRandomSeed;
     private final Map<String, List<String>> portalTargets;
     private final Map<String, Map<String, Integer>> itemEffects;
 
     public LoadedWorld(Map<String, Room> rooms,
                        String startRoomId,
                        int defaultMaxWeight,
-                       long portalSeed,
+                       int defaultPlayerGridRow,
+                       int defaultPlayerGridCol,
+                       long spawnRandomSeed,
+                       long portalRandomSeed,
                        Map<String, List<String>> portalTargets,
                        Map<String, Map<String, Integer>> itemEffects) {
         this.rooms = rooms;
         this.startRoomId = startRoomId;
         this.defaultMaxWeight = defaultMaxWeight;
-        this.portalSeed = portalSeed;
+        this.defaultPlayerGridRow = defaultPlayerGridRow;
+        this.defaultPlayerGridCol = defaultPlayerGridCol;
+        this.spawnRandomSeed = spawnRandomSeed;
+        this.portalRandomSeed = portalRandomSeed;
         this.portalTargets = portalTargets;
         this.itemEffects = itemEffects;
     }
@@ -40,8 +49,20 @@ public class LoadedWorld {
         return defaultMaxWeight;
     }
 
-    public long getPortalSeed() {
-        return portalSeed;
+    public int getDefaultPlayerGridRow() {
+        return defaultPlayerGridRow;
+    }
+
+    public int getDefaultPlayerGridCol() {
+        return defaultPlayerGridCol;
+    }
+
+    public long getSpawnRandomSeed() {
+        return spawnRandomSeed;
+    }
+
+    public long getPortalRandomSeed() {
+        return portalRandomSeed;
     }
 
     public Map<String, List<String>> getPortalTargets() {

@@ -24,6 +24,12 @@ public class WorldItem {
     @Column(name = "item_value", nullable = false)
     private Integer value;
 
+    @Column(name = "item_category", nullable = false, length = 30)
+    private String itemCategory;
+
+    @Column(name = "usable", nullable = false)
+    private Boolean usable;
+
     public String getItemId() {
         return itemId;
     }
@@ -42,5 +48,17 @@ public class WorldItem {
 
     public Integer getValue() {
         return value;
+    }
+
+    public String getItemCategory() {
+        return itemCategory;
+    }
+
+    public Boolean getUsable() {
+        return usable;
+    }
+
+    public boolean isUsable() {
+        return Boolean.TRUE.equals(usable);
     }
 }

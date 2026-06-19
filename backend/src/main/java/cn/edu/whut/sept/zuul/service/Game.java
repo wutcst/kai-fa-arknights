@@ -65,7 +65,7 @@ public class Game {
         player.resetMaxWeightToBase();
         currentRoom = rooms.get(loadedWorld.getStartRoomId());
         player.setCurrentRoom(currentRoom);
-        portalRandom = new Random(loadedWorld.getPortalSeed());
+        portalRandom = new Random(loadedWorld.getPortalRandomSeed());
         saveInitialRoomItems();
     }
 
@@ -89,6 +89,14 @@ public class Game {
 
     public Long getCurrentUserId() {
         return currentUserId;
+    }
+
+    public int getDefaultPlayerGridRow() {
+        return loadedWorld.getDefaultPlayerGridRow();
+    }
+
+    public int getDefaultPlayerGridCol() {
+        return loadedWorld.getDefaultPlayerGridCol();
     }
 
     public void setCurrentUserId(Long currentUserId) {
@@ -532,13 +540,14 @@ public class Game {
      */
     public void resetToStart() {
         this.currentRoom = rooms.get(loadedWorld.getStartRoomId());
+        this.player.setCurrentRoom(this.currentRoom);
         this.roomHistory.clear();
         this.player.getInventory().clear();
         this.player.setBaseMaxWeight(loadedWorld.getDefaultMaxWeight());
         this.player.resetMaxWeightToBase();
         this.justTeleported = false;
         this.teleportedFrom = null;
-        this.portalRandom = new Random(loadedWorld.getPortalSeed());
+        this.portalRandom = new Random(loadedWorld.getPortalRandomSeed());
         // 恢复房间物品到初始状态
         restoreRoomItems();
     }

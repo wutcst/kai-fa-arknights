@@ -37,10 +37,10 @@ import java.util.Set;
 
 @Service
 public class WorldDataService {
-    public static final String CONFIG_START_ROOM_ID = "start_room_id";
-    public static final String CONFIG_DEFAULT_MAX_WEIGHT = "default_max_weight";
-    public static final String CONFIG_PORTAL_SEED = "portal_seed";
     public static final String EFFECT_MAX_WEIGHT_BONUS = "MAX_WEIGHT_BONUS";
+    private static final int GAME_CONFIG_ID = 1;
+    private static final String ROOM_TYPE_PORTAL = "portal";
+    private static final String ITEM_CATEGORY_CONSUMABLE = "consumable";
 
     private final WorldAreaRepository areaRepository;
     private final WorldRoomRepository roomRepository;
@@ -82,65 +82,38 @@ public class WorldDataService {
 
     @Transactional(readOnly = true)
     public LoadedWorld loadWorld() {
-        Map<String, String> config = loadConfig();
-        String startRoomId = requiredConfig(config, CONFIG_START_ROOM_ID);
-        int defaultMaxWeight = parsePositiveInt(config, CONFIG_DEFAULT_MAX_WEIGHT);
-        long portalSeed = parseLong(config, CONFIG_PORTAL_SEED);
+        WorldGameConfig config = loadGameConfig();
 
         Map<String, WorldArea> areas = indexAreas();
         Map<String, WorldItem> itemTemplates = indexItems();
-        Map<String, Room> rooms = buildRooms(areas);
-        validateRoomExists(rooms, startRoomId, "起始房间不存在");
+        Map<String, WorldRoom> roomConfigs = indexRoomConfigs(areas);
+        Map<String, Room> rooms = buildRooms(roomConfigs);
+        validateRoomExists(rooms, config.getStartRoomId(), "起始房间不存在");
+        validatePositive(config.getDefaultMaxWeight(), "默认负重必须大于0");
+        validateGrid(config.getDefaultPlayerGridRow(), config.getDefaultPlayerGridCol(), "默认玩家格子越界");
 
         applyExits(rooms);
         applyInitialItems(rooms, itemTemplates);
-        applyRandomItems(rooms, itemTemplates);
+        applyRandomItems(rooms, itemTemplates, config.getSpawnRandomSeed());
 
-        Map<String, List<String>> portalTargets = buildPortalTargets(rooms);
+        Map<String, List<String>> portalTargets = buildPortalTargets(rooms, roomConfigs);
         Map<String, Map<String, Integer>> itemEffects = buildItemEffects(itemTemplates);
         validateMagicCookieEffect(itemTemplates, itemEffects);
 
-        return new LoadedWorld(rooms, startRoomId, defaultMaxWeight, portalSeed, portalTargets, itemEffects);
+        return new LoadedWorld(rooms,
+                config.getStartRoomId(),
+                config.getDefaultMaxWeight(),
+                config.getDefaultPlayerGridRow(),
+                config.getDefaultPlayerGridCol(),
+                config.getSpawnRandomSeed(),
+                config.getPortalRandomSeed(),
+                portalTargets,
+                itemEffects);
     }
 
-    private Map<String, String> loadConfig() {
-        Map<String, String> config = new HashMap<>();
-        for (WorldGameConfig row : gameConfigRepository.findAll()) {
-            config.put(row.getConfigKey(), row.getConfigValue());
-        }
-        if (config.isEmpty()) {
-            throw new IllegalStateException("世界配置为空");
-        }
-        return config;
-    }
-
-    private String requiredConfig(Map<String, String> config, String key) {
-        String value = config.get(key);
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalStateException("缺少世界配置: " + key);
-        }
-        return value;
-    }
-
-    private int parsePositiveInt(Map<String, String> config, String key) {
-        int value;
-        try {
-            value = Integer.parseInt(requiredConfig(config, key));
-        } catch (NumberFormatException ex) {
-            throw new IllegalStateException("世界配置必须是整数: " + key, ex);
-        }
-        if (value <= 0) {
-            throw new IllegalStateException("世界配置必须大于0: " + key);
-        }
-        return value;
-    }
-
-    private long parseLong(Map<String, String> config, String key) {
-        try {
-            return Long.parseLong(requiredConfig(config, key));
-        } catch (NumberFormatException ex) {
-            throw new IllegalStateException("世界配置必须是长整数: " + key, ex);
-        }
+    private WorldGameConfig loadGameConfig() {
+        return gameConfigRepository.findById(GAME_CONFIG_ID)
+                .orElseThrow(() -> new IllegalStateException("缺少世界主配置: " + GAME_CONFIG_ID));
     }
 
     private Map<String, WorldArea> indexAreas() {
@@ -160,6 +133,9 @@ public class WorldDataService {
             if (item.getWeight() < 0 || item.getValue() < 0) {
                 throw new IllegalStateException("物品重量和价值不能为负数: " + item.getItemId());
             }
+            if (item.getItemCategory() == null || item.getItemCategory().isBlank()) {
+                throw new IllegalStateException("物品分类不能为空: " + item.getItemId());
+            }
             items.put(item.getItemId(), item);
         }
         if (items.isEmpty()) {
@@ -168,8 +144,8 @@ public class WorldDataService {
         return items;
     }
 
-    private Map<String, Room> buildRooms(Map<String, WorldArea> areas) {
-        Map<String, Room> rooms = new LinkedHashMap<>();
+    private Map<String, WorldRoom> indexRoomConfigs(Map<String, WorldArea> areas) {
+        Map<String, WorldRoom> roomConfigs = new LinkedHashMap<>();
         List<WorldRoom> rows = roomRepository.findAllByOrderByDisplayOrderAsc();
         if (rows.isEmpty()) {
             throw new IllegalStateException("世界房间配置为空");
@@ -178,6 +154,14 @@ public class WorldDataService {
             if (!areas.containsKey(row.getAreaId())) {
                 throw new IllegalStateException("房间引用了不存在的区域: " + row.getRoomId());
             }
+            roomConfigs.put(row.getRoomId(), row);
+        }
+        return roomConfigs;
+    }
+
+    private Map<String, Room> buildRooms(Map<String, WorldRoom> roomConfigs) {
+        Map<String, Room> rooms = new LinkedHashMap<>();
+        for (WorldRoom row : roomConfigs.values()) {
             rooms.put(row.getRoomId(), new Room(row.getDescription(), row.getRoomId(), row.getZhName()));
         }
         return rooms;
@@ -223,8 +207,8 @@ public class WorldDataService {
         }
     }
 
-    private void applyRandomItems(Map<String, Room> rooms, Map<String, WorldItem> itemTemplates) {
-        for (WorldRandomSpawnRule rule : randomSpawnRuleRepository.findByEnabledTrueOrderByRuleIdAsc()) {
+    private void applyRandomItems(Map<String, Room> rooms, Map<String, WorldItem> itemTemplates, long spawnRandomSeed) {
+        for (WorldRandomSpawnRule rule : randomSpawnRuleRepository.findByEnabledTrueOrderByDisplayOrderAsc()) {
             WorldItem item = validateItemExists(itemTemplates, rule.getItemId());
             List<WorldRandomSpawnCandidate> candidates = randomSpawnCandidateRepository
                     .findByRuleIdOrderByDisplayOrderAsc(rule.getRuleId());
@@ -236,7 +220,7 @@ public class WorldDataService {
                 }
             }
 
-            for (RandomSpawnPlanner.SpawnPlacement placement : randomSpawnPlanner.plan(rule, candidates)) {
+            for (RandomSpawnPlanner.SpawnPlacement placement : randomSpawnPlanner.plan(spawnRandomSeed, rule, candidates)) {
                 Room room = rooms.get(placement.getRoomId());
                 if (room.getItem(placement.getItemId()) != null) {
                     throw new IllegalStateException("随机物品在同一房间重复: " + placement.getRoomId());
@@ -247,11 +231,16 @@ public class WorldDataService {
         }
     }
 
-    private Map<String, List<String>> buildPortalTargets(Map<String, Room> rooms) {
+    private Map<String, List<String>> buildPortalTargets(Map<String, Room> rooms,
+                                                         Map<String, WorldRoom> roomConfigs) {
         Map<String, List<String>> portalTargets = new HashMap<>();
         for (WorldPortalTarget row : portalTargetRepository.findAllByOrderByPortalRoomIdAscDisplayOrderAsc()) {
             validateRoomExists(rooms, row.getPortalRoomId(), "传送门房间不存在");
             validateRoomExists(rooms, row.getTargetRoomId(), "传送目标房间不存在");
+            WorldRoom portalRoom = roomConfigs.get(row.getPortalRoomId());
+            if (portalRoom == null || !ROOM_TYPE_PORTAL.equals(portalRoom.getRoomType())) {
+                throw new IllegalStateException("传送门源房间类型必须是portal: " + row.getPortalRoomId());
+            }
             if (row.getPortalRoomId().equals(row.getTargetRoomId())) {
                 throw new IllegalStateException("传送门不能指向自身: " + row.getPortalRoomId());
             }
@@ -280,7 +269,10 @@ public class WorldDataService {
 
     private void validateMagicCookieEffect(Map<String, WorldItem> itemTemplates,
                                            Map<String, Map<String, Integer>> itemEffects) {
-        validateItemExists(itemTemplates, "magic_cookie");
+        WorldItem magicCookie = validateItemExists(itemTemplates, "magic_cookie");
+        if (!ITEM_CATEGORY_CONSUMABLE.equals(magicCookie.getItemCategory()) || !magicCookie.isUsable()) {
+            throw new IllegalStateException("理智增强剂必须是可使用消耗品");
+        }
         if (itemEffects.getOrDefault("magic_cookie", Map.of())
                 .getOrDefault(EFFECT_MAX_WEIGHT_BONUS, 0) <= 0) {
             throw new IllegalStateException("理智增强剂缺少有效负重效果配置");
@@ -305,6 +297,12 @@ public class WorldDataService {
 
     private void validateGrid(int row, int col, String message) {
         if (row < 0 || row > 8 || col < 0 || col > 8) {
+            throw new IllegalStateException(message);
+        }
+    }
+
+    private void validatePositive(int value, String message) {
+        if (value <= 0) {
             throw new IllegalStateException(message);
         }
     }
