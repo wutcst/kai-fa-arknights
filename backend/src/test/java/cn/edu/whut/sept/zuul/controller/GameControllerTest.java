@@ -206,6 +206,9 @@ public class GameControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rooms").isArray())
                 .andExpect(jsonPath("$.currentRoomId").exists())
+                .andExpect(jsonPath("$.currentViewType").value("external"))
+                .andExpect(jsonPath("$.viewBox").value("0 0 1100 1050"))
+                .andExpect(jsonPath("$.mapViews").isArray())
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
@@ -213,6 +216,10 @@ public class GameControllerTest {
 
         assertTrue(jsonNode.get("rooms").size() > 0);
         assertEquals("outside", jsonNode.get("currentRoomId").asText());
+        JsonNode outside = findRoom(jsonNode.get("rooms"), "outside");
+        assertNotNull(outside);
+        assertTrue(outside.get("layouts").isArray());
+        assertEquals("external", outside.get("layouts").get(0).get("viewType").asText());
     }
 
     @Test
@@ -229,6 +236,20 @@ public class GameControllerTest {
         assertTrue(firstRoom.has("name"));
         assertTrue(firstRoom.has("exits"));
         assertTrue(firstRoom.has("connectedRooms"));
+        assertTrue(firstRoom.has("layouts"));
+
+        JsonNode theater = findRoom(jsonNode.get("rooms"), "theater");
+        assertNotNull(theater);
+        assertEquals(2, theater.get("layouts").size());
+    }
+
+    private JsonNode findRoom(JsonNode rooms, String roomId) {
+        for (JsonNode room : rooms) {
+            if (roomId.equals(room.get("id").asText())) {
+                return room;
+            }
+        }
+        return null;
     }
 
     @Test

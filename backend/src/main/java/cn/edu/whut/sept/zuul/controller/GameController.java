@@ -5,6 +5,8 @@ import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
 import cn.edu.whut.sept.zuul.service.Game;
+import cn.edu.whut.sept.zuul.service.world.MapLayoutSnapshot;
+import cn.edu.whut.sept.zuul.service.world.WorldMapLayoutService;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -21,9 +23,11 @@ import java.util.ArrayList;
 public class GameController {
 
     private final Game game;
+    private final WorldMapLayoutService worldMapLayoutService;
 
-    public GameController(Game game) {
+    public GameController(Game game, WorldMapLayoutService worldMapLayoutService) {
         this.game = game;
+        this.worldMapLayoutService = worldMapLayoutService;
     }
 
     private int getPlayerMaxWeight() {
@@ -166,6 +170,7 @@ public class GameController {
 
         Room currentRoom = getCurrentRoom();
         Map<String, Room> allRooms = game.getRooms();
+        MapLayoutSnapshot layoutSnapshot = worldMapLayoutService.loadLayoutSnapshot(currentRoom.getId());
         for (Map.Entry<String, Room> entry : allRooms.entrySet()) {
             Room room = entry.getValue();
             Map<String, Object> roomInfo = new HashMap<>();
@@ -182,11 +187,16 @@ public class GameController {
                 }
             }
             roomInfo.put("connectedRooms", connectedRoomIds);
+            roomInfo.put("layouts", layoutSnapshot.getRoomLayoutsByRoomId()
+                    .getOrDefault(room.getId(), java.util.Collections.emptyList()));
             rooms.add(roomInfo);
         }
 
         result.put("rooms", rooms);
         result.put("currentRoomId", currentRoom.getId());
+        result.put("currentViewType", layoutSnapshot.getCurrentViewType());
+        result.put("viewBox", layoutSnapshot.getViewBox());
+        result.put("mapViews", layoutSnapshot.getMapViews());
         return result;
     }
 
@@ -362,7 +372,8 @@ public class GameController {
     }
 
     private Double parseRequiredGridCoordinate(Object value) {
-        if (value instanceof Number number) {
+        if (value instanceof Number) {
+            Number number = (Number) value;
             double coordinate = number.doubleValue();
             if (Double.isNaN(coordinate) || Double.isInfinite(coordinate)) {
                 return null;
@@ -372,7 +383,8 @@ public class GameController {
             }
             return coordinate;
         }
-        if (value instanceof String text) {
+        if (value instanceof String) {
+            String text = (String) value;
             try {
                 double coordinate = Double.parseDouble(text);
                 if (Double.isNaN(coordinate) || Double.isInfinite(coordinate)) {

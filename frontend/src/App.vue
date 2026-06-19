@@ -70,6 +70,8 @@
         <GameMap
           :rooms="rooms"
           :currentRoomId="currentRoomId"
+          :current-view-type="mapCurrentViewType"
+          :view-box="mapViewBox"
         />
       </div>
     </div>
@@ -204,6 +206,8 @@ const {
   playerMaxWeight,
   playerGridPosition,
   rooms,
+  mapCurrentViewType,
+  mapViewBox,
   isError,
   showMap,
   isMoving,

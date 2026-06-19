@@ -13,6 +13,8 @@ DROP TABLE IF EXISTS world_random_spawn_rules;
 DROP TABLE IF EXISTS world_room_initial_items;
 DROP TABLE IF EXISTS world_item_effects;
 DROP TABLE IF EXISTS world_room_exits;
+DROP TABLE IF EXISTS world_room_layouts;
+DROP TABLE IF EXISTS world_map_views;
 DROP TABLE IF EXISTS world_items;
 DROP TABLE IF EXISTS world_rooms;
 DROP TABLE IF EXISTS world_directions;
@@ -40,6 +42,14 @@ CREATE TABLE world_areas (
     description VARCHAR(200)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE world_map_views (
+    view_type VARCHAR(30) PRIMARY KEY,
+    view_name VARCHAR(50) NOT NULL,
+    view_box VARCHAR(50) NOT NULL,
+    display_order INT NOT NULL,
+    UNIQUE KEY uk_world_map_views_order (display_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE world_rooms (
     room_id VARCHAR(50) PRIMARY KEY,
     area_id VARCHAR(50) NOT NULL,
@@ -51,6 +61,22 @@ CREATE TABLE world_rooms (
     CONSTRAINT fk_world_rooms_area FOREIGN KEY (area_id) REFERENCES world_areas(area_id),
     CONSTRAINT ck_world_rooms_type CHECK (room_type IN ('normal', 'entrance', 'facility', 'portal')),
     INDEX idx_world_rooms_area (area_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE world_room_layouts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    view_type VARCHAR(30) NOT NULL,
+    room_id VARCHAR(50) NOT NULL,
+    x INT NOT NULL,
+    y INT NOT NULL,
+    primary_view BOOLEAN NOT NULL DEFAULT FALSE,
+    display_order INT NOT NULL,
+    UNIQUE KEY uk_world_room_layout_view_room (view_type, room_id),
+    UNIQUE KEY uk_world_room_layout_view_order (view_type, display_order),
+    CONSTRAINT fk_world_room_layouts_view FOREIGN KEY (view_type) REFERENCES world_map_views(view_type),
+    CONSTRAINT fk_world_room_layouts_room FOREIGN KEY (room_id) REFERENCES world_rooms(room_id),
+    CONSTRAINT chk_world_room_layouts_x CHECK (x >= 0),
+    CONSTRAINT chk_world_room_layouts_y CHECK (y >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE world_directions (
@@ -242,6 +268,37 @@ INSERT INTO world_rooms (room_id, area_id, description, zh_name, room_type, floo
 ('theater_classroom_302', 'training_facility', 'in classroom 302', '精英训练室B', 'facility', 3, 22),
 ('theater_lab', 'training_facility', 'in the computer lab', '制造站', 'facility', 3, 23),
 ('theater_stairway_3f', 'training_facility', 'in the 3rd floor stairway', '设施顶层通道', 'facility', 3, 24);
+
+INSERT INTO world_map_views (view_type, view_name, view_box, display_order) VALUES
+('external', '主区地图', '0 0 1100 1050', 1),
+('internal', '训练设施内部', '100 30 700 750', 2);
+
+INSERT INTO world_room_layouts (view_type, room_id, x, y, primary_view, display_order) VALUES
+('external','portal',500,50,true,1),
+('external','outside',500,200,true,2),
+('external','theater',800,200,true,3),
+('external','library',800,50,true,4),
+('external','pub',200,200,true,5),
+('external','gym',200,350,true,6),
+('external','lab',500,400,true,7),
+('external','office',800,400,true,8),
+('external','cafeteria',200,500,true,9),
+('external','garden',500,600,true,10),
+('external','bookstore',50,600,true,11),
+('external','dormitory',500,800,true,12),
+('internal','theater',400,50,false,1),
+('internal','theater_lobby',400,150,true,2),
+('internal','theater_classroom_101',200,150,true,3),
+('internal','theater_classroom_102',600,150,true,4),
+('internal','theater_stairway_1f',400,260,true,5),
+('internal','theater_stairway_2f',400,370,true,6),
+('internal','theater_classroom_201',200,370,true,7),
+('internal','theater_classroom_202',600,370,true,8),
+('internal','theater_office',400,450,true,9),
+('internal','theater_stairway_3f',400,590,true,10),
+('internal','theater_classroom_301',200,590,true,11),
+('internal','theater_classroom_302',600,590,true,12),
+('internal','theater_lab',400,670,true,13);
 
 INSERT INTO world_game_config (id, start_room_id, default_max_weight, default_player_grid_row, default_player_grid_col, spawn_random_seed, portal_random_seed) VALUES
 (1, 'outside', 5, 4, 4, 20260620, 20260621);

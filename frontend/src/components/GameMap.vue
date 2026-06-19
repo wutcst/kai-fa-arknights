@@ -1,6 +1,6 @@
 <template>
   <div class="game-map" v-if="rooms && rooms.length">
-    <svg :viewBox="viewBox" class="map-svg">
+    <svg :viewBox="effectiveViewBox" class="map-svg">
       <!-- 连接线 -->
       <line
         v-for="(conn, index) in connections"
@@ -55,7 +55,7 @@
       </g>
 
       <!-- 训练设施区域标识（仅外部地图显示） -->
-      <g v-if="!isInTheater">
+      <g v-if="isExternalView">
         <text
           x="860"
           y="275"
@@ -79,10 +79,7 @@
 import {
   MAP_VIEW_TYPES,
   getMapViewBox,
-  getMapViewType,
-  getRoomPositions,
-  shouldDisplayConnection,
-  shouldDisplayRoom
+  getMapViewType
 } from '@/config/mapLayout';
 
 export default {
@@ -95,6 +92,14 @@ export default {
     currentRoomId: {
       type: String,
       required: true
+    },
+    currentViewType: {
+      type: String,
+      default: ''
+    },
+    viewBox: {
+      type: String,
+      default: ''
     }
   },
   methods: {
@@ -126,23 +131,35 @@ export default {
         }
       }
       return { p1, p2 };
+    },
+    getLayoutForRoom(room) {
+      return (room.layouts || []).find(layout => layout.viewType === this.mapViewType) || null;
     }
   },
   computed: {
     mapViewType() {
-      return getMapViewType(this.currentRoomId);
+      return this.currentViewType || getMapViewType(this.currentRoomId);
     },
-    viewBox() {
-      return getMapViewBox(this.mapViewType);
+    effectiveViewBox() {
+      return this.viewBox || getMapViewBox(this.mapViewType);
     },
     positions() {
-      return getRoomPositions(this.mapViewType);
+      return this.rooms.reduce((result, room) => {
+        const layout = this.getLayoutForRoom(room);
+        if (layout) {
+          result[room.id] = {
+            x: Number(layout.x),
+            y: Number(layout.y)
+          };
+        }
+        return result;
+      }, {});
     },
-    isInTheater() {
-      return this.mapViewType === MAP_VIEW_TYPES.INTERNAL;
+    isExternalView() {
+      return this.mapViewType === MAP_VIEW_TYPES.EXTERNAL;
     },
     filteredRooms() {
-      return this.rooms.filter(room => shouldDisplayRoom(room.id, this.mapViewType));
+      return this.rooms.filter(room => this.positions[room.id]);
     },
     connections() {
       const conns = [];
@@ -156,8 +173,6 @@ export default {
         if (!pos || !room.connectedRooms) continue;
 
         for (const connectedId of room.connectedRooms) {
-          if (!shouldDisplayConnection(room.id, connectedId, this.mapViewType)) continue;
-
           const key = [room.id, connectedId].sort().join('-');
           if (added.has(key)) continue;
           added.add(key);
