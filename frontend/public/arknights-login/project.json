@@ -1,0 +1,24 @@
+{
+	"contentrating" : "Everyone",
+	"description" : "原版：https://steamcommunity.com/sharedfiles/filedetails/?id=1985858824\n做了一点小修改，以符合个人喜好（顺便修复了uptime分钟显示异常的问题）",
+	"file" : "index.html",
+	"general" : 
+	{
+		"properties" : 
+		{
+			"schemecolor" : 
+			{
+				"order" : 0,
+				"text" : "ui_browse_properties_scheme_color",
+				"type" : "color",
+				"value" : "0 0 0"
+			}
+		}
+	},
+	"preview" : "preview.jpg",
+	"tags" : [ "Game" ],
+	"title" : "明日方舟 (Arknights)",
+	"type" : "web",
+	"version" : 0,
+	"visibility" : "public"
+}
