@@ -186,10 +186,7 @@ const {
   fetchUserAbility: _fetchUserAbility,
   handleUpgrade: _handleUpgrade
 } = useAbilityState({
-  appendLog,
-  onMaxWeightUpdated: (newMaxWeight) => {
-    playerMaxWeight.value = newMaxWeight;
-  }
+  appendLog
 });
 
 const fetchUserAbility = () => _fetchUserAbility(username.value);

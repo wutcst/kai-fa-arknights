@@ -23,6 +23,33 @@ export function useGameState(options) {
   const showMap = ref(false);
   const isMoving = ref(false);
 
+  const syncWeightFromPayload = (payload, source = '') => {
+    if (!payload) return;
+
+    if (payload.playerWeight !== undefined && payload.playerWeight !== null) {
+      const nextWeight = Number(payload.playerWeight);
+      if (!Number.isNaN(nextWeight)) {
+        playerWeight.value = nextWeight;
+      }
+    }
+
+    if (payload.playerMaxWeight !== undefined && payload.playerMaxWeight !== null) {
+      const nextMaxWeight = Number(payload.playerMaxWeight);
+      if (!Number.isNaN(nextMaxWeight)) {
+        playerMaxWeight.value = nextMaxWeight;
+      }
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[weight-sync]', source, {
+        payloadPlayerWeight: payload.playerWeight,
+        payloadPlayerMaxWeight: payload.playerMaxWeight,
+        statePlayerWeight: playerWeight.value,
+        statePlayerMaxWeight: playerMaxWeight.value
+      });
+    }
+  };
+
   const updateGameState = (gameData) => {
     currentRoomName.value = gameData.description || '';
     currentRoomId.value = gameData.roomId || '';
@@ -31,8 +58,7 @@ export function useGameState(options) {
     items.value = [];
     inventory.value = gameData.inventory || [];
     syncSelectedInventory();
-    playerWeight.value = gameData.playerWeight ?? playerWeight.value;
-    playerMaxWeight.value = gameData.playerMaxWeight ?? playerMaxWeight.value;
+    syncWeightFromPayload(gameData, 'updateGameState');
     playerGridPosition.value = {
       row: gameData.playerGridRow ?? 4,
       col: gameData.playerGridCol ?? 4
@@ -149,8 +175,7 @@ export function useGameState(options) {
     try {
       const response = await getItems();
       inventory.value = response.data.inventory || [];
-      playerWeight.value = response.data.playerWeight ?? playerWeight.value;
-      playerMaxWeight.value = response.data.playerMaxWeight ?? playerMaxWeight.value;
+      syncWeightFromPayload(response.data, 'showInventory');
       syncSelectedInventory();
       displayMessage.value = response.data.message;
       appendLog(displayMessage.value || `查看背包，共 ${inventory.value.length} 个物品`);
@@ -167,8 +192,7 @@ export function useGameState(options) {
       displayMessage.value = response.data.message;
       items.value = response.data.items || [];
       inventory.value = response.data.inventory || [];
-      playerWeight.value = response.data.playerWeight ?? playerWeight.value;
-      playerMaxWeight.value = response.data.playerMaxWeight ?? playerMaxWeight.value;
+      syncWeightFromPayload(response.data, 'handleTake');
       isError.value = !response.data.success;
       syncSelectedInventory();
       appendLog(displayMessage.value || '拾取物品', isError.value);
@@ -185,8 +209,7 @@ export function useGameState(options) {
       displayMessage.value = response.data.message;
       items.value = response.data.items || [];
       inventory.value = response.data.inventory || [];
-      playerWeight.value = response.data.playerWeight ?? playerWeight.value;
-      playerMaxWeight.value = response.data.playerMaxWeight ?? playerMaxWeight.value;
+      syncWeightFromPayload(response.data, 'handleDrop');
       isError.value = !response.data.success;
       syncSelectedInventory();
       appendLog(displayMessage.value || '丢弃物品', isError.value);
@@ -202,10 +225,17 @@ export function useGameState(options) {
       const response = await apiEatCookie();
       displayMessage.value = response.data.message;
       inventory.value = response.data.inventory || [];
-      playerWeight.value = response.data.playerWeight ?? playerWeight.value;
-      playerMaxWeight.value = response.data.playerMaxWeight ?? playerMaxWeight.value;
+      syncWeightFromPayload(response.data, 'handleEatCookie');
       isError.value = !response.data.success;
       syncSelectedInventory();
+
+      if (response.data.success) {
+        const inventoryResponse = await getItems();
+        inventory.value = inventoryResponse.data.inventory || inventory.value;
+        syncWeightFromPayload(inventoryResponse.data, 'afterEatCookie:getItems');
+        syncSelectedInventory();
+      }
+
       appendLog(displayMessage.value || '使用理智增强剂', isError.value);
     } catch (error) {
       displayMessage.value = '吃饼干失败：' + error.message;
