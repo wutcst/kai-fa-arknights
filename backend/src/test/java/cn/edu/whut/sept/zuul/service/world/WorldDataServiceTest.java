@@ -5,6 +5,7 @@ import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Room;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -95,6 +96,31 @@ class WorldDataServiceTest {
         } finally {
             jdbcTemplate.update("update world_rooms set room_type = 'portal' where room_id = 'portal'");
         }
+    }
+
+    @Test
+    void portalTargetsCannotPointToSelf() {
+        jdbcTemplate.update("""
+                insert into world_portal_targets (portal_room_id, target_room_id, display_order)
+                values ('portal', 'portal', 999)
+                """);
+        try {
+            IllegalStateException ex = assertThrows(IllegalStateException.class, () -> worldDataService.loadWorld());
+            assertTrue(ex.getMessage().contains("传送门不能指向自身"));
+        } finally {
+            jdbcTemplate.update("""
+                    delete from world_portal_targets
+                    where portal_room_id = 'portal' and target_room_id = 'portal'
+                    """);
+        }
+    }
+
+    @Test
+    void randomSpawnCandidateOrderMustBeUniqueWithinRule() {
+        assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update("""
+                insert into world_random_spawn_candidates (rule_id, room_id, grid_row, grid_col, display_order)
+                values ('magic_cookie_spawn', 'office', 0, 0, 1)
+                """));
     }
 
     private Set<String> cookieRooms(Map<String, Room> rooms) {

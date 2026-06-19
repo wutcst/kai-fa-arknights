@@ -10,7 +10,12 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "world_random_spawn_candidates",
-        uniqueConstraints = @UniqueConstraint(name = "uk_world_spawn_candidate_room", columnNames = {"rule_id", "room_id"}))
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_world_spawn_candidate_room", columnNames = {"rule_id", "room_id"}),
+                @UniqueConstraint(name = "uk_world_spawn_candidate_cell",
+                        columnNames = {"rule_id", "room_id", "grid_row", "grid_col"}),
+                @UniqueConstraint(name = "uk_world_spawn_candidate_order", columnNames = {"rule_id", "display_order"})
+        })
 public class WorldRandomSpawnCandidate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

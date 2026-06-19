@@ -10,7 +10,10 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "world_portal_targets",
-        uniqueConstraints = @UniqueConstraint(name = "uk_world_portal_target", columnNames = {"portal_room_id", "target_room_id"}))
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_world_portal_target", columnNames = {"portal_room_id", "target_room_id"}),
+                @UniqueConstraint(name = "uk_world_portal_target_order", columnNames = {"portal_room_id", "display_order"})
+        })
 public class WorldPortalTarget {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

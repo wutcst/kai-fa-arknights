@@ -127,6 +127,8 @@ CREATE TABLE world_random_spawn_candidates (
     grid_col INT NOT NULL,
     display_order INT NOT NULL,
     UNIQUE KEY uk_world_spawn_candidate_room (rule_id, room_id),
+    UNIQUE KEY uk_world_spawn_candidate_cell (rule_id, room_id, grid_row, grid_col),
+    UNIQUE KEY uk_world_spawn_candidate_order (rule_id, display_order),
     CONSTRAINT fk_world_spawn_candidates_rule FOREIGN KEY (rule_id) REFERENCES world_random_spawn_rules(rule_id),
     CONSTRAINT fk_world_spawn_candidates_room FOREIGN KEY (room_id) REFERENCES world_rooms(room_id),
     CONSTRAINT ck_world_spawn_candidates_grid CHECK (grid_row BETWEEN 0 AND 8 AND grid_col BETWEEN 0 AND 8)
@@ -138,8 +140,10 @@ CREATE TABLE world_portal_targets (
     target_room_id VARCHAR(50) NOT NULL,
     display_order INT NOT NULL,
     UNIQUE KEY uk_world_portal_target (portal_room_id, target_room_id),
+    UNIQUE KEY uk_world_portal_target_order (portal_room_id, display_order),
     CONSTRAINT fk_world_portal_targets_portal FOREIGN KEY (portal_room_id) REFERENCES world_rooms(room_id),
-    CONSTRAINT fk_world_portal_targets_target FOREIGN KEY (target_room_id) REFERENCES world_rooms(room_id)
+    CONSTRAINT fk_world_portal_targets_target FOREIGN KEY (target_room_id) REFERENCES world_rooms(room_id),
+    CONSTRAINT chk_world_portal_targets_not_self CHECK (portal_room_id <> target_room_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE world_game_config (

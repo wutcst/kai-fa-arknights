@@ -22,6 +22,8 @@ mysql -h 127.0.0.1 -u root -p123456 arknights_db < backend/scripts/verify-mysql-
 - `magic_cookie` 的 `item_category` 是 `consumable`，`usable` 是 `1`。
 - `game_saves.current_room_id` 存在外键 `fk_game_saves_current_room`。
 - 世界配置表之间存在外键和基础 CHECK 约束。
+- `world_portal_targets` 存在 `chk_world_portal_targets_not_self`，禁止 portal 指向自身。
+- `world_random_spawn_candidates` 存在 `uk_world_spawn_candidate_order`，保证同一规则下候选排序唯一。
 
 ## 负向检查
 
@@ -36,4 +38,10 @@ VALUES ('bad_item', '坏物品', 'bad', -1, 0, 'material', false);
 
 INSERT INTO game_saves (user_id, current_room_id)
 VALUES (1, 'missing_room');
+
+INSERT INTO world_portal_targets (portal_room_id, target_room_id, display_order)
+VALUES ('portal', 'portal', 999);
+
+INSERT INTO world_random_spawn_candidates (rule_id, room_id, grid_row, grid_col, display_order)
+VALUES ('magic_cookie_spawn', 'office', 0, 0, 1);
 ```
