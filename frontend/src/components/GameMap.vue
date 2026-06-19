@@ -1,6 +1,6 @@
 <template>
   <div class="game-map" v-if="rooms && rooms.length">
-    <svg :viewBox="isInTheater ? '100 30 700 750' : '0 0 1100 1050'" class="map-svg">
+    <svg :viewBox="viewBox" class="map-svg">
       <!-- 连接线 -->
       <line
         v-for="(conn, index) in connections"
@@ -9,7 +9,7 @@
         :y1="conn.y1"
         :x2="conn.x2"
         :y2="conn.y2"
-        stroke="#4CAF50"
+        stroke="rgba(215, 168, 77, 0.5)"
         stroke-width="3"
       />
 
@@ -28,15 +28,15 @@
           width="120"
           height="60"
           rx="8"
-          :fill="room.id === currentRoomId ? '#4CAF50' : '#f5f5f5'"
-          :stroke="room.id === currentRoomId ? '#388E3C' : '#ddd'"
+          :fill="room.id === currentRoomId ? '#f7d67b' : 'rgba(27, 33, 31, 0.95)'"
+          :stroke="room.id === currentRoomId ? '#f7d67b' : 'rgba(215, 168, 77, 0.4)'"
           stroke-width="3"
         />
         <text
           x="60"
           y="24"
           text-anchor="middle"
-          :fill="room.id === currentRoomId ? 'white' : '#333'"
+          :fill="room.id === currentRoomId ? '#1a1a1a' : '#f6ead2'"
           font-size="13"
           font-weight="bold"
         >
@@ -46,7 +46,7 @@
           x="60"
           y="44"
           text-anchor="middle"
-          :fill="room.id === currentRoomId ? '#e8f5e9' : '#666'"
+          :fill="room.id === currentRoomId ? 'rgba(0,0,0,0.6)' : 'rgba(246, 234, 210, 0.5)'"
           font-size="11"
         >
           {{ room.id }}
@@ -54,17 +54,17 @@
         </g>
       </g>
 
-      <!-- 教学楼区域标识（仅外部地图显示） -->
+      <!-- 训练设施区域标识（仅外部地图显示） -->
       <g v-if="!isInTheater">
         <text
           x="860"
           y="275"
           text-anchor="middle"
-          fill="#2196F3"
+          fill="#f7d67b"
           font-size="12"
           font-weight="bold"
         >
-          教学楼内部 ↓
+          训练设施内部 ↓
         </text>
       </g>
     </svg>
@@ -76,6 +76,15 @@
  * 游戏地图可视化组件.
  * 使用 SVG 展示房间及连接关系.
  */
+import {
+  MAP_VIEW_TYPES,
+  getMapViewBox,
+  getMapViewType,
+  getRoomPositions,
+  shouldDisplayConnection,
+  shouldDisplayRoom
+} from '@/config/mapLayout';
+
 export default {
   name: 'GameMap',
   props: {
@@ -88,103 +97,82 @@ export default {
       required: true
     }
   },
-  data() {
-    return {
-      // 外部地图房间位置
-      externalRoomPositions: {
-        'portal': { x: 500, y: 50 },
-        'outside': { x: 500, y: 200 },
-        'theater': { x: 800, y: 200 },
-        'library': { x: 800, y: 50 },
-        'pub': { x: 200, y: 200 },
-        'gym': { x: 200, y: 350 },
-        'lab': { x: 500, y: 400 },
-        'office': { x: 800, y: 400 },
-        'cafeteria': { x: 200, y: 500 },
-        'garden': { x: 500, y: 600 },
-        'bookstore': { x: 50, y: 600 },
-        'dormitory': { x: 500, y: 800 }
-      },
-      // 教学楼内部地图房间位置 - 分层显示
-      internalRoomPositions: {
-        // 一楼 (y: 50-260)
-        'theater': { x: 400, y: 50 },
-        'theater_lobby': { x: 400, y: 150 },
-        'theater_classroom_101': { x: 200, y: 150 },
-        'theater_classroom_102': { x: 600, y: 150 },
-        'theater_stairway_1f': { x: 400, y: 260 },
-        // 二楼 (y: 320-480)
-        'theater_stairway_2f': { x: 400, y: 370 },
-        'theater_classroom_201': { x: 200, y: 370 },
-        'theater_classroom_202': { x: 600, y: 370 },
-        'theater_office': { x: 400, y: 450 },
-        // 三楼 (y: 520-700)
-        'theater_stairway_3f': { x: 400, y: 590 },
-        'theater_classroom_301': { x: 200, y: 590 },
-        'theater_classroom_302': { x: 600, y: 590 },
-        'theater_lab': { x: 400, y: 670 }
-      }
-    };
-  },
   methods: {
     getRoomPosition(roomId) {
-      const positions = this.isInTheater ? this.internalRoomPositions : this.externalRoomPositions;
-      return positions[roomId] || { x: 0, y: 0 };
+      return this.positions[roomId] || { x: 0, y: 0 };
+    },
+    getBorderPoint(pos1, pos2) {
+      const w = 120, h = 60;
+      const cx1 = pos1.x + w / 2, cy1 = pos1.y + h / 2;
+      const cx2 = pos2.x + w / 2, cy2 = pos2.y + h / 2;
+      const dx = cx2 - cx1, dy = cy2 - cy1;
+      let p1 = { x: cx1, y: cy1 }, p2 = { x: cx2, y: cy2 };
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) {
+          p1.x = pos1.x + w; p1.y = cy1;
+          p2.x = pos2.x; p2.y = cy2;
+        } else {
+          p1.x = pos1.x; p1.y = cy1;
+          p2.x = pos2.x + w; p2.y = cy2;
+        }
+      } else {
+        if (dy > 0) {
+          p1.x = cx1; p1.y = pos1.y + h;
+          p2.x = cx2; p2.y = pos2.y;
+        } else {
+          p1.x = cx1; p1.y = pos1.y;
+          p2.x = cx2; p2.y = pos2.y + h;
+        }
+      }
+      return { p1, p2 };
     }
   },
   computed: {
+    mapViewType() {
+      return getMapViewType(this.currentRoomId);
+    },
+    viewBox() {
+      return getMapViewBox(this.mapViewType);
+    },
+    positions() {
+      return getRoomPositions(this.mapViewType);
+    },
     isInTheater() {
-      return this.currentRoomId.startsWith('theater_');
+      return this.mapViewType === MAP_VIEW_TYPES.INTERNAL;
     },
     filteredRooms() {
-      if (this.isInTheater) {
-        // 教学楼内部：显示内部房间 + 教学楼入口作为参考
-        return this.rooms.filter(room =>
-          room.id.startsWith('theater_') || room.id === 'theater'
-        );
-      } else {
-        // 外部：显示外部房间（排除内部房间）
-        return this.rooms.filter(room => !room.id.startsWith('theater_'));
-      }
+      return this.rooms.filter(room => shouldDisplayRoom(room.id, this.mapViewType));
     },
     connections() {
       const conns = [];
       const added = new Set();
+      const colors = ['#4ECDC4', '#FF6B6B', '#FFE66D', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3'];
 
-      // 根据当前位置决定显示哪些连接
-      const showInternal = this.isInTheater;
-      const positions = showInternal ? this.internalRoomPositions : this.externalRoomPositions;
-
-      if (!positions || !this.filteredRooms) return conns;
+      if (!this.positions || !this.filteredRooms) return conns;
 
       for (const room of this.filteredRooms) {
-        const pos = positions[room.id];
+        const pos = this.positions[room.id];
         if (!pos || !room.connectedRooms) continue;
 
         for (const connectedId of room.connectedRooms) {
-          // 如果是教学楼内部视图，只显示内部房间之间的连接
-          // 但 theater 到 theater_lobby 的连接需要显示
-          if (showInternal) {
-            if (room.id !== 'theater' && connectedId !== 'theater' &&
-                !connectedId.startsWith('theater_')) continue;
-            if (room.id === 'theater' && connectedId !== 'theater_lobby') continue;
-          }
-          // 如果是外部视图，不显示内部房间的连接
-          if (!showInternal && connectedId.startsWith('theater_')) continue;
+          if (!shouldDisplayConnection(room.id, connectedId, this.mapViewType)) continue;
 
           const key = [room.id, connectedId].sort().join('-');
           if (added.has(key)) continue;
           added.add(key);
 
-          const targetPos = positions[connectedId];
+          const targetPos = this.positions[connectedId];
           if (!targetPos) continue;
 
+          const { p1, p2 } = this.getBorderPoint(pos, targetPos);
           conns.push({
             key: key,
-            x1: pos.x + 60,
-            y1: pos.y + 30,
-            x2: targetPos.x + 60,
-            y2: targetPos.y + 30
+            x1: p1.x,
+            y1: p1.y,
+            x2: p2.x,
+            y2: p2.y,
+            stroke: colors[added.size % colors.length]
           });
         }
       }
@@ -207,9 +195,12 @@ export default {
   width: 100%;
   height: auto;
   max-width: 100%;
-  background: #fafafa;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background:
+    radial-gradient(circle at top left, rgba(215, 168, 77, 0.18), transparent 38%),
+    linear-gradient(180deg, rgba(27, 33, 31, 0.98), rgba(12, 15, 15, 0.98));
+  border-radius: 16px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(215, 168, 77, 0.42);
 }
 
 .room {
@@ -222,6 +213,6 @@ export default {
 }
 
 .room.active rect {
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+  filter: drop-shadow(0 0 8px rgba(247, 214, 123, 0.8));
 }
 </style>

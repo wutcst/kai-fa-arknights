@@ -6,37 +6,23 @@
     </div>
 
     <div class="room-grid" :class="{ bump: isBumping }" ref="grid">
-      <div
+      <RoomCell
         v-for="cell in cells"
         :key="cell.key"
-        class="room-cell"
-        :class="cell.classes"
-      >
-        <span v-if="cell.label" class="cell-label">{{ cell.label }}</span>
-      </div>
-      <div
-        class="player-avatar"
-        :class="{ 'facing-left': playerFacing === 'west' }"
-        :style="playerStyle"
-        aria-label="玩家当前位置"
-      >
-        <video
-          ref="playerVideo"
-          class="player-video"
-          :key="playerAnimation"
-          :src="playerVideoSrc"
-          :loop="isLoopingAnimation"
-          autoplay
-          muted
-          playsinline
-          @ended="handleAnimationEnded"
-        />
-      </div>
+        :cell="cell"
+      />
+      <PlayerAvatar
+        :animation="playerAnimation"
+        :facing="playerFacing"
+        :player-style="playerStyle"
+        :looping="isLoopingAnimation"
+        @ended="handleAnimationEnded"
+      />
     </div>
 
     <div v-if="activeRoomItem" class="pickup-hint">
-      可拾取：<strong>{{ activeRoomItem.name }}</strong>
-      <span>靠近物品后按“拾取附近物品”放入背包</span>
+      当前格物品：<strong>{{ activeRoomItem.name }}</strong>
+      <span>站到物品所在格后按“拾取当前格物品”放入背包</span>
     </div>
     <div v-if="hasVerticalExit" class="floor-hint">
       楼层出口：
@@ -48,591 +34,167 @@
   </section>
 </template>
 
-<script>
-import checkoutVideo from '@/assets/characters/维什戴尔-绝对主角-checkout.webm';
-import moveVideo from '@/assets/characters/维什戴尔-绝对主角-Move.webm';
-import operationVideo from '@/assets/characters/维什戴尔-绝对主角-Operation.webm';
-import sitVideo from '@/assets/characters/维什戴尔-绝对主角-Sit.webm';
-import sleepVideo from '@/assets/characters/维什戴尔-绝对主角-Sleep.webm';
+<script setup>
+/* global defineProps, defineEmits, defineExpose */
+import { onBeforeUnmount, onMounted, toRefs, watch } from 'vue';
+import PlayerAvatar from '@/components/game/PlayerAvatar.vue';
+import RoomCell from '@/components/game/RoomCell.vue';
+import { usePlayerAnimation } from '@/composables/usePlayerAnimation';
+import { usePlayerMovement } from '@/composables/usePlayerMovement';
+import { useRoomInteraction } from '@/composables/useRoomInteraction';
 
-const GRID_SIZE = 9;
-const CENTER = 4;
-const MIN_POSITION = 0.5;
-const MAX_POSITION = GRID_SIZE - 1.5;
-const INTERACT_DISTANCE = 0.78;
-const BASE_STEP_PER_FRAME = 0.032;
-const BUTTON_NUDGE_FRAMES = 12;
-const SLEEP_DELAY_MS = 8000;
-const MOVE_TO_SIT_DELAY_MS = 1000;
-const OPERATION_FALLBACK_MS = 1800;
-const CHECKOUT_FALLBACK_MS = 3500;
-
-export default {
-  name: 'RoomGrid',
-  props: {
-    roomName: {
-      type: String,
-      default: ''
-    },
-    description: {
-      type: String,
-      default: ''
-    },
-    exits: {
-      type: Array,
-      default: () => []
-    },
-    items: {
-      type: Array,
-      default: () => []
-    },
-    playerGridPosition: {
-      type: Object,
-      default: null
-    },
-    moveSpeed: {
-      type: Number,
-      default: 0.5
-    }
+const props = defineProps({
+  roomName: {
+    type: String,
+    default: ''
   },
-  data() {
-    return {
-      playerX: CENTER,
-      playerY: CENTER,
-      isBumping: false,
-      bumpTimer: null,
-      activeDirections: new Set(),
-      animationFrame: null,
-      lastFrameTime: 0,
-      playerAnimation: 'sit',
-      idleTimer: null,
-      moveEndTimer: null,
-      operationTimer: null,
-      checkoutTimer: null,
-      checkoutResolver: null,
-      playerFacing: 'east'
-    };
+  description: {
+    type: String,
+    default: ''
   },
-  computed: {
-    playerVideos() {
-      return {
-        checkout: checkoutVideo,
-        move: moveVideo,
-        operation: operationVideo,
-        sit: sitVideo,
-        sleep: sleepVideo
-      };
-    },
-    playerVideoSrc() {
-      return this.playerVideos[this.playerAnimation] || sitVideo;
-    },
-    isLoopingAnimation() {
-      return !['operation', 'checkout'].includes(this.playerAnimation);
-    },
-    itemPositions() {
-      return [
-        [2, 2],
-        [6, 2],
-        [2, 6],
-        [6, 6],
-        [3, 5],
-        [5, 3]
-      ];
-    },
-    stairPositions() {
-      return {
-        up: [7, 3],
-        down: [1, 5]
-      };
-    },
-    visibleItems() {
-      return this.items.slice(0, 6);
-    },
-    activeRoomItem() {
-      const itemIndex = this.itemPositions.findIndex(([itemX, itemY]) => (
-        this.distanceTo(itemX, itemY) <= INTERACT_DISTANCE
-      ));
-      return itemIndex >= 0 ? this.visibleItems[itemIndex] : null;
-    },
-    hasVerticalExit() {
-      return this.hasExit('up') || this.hasExit('down');
-    },
-    activeVerticalExit() {
-      return ['up', 'down'].find((direction) => {
-        const [stairX, stairY] = this.stairPositions[direction];
-        return this.hasExit(direction) && this.distanceTo(stairX, stairY) <= INTERACT_DISTANCE;
-      }) || '';
-    },
-    playerPosition() {
-      return {
-        row: Number(this.playerY.toFixed(3)),
-        col: Number(this.playerX.toFixed(3))
-      };
-    },
-    playerStyle() {
-      return {
-        left: `${((this.playerX + 0.5) / GRID_SIZE) * 100}%`,
-        top: `${((this.playerY - 0.6) / GRID_SIZE) * 100}%`
-      };
-    },
-    playerCell() {
-      return {
-        row: this.coordinateToCell(this.playerY),
-        col: this.coordinateToCell(this.playerX)
-      };
-    },
-    cells() {
-      return Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, index) => {
-        const row = Math.floor(index / GRID_SIZE);
-        const col = index % GRID_SIZE;
-        const classes = [];
-        let label = '';
-
-        if (row === 0 || row === GRID_SIZE - 1 || col === 0 || col === GRID_SIZE - 1) {
-          classes.push('wall');
-        } else {
-          classes.push('floor');
-        }
-
-        if (row === this.playerCell.row && col === this.playerCell.col) {
-          classes.push('player-cell');
-        }
-
-        const direction = this.exitAt(row, col);
-        if (direction) {
-          classes.push('door', `door-${direction}`);
-          if (this.isNearDoor(direction)) {
-            classes.push('near-active');
-          }
-          label = this.exitLabel(direction);
-        }
-
-        const itemIndex = this.itemPositions.findIndex(([itemCol, itemRow]) => itemCol === col && itemRow === row);
-        if (itemIndex >= 0 && this.visibleItems[itemIndex] && !label) {
-          classes.push('item');
-          if (this.activeRoomItem?.id === this.visibleItems[itemIndex].id) {
-            classes.push('near-active');
-          }
-          label = this.itemLabel(this.visibleItems[itemIndex]);
-        }
-
-        const stairDirection = this.stairAt(row, col);
-        if (stairDirection && !label) {
-          classes.push('stair', `stair-${stairDirection}`);
-          if (this.activeVerticalExit === stairDirection) {
-            classes.push('near-active');
-          }
-          label = stairDirection === 'up' ? '⇧' : '⇩';
-        }
-
-        return {
-          key: `${row}-${col}`,
-          classes,
-          label
-        };
-      });
-    }
+  exits: {
+    type: Array,
+    default: () => []
   },
-  watch: {
-    activeRoomItem: {
-      immediate: true,
-      handler(item) {
-        this.$emit('active-item-change', item?.id || '');
-        this.$emit('active-item-name-change', item?.name || '');
-      }
-    },
-    activeVerticalExit: {
-      immediate: true,
-      handler(direction) {
-        this.$emit('active-vertical-exit-change', direction);
-      }
-    },
-    playerPosition: {
-      immediate: true,
-      handler(position) {
-        this.$emit('player-position-change', position);
-      }
-    },
-    playerGridPosition: {
-      deep: true,
-      immediate: true,
-      handler(position) {
-        if (!position) return;
-        const nextY = this.clampPosition(position.row);
-        const nextX = this.clampPosition(position.col);
-        if (Math.abs(nextY - this.playerY) > 0.001 || Math.abs(nextX - this.playerX) > 0.001) {
-          this.playerY = nextY;
-          this.playerX = nextX;
-        }
-      }
-    }
+  items: {
+    type: Array,
+    default: () => []
   },
-  methods: {
-    coordinateToCell(position) {
-      if (position <= MIN_POSITION) return 0;
-      if (position >= MAX_POSITION) return GRID_SIZE - 1;
-      return Math.round(position);
-    },
-    clampPosition(value) {
-      const number = Number(value);
-      if (!Number.isFinite(number)) return CENTER;
-      return Math.max(MIN_POSITION, Math.min(MAX_POSITION, number));
-    },
-    hasExit(direction) {
-      return this.exits.includes(direction);
-    },
-    exitAt(row, col) {
-      if (row === 0 && col === CENTER && this.hasExit('north')) return 'north';
-      if (row === GRID_SIZE - 1 && col === CENTER && this.hasExit('south')) return 'south';
-      if (row === CENTER && col === 0 && this.hasExit('west')) return 'west';
-      if (row === CENTER && col === GRID_SIZE - 1 && this.hasExit('east')) return 'east';
-      return '';
-    },
-    exitLabel(direction) {
-      const labels = {
-        north: 'N',
-        south: 'S',
-        west: 'W',
-        east: 'E'
-      };
-      return labels[direction] || '';
-    },
-    stairAt(row, col) {
-      return ['up', 'down'].find((direction) => {
-        const [stairCol, stairRow] = this.stairPositions[direction];
-        return this.hasExit(direction) && stairRow === row && stairCol === col;
-      }) || '';
-    },
-    itemLabel(item) {
-      if (item.id === 'magic_cookie') return '🍪';
-      if ((item.name || '').includes('钥匙')) return '⚿';
-      if ((item.name || '').includes('金币')) return '◎';
-      return '✦';
-    },
-    distanceTo(targetX, targetY) {
-      return Math.hypot(this.playerX - targetX, this.playerY - targetY);
-    },
-    isNearDoor(direction) {
-      const doorPositions = {
-        north: [CENTER, MIN_POSITION],
-        south: [CENTER, MAX_POSITION],
-        west: [MIN_POSITION, CENTER],
-        east: [MAX_POSITION, CENTER]
-      };
-      const [doorX, doorY] = doorPositions[direction] || [CENTER, CENTER];
-      return this.hasExit(direction) && this.distanceTo(doorX, doorY) <= INTERACT_DISTANCE;
-    },
-    bumpWall() {
-      if (this.bumpTimer) {
-        clearTimeout(this.bumpTimer);
-      }
-      this.isBumping = true;
-      this.bumpTimer = setTimeout(() => {
-        this.isBumping = false;
-      }, 140);
-    },
-    normalizedVector() {
-      let x = 0;
-      let y = 0;
-      if (this.activeDirections.has('north')) y -= 1;
-      if (this.activeDirections.has('south')) y += 1;
-      if (this.activeDirections.has('west')) x -= 1;
-      if (this.activeDirections.has('east')) x += 1;
-      this.updateFacing(x);
-      const length = Math.hypot(x, y);
-      if (!length) return { x: 0, y: 0 };
-      return { x: x / length, y: y / length };
-    },
-    movementStep(deltaMs) {
-      const speed = Math.max(0.2, Number(this.moveSpeed) || 0.5);
-      return BASE_STEP_PER_FRAME * speed * (deltaMs / 16.67);
-    },
-    startMovementLoop() {
-      if (this.animationFrame) return;
-      this.clearMoveEndTimer();
-      this.setPlayerAnimation('move');
-      this.lastFrameTime = performance.now();
-      this.animationFrame = requestAnimationFrame(this.updateMovement);
-    },
-    stopMovementLoop() {
-      if (this.animationFrame) {
-        cancelAnimationFrame(this.animationFrame);
-        this.animationFrame = null;
-      }
-      this.lastFrameTime = 0;
-      if (!this.activeDirections.size && this.playerAnimation === 'move') {
-        this.scheduleSitAfterMove();
-      }
-    },
-    updateMovement(timestamp) {
-      const deltaMs = Math.min(40, timestamp - this.lastFrameTime || 16.67);
-      this.lastFrameTime = timestamp;
-
-      if (!this.activeDirections.size) {
-        this.stopMovementLoop();
-        return;
-      }
-
-      const vector = this.normalizedVector();
-      this.applyMovement(vector.x * this.movementStep(deltaMs), vector.y * this.movementStep(deltaMs));
-      this.animationFrame = requestAnimationFrame(this.updateMovement);
-    },
-    applyMovement(deltaX, deltaY) {
-      if (!deltaX && !deltaY) return;
-      this.updateFacing(deltaX);
-
-      const nextX = this.clampPosition(this.playerX + deltaX);
-      const nextY = this.clampPosition(this.playerY + deltaY);
-      const blockedX = nextX === this.playerX && deltaX !== 0;
-      const blockedY = nextY === this.playerY && deltaY !== 0;
-
-      this.playerX = nextX;
-      this.playerY = nextY;
-
-      const exitDirection = this.exitDirectionForMovement(deltaX, deltaY);
-      if (exitDirection) {
-        this.activeDirections.clear();
-        this.stopMovementLoop();
-        this.$emit('move', exitDirection);
-        return;
-      }
-
-      if ((blockedX || blockedY) && !this.isNearAnyDoor()) {
-        this.bumpWall();
-      }
-    },
-    exitDirectionForMovement(deltaX, deltaY) {
-      if (deltaY < 0 && this.isStandingOnDoor('north')) {
-        return 'north';
-      }
-      if (deltaY > 0 && this.isStandingOnDoor('south')) {
-        return 'south';
-      }
-      if (deltaX < 0 && this.isStandingOnDoor('west')) {
-        return 'west';
-      }
-      if (deltaX > 0 && this.isStandingOnDoor('east')) {
-        return 'east';
-      }
-      return '';
-    },
-    isStandingOnDoor(direction) {
-      if (!this.hasExit(direction)) return false;
-      const doorCells = {
-        north: { row: 0, col: CENTER },
-        south: { row: GRID_SIZE - 1, col: CENTER },
-        west: { row: CENTER, col: 0 },
-        east: { row: CENTER, col: GRID_SIZE - 1 }
-      };
-      const doorCell = doorCells[direction];
-      return this.playerCell.row === doorCell.row && this.playerCell.col === doorCell.col;
-    },
-    isNearAnyDoor() {
-      return ['north', 'south', 'west', 'east'].some(direction => this.isNearDoor(direction));
-    },
-    directionFromKey(key) {
-      const keyMap = {
-        ArrowUp: 'north',
-        w: 'north',
-        W: 'north',
-        ArrowDown: 'south',
-        s: 'south',
-        S: 'south',
-        ArrowLeft: 'west',
-        a: 'west',
-        A: 'west',
-        ArrowRight: 'east',
-        d: 'east',
-        D: 'east'
-      };
-      return keyMap[key] || '';
-    },
-    tryMoveByKey(event) {
-      const direction = this.directionFromKey(event.key);
-      if (!direction) return;
-      event.preventDefault();
-      this.activeDirections.add(direction);
-      this.startMovementLoop();
-    },
-    stopMoveByKey(event) {
-      const direction = this.directionFromKey(event.key);
-      if (!direction) return;
-      this.activeDirections.delete(direction);
-    },
-    nudge(direction, frames = BUTTON_NUDGE_FRAMES) {
-      const vectors = {
-        north: [0, -1],
-        south: [0, 1],
-        west: [-1, 0],
-        east: [1, 0]
-      };
-      const [x, y] = vectors[direction] || [0, 0];
-      if (!x && !y) return;
-      this.updateFacing(x);
-
-      let remaining = frames;
-      const tick = () => {
-        this.setPlayerAnimation('move');
-        this.applyMovement(x * this.movementStep(16.67), y * this.movementStep(16.67));
-        remaining -= 1;
-        if (remaining > 0) {
-          requestAnimationFrame(tick);
-        } else if (!this.activeDirections.size && this.playerAnimation === 'move') {
-          this.scheduleSitAfterMove();
-        }
-      };
-      requestAnimationFrame(tick);
-    },
-    resetPosition(entryDirection) {
-      const upEntry = this.stairPositions.down;
-      const downEntry = this.stairPositions.up;
-      const entryPositions = {
-        north: [CENTER, GRID_SIZE - 2],
-        south: [CENTER, 1],
-        west: [GRID_SIZE - 2, CENTER],
-        east: [1, CENTER],
-        up: [upEntry[0], upEntry[1]],
-        down: [downEntry[0], downEntry[1]]
-      };
-      const [x, y] = entryPositions[entryDirection] || [CENTER, CENTER];
-      this.activeDirections.clear();
-      this.stopMovementLoop();
-      this.clearMoveEndTimer();
-      this.playerX = this.clampPosition(x);
-      this.playerY = this.clampPosition(y);
-      this.setPlayerAnimation('sit');
-      this.bumpWall();
-    },
-    playOperation() {
-      if (this.playerAnimation === 'checkout') return;
-      this.clearMoveEndTimer();
-      if (this.operationTimer) {
-        clearTimeout(this.operationTimer);
-      }
-      this.setPlayerAnimation('operation');
-      this.operationTimer = setTimeout(() => {
-        if (this.playerAnimation === 'operation') {
-          this.setPlayerAnimation('sit');
-        }
-      }, OPERATION_FALLBACK_MS);
-    },
-    playCheckout() {
-      this.activeDirections.clear();
-      this.stopMovementLoop();
-      this.clearIdleTimer();
-      this.clearMoveEndTimer();
-      if (this.operationTimer) {
-        clearTimeout(this.operationTimer);
-        this.operationTimer = null;
-      }
-      this.setPlayerAnimation('checkout');
-      return new Promise((resolve) => {
-        this.checkoutResolver = resolve;
-        this.checkoutTimer = setTimeout(() => {
-          this.finishCheckout();
-        }, CHECKOUT_FALLBACK_MS);
-      });
-    },
-    setPlayerAnimation(animation) {
-      if (this.playerAnimation === 'checkout' && animation !== 'checkout') return;
-      if (animation === 'move' || animation === 'operation' || animation === 'checkout') {
-        this.clearMoveEndTimer();
-      }
-      this.playerAnimation = animation;
-      this.clearIdleTimer();
-      if (animation === 'sit') {
-        this.scheduleSleep();
-      }
-      this.$nextTick(() => {
-        const video = this.$refs.playerVideo;
-        if (video) {
-          video.currentTime = 0;
-          video.play?.().catch(() => {});
-        }
-      });
-    },
-    scheduleSleep() {
-      this.clearIdleTimer();
-      this.idleTimer = setTimeout(() => {
-        if (this.playerAnimation === 'sit' && !this.activeDirections.size) {
-          this.playerAnimation = 'sleep';
-        }
-      }, SLEEP_DELAY_MS);
-    },
-    clearIdleTimer() {
-      if (this.idleTimer) {
-        clearTimeout(this.idleTimer);
-        this.idleTimer = null;
-      }
-    },
-    scheduleSitAfterMove() {
-      this.clearMoveEndTimer();
-      this.moveEndTimer = setTimeout(() => {
-        if (this.playerAnimation === 'move' && !this.activeDirections.size) {
-          this.setPlayerAnimation('sit');
-        }
-      }, MOVE_TO_SIT_DELAY_MS);
-    },
-    clearMoveEndTimer() {
-      if (this.moveEndTimer) {
-        clearTimeout(this.moveEndTimer);
-        this.moveEndTimer = null;
-      }
-    },
-    handleAnimationEnded() {
-      if (this.playerAnimation === 'operation') {
-        if (this.operationTimer) {
-          clearTimeout(this.operationTimer);
-          this.operationTimer = null;
-        }
-        this.setPlayerAnimation('sit');
-      }
-      if (this.playerAnimation === 'checkout') {
-        this.finishCheckout();
-      }
-    },
-    finishCheckout() {
-      if (this.checkoutTimer) {
-        clearTimeout(this.checkoutTimer);
-        this.checkoutTimer = null;
-      }
-      const resolve = this.checkoutResolver;
-      this.checkoutResolver = null;
-      if (resolve) {
-        resolve();
-      }
-    },
-    updateFacing(deltaX) {
-      if (deltaX < 0) {
-        this.playerFacing = 'west';
-      }
-      if (deltaX > 0) {
-        this.playerFacing = 'east';
-      }
-    }
+  playerGridPosition: {
+    type: Object,
+    default: null
   },
-  mounted() {
-    window.addEventListener('keyup', this.stopMoveByKey, true);
-    this.scheduleSleep();
-  },
-  beforeUnmount() {
-    window.removeEventListener('keyup', this.stopMoveByKey, true);
-    if (this.bumpTimer) {
-      clearTimeout(this.bumpTimer);
-    }
-    if (this.operationTimer) {
-      clearTimeout(this.operationTimer);
-    }
-    if (this.moveEndTimer) {
-      clearTimeout(this.moveEndTimer);
-    }
-    if (this.checkoutTimer) {
-      clearTimeout(this.checkoutTimer);
-    }
-    this.clearIdleTimer();
-    this.stopMovementLoop();
+  moveSpeed: {
+    type: Number,
+    default: 0.5
   }
+});
+
+const emit = defineEmits([
+  'move',
+  'active-item-change',
+  'active-item-name-change',
+  'active-vertical-exit-change',
+  'player-position-change'
+]);
+
+const { exits, items, moveSpeed, playerGridPosition } = toRefs(props);
+
+let movement;
+
+const {
+  playerAnimation,
+  playerFacing,
+  isLoopingAnimation,
+  setPlayerAnimation,
+  scheduleSleep,
+  clearMoveEndTimer,
+  scheduleSitAfterMove,
+  playOperation,
+  playCheckout: playCheckoutAnimation,
+  handleAnimationEnded,
+  updateFacing,
+  cleanupAnimationTimers
+} = usePlayerAnimation({
+  hasActiveDirections: () => movement?.activeDirections.value.size > 0
+});
+
+movement = usePlayerMovement({
+  moveSpeed,
+  isNearAnyDoor: () => isNearAnyDoor(),
+  exitDirectionForMovement: (deltaX, deltaY) => exitDirectionForMovement(deltaX, deltaY),
+  onMoveToExit: (direction) => emit('move', direction),
+  onFacingChange: updateFacing,
+  onStartMoving: () => {
+    clearMoveEndTimer();
+    setPlayerAnimation('move');
+  },
+  onStopMoving: () => {
+    if (playerAnimation.value === 'move') {
+      scheduleSitAfterMove();
+    }
+  }
+});
+
+const {
+  playerX,
+  playerY,
+  activeDirections,
+  isBumping,
+  playerPosition,
+  playerStyle,
+  setPlayerPosition,
+  tryMoveByKey,
+  stopMoveByKey,
+  nudge,
+  resetPosition: resetMovementPosition,
+  stopMovementLoop,
+  cleanupMovement
+} = movement;
+
+const {
+  cells,
+  activeRoomItem,
+  hasVerticalExit,
+  activeVerticalExit,
+  hasExit,
+  isNearAnyDoor,
+  exitDirectionForMovement
+} = useRoomInteraction({
+  exits,
+  items,
+  playerX,
+  playerY
+});
+
+const resetPosition = (entryDirection) => {
+  resetMovementPosition(entryDirection, () => {
+    clearMoveEndTimer();
+    setPlayerAnimation('sit');
+  });
 };
+
+const playCheckout = () => playCheckoutAnimation({
+  clearDirections: () => activeDirections.value.clear(),
+  stopMovement: stopMovementLoop
+});
+
+watch(activeRoomItem, (item) => {
+  emit('active-item-change', item?.id || '');
+  emit('active-item-name-change', item?.name || '');
+}, { immediate: true });
+
+watch(activeVerticalExit, (direction) => {
+  emit('active-vertical-exit-change', direction);
+}, { immediate: true });
+
+watch(playerPosition, (position) => {
+  emit('player-position-change', position);
+}, { immediate: true });
+
+watch(playerGridPosition, (position) => {
+  if (!position) return;
+  setPlayerPosition(position.row, position.col);
+}, { deep: true, immediate: true });
+
+onMounted(() => {
+  window.addEventListener('keyup', stopMoveByKey, true);
+  scheduleSleep();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keyup', stopMoveByKey, true);
+  cleanupMovement();
+  cleanupAnimationTimers();
+});
+
+defineExpose({
+  tryMoveByKey,
+  resetPosition,
+  nudge,
+  playOperation,
+  playCheckout
+});
 </script>
 
 <style scoped>
@@ -721,32 +283,6 @@ export default {
   font-weight: 800;
 }
 
-.player-avatar {
-  align-items: center;
-  display: flex;
-  height: calc((100% - 64px) / 9 * 4.05);
-  justify-content: center;
-  min-height: 108px;
-  min-width: 108px;
-  pointer-events: none;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  transform-origin: center center;
-  width: calc((100% - 64px) / 9 * 4.05);
-  z-index: 3;
-}
-
-.player-avatar.facing-left {
-  transform: translate(-50%, -50%) scaleX(-1);
-}
-
-.player-video {
-  display: block;
-  height: 100%;
-  object-fit: contain;
-  width: 100%;
-}
-
 .item {
   background: radial-gradient(circle, #f1d27a 0 28%, #634520 29% 70%, #2a1e16 71%);
   border: 1px solid #d7a84d;
@@ -773,12 +309,6 @@ export default {
   box-shadow:
     0 0 0 3px rgba(143, 226, 180, 0.22),
     0 0 28px rgba(143, 226, 180, 0.62);
-}
-
-.cell-label {
-  font-size: clamp(12px, 2vw, 20px);
-  line-height: 1;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 .room-description {

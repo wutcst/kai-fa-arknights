@@ -6,7 +6,7 @@
         <h1>俯视角房间探索</h1>
       </div>
       <div class="top-actions">
-        <span class="gold-pill">金币 {{ userGold }}</span>
+        <span class="gold-pill"><img src="@/assets/items/Lungmen_Dollars.png" class="gold-icon" alt="金币">{{ userGold }}</span>
         <button @click="playCheckoutThen('back-to-menu')">返回主界面</button>
         <button class="logout" @click="playCheckoutThen('logout')">退出登录</button>
       </div>
@@ -23,20 +23,31 @@
     />
 
     <div class="game-layout">
-      <RoomGrid
-        ref="roomGrid"
-        :room-name="roomName"
-        :description="description"
-        :exits="exits"
-        :items="items"
-        :player-grid-position="playerGridPosition"
-        :move-speed="moveSpeed"
-        @move="$emit('move', $event)"
-        @active-item-change="activeRoomItemId = $event"
-        @active-item-name-change="activeRoomItemName = $event"
-        @active-vertical-exit-change="activeVerticalExit = $event"
-        @player-position-change="$emit('player-position-change', $event)"
-      />
+      <section class="main-play-area">
+        <RoomGrid
+          ref="roomGrid"
+          :room-name="roomName"
+          :description="description"
+          :exits="exits"
+          :items="items"
+          :player-grid-position="playerGridPosition"
+          :move-speed="moveSpeed"
+          @move="$emit('move', $event)"
+          @active-item-change="activeRoomItemId = $event"
+          @active-item-name-change="activeRoomItemName = $event"
+          @active-vertical-exit-change="activeVerticalExit = $event"
+          @player-position-change="$emit('player-position-change', $event)"
+        />
+
+        <InventoryHotbar
+          class="bottom-hotbar"
+          :inventory="inventory"
+          :selected-id="selectedInventoryId"
+          :player-weight="playerWeight"
+          :player-max-weight="playerMaxWeight"
+          @select="$emit('select-inventory', $event)"
+        />
+      </section>
 
       <aside class="right-rail">
         <ActionPanel
@@ -58,20 +69,13 @@
           @toggle-map="playOperationThen('toggle-map')"
           @help="playOperationThen('help')"
           @open-ability="playOperationThen('open-ability')"
+          @open-inventory-detail="playOperationThen('open-inventory-detail')"
           @settle="$emit('settle')"
         />
 
-        <InventoryPanel
-          :inventory="inventory"
-          :selected-id="selectedInventoryId"
-          :player-weight="playerWeight"
-          :player-max-weight="playerMaxWeight"
-          @select="$emit('select-inventory', $event)"
-        />
+        <MessageLog :messages="messages" />
       </aside>
     </div>
-
-    <MessageLog :messages="messages" />
   </main>
 </template>
 
@@ -79,7 +83,7 @@
 import RoomGrid from '@/components/game/RoomGrid.vue';
 import GameStatusBar from '@/components/game/GameStatusBar.vue';
 import ActionPanel from '@/components/game/ActionPanel.vue';
-import InventoryPanel from '@/components/game/InventoryPanel.vue';
+import InventoryHotbar from '@/components/game/InventoryHotbar.vue';
 import MessageLog from '@/components/game/MessageLog.vue';
 
 export default {
@@ -88,7 +92,7 @@ export default {
     RoomGrid,
     GameStatusBar,
     ActionPanel,
-    InventoryPanel,
+    InventoryHotbar,
     MessageLog
   },
   props: {
@@ -167,34 +171,34 @@ export default {
   computed: {
     floorLabel() {
       const floorByRoomId = {
-        theater_lobby: '教学楼一楼',
-        theater_classroom_101: '教学楼一楼',
-        theater_classroom_102: '教学楼一楼',
-        theater_stairway_1f: '教学楼一楼',
-        theater_classroom_201: '教学楼二楼',
-        theater_classroom_202: '教学楼二楼',
-        theater_office: '教学楼二楼',
-        theater_stairway_2f: '教学楼二楼',
-        theater_classroom_301: '教学楼三楼',
-        theater_classroom_302: '教学楼三楼',
-        theater_lab: '教学楼三楼',
-        theater_stairway_3f: '教学楼三楼'
+        theater_lobby: '设施一层',
+        theater_classroom_101: '设施一层',
+        theater_classroom_102: '设施一层',
+        theater_stairway_1f: '设施一层',
+        theater_classroom_201: '设施二层',
+        theater_classroom_202: '设施二层',
+        theater_office: '设施二层',
+        theater_stairway_2f: '设施二层',
+        theater_classroom_301: '设施三层',
+        theater_classroom_302: '设施三层',
+        theater_lab: '设施三层',
+        theater_stairway_3f: '设施三层'
       };
       if (floorByRoomId[this.roomId]) {
         return floorByRoomId[this.roomId];
       }
 
       const source = `${this.roomName}`.toLowerCase();
-      if (source.includes('101') || source.includes('102') || source.includes('一楼')) {
-        return '教学楼一楼';
+      if (source.includes('101') || source.includes('102') || source.includes('一楼') || source.includes('一层')) {
+        return '设施一层';
       }
-      if (source.includes('201') || source.includes('202') || source.includes('二楼')) {
-        return '教学楼二楼';
+      if (source.includes('201') || source.includes('202') || source.includes('二楼') || source.includes('二层')) {
+        return '设施二层';
       }
-      if (source.includes('301') || source.includes('302') || source.includes('三楼')) {
-        return '教学楼三楼';
+      if (source.includes('301') || source.includes('302') || source.includes('三楼') || source.includes('三层')) {
+        return '设施三层';
       }
-      return '室外区域';
+      return '设施外围';
     }
   },
   methods: {
@@ -279,6 +283,13 @@ h1 {
   justify-content: flex-end;
 }
 
+.gold-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
 .gold-pill,
 button {
   border: 1px solid rgba(247, 214, 123, 0.45);
@@ -311,14 +322,24 @@ button:hover {
   max-width: 1480px;
 }
 
+.main-play-area {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.bottom-hotbar {
+  justify-self: center;
+  width: min(100%, 760px);
+}
+
 .right-rail {
   display: grid;
   align-content: start;
   gap: 16px;
 }
 
-.game-view > .status-shell,
-.game-view > .message-log {
+.game-view > .status-shell {
   margin-left: auto;
   margin-right: auto;
   max-width: 1480px;

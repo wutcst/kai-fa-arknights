@@ -9,7 +9,7 @@
 - 前后端分离架构：后端提供 Spring Boot API，前端提供 Vue 图形化界面。
 - 地图与房间系统：支持多个房间、方向移动、返回上一房间和传送房间。
 - 玩家与背包系统：玩家可拾取、丢弃、查看物品，背包受重量上限约束。
-- 魔法饼干机制：吃掉特定物品后可提升玩家最大负重。
+- 理智增强剂机制：吃掉特定物品后可提升玩家最大负重。
 - 用户与存档系统：支持登录注册，并通过数据库保存和读取游戏状态。
 - 自动化工程流程：CI 覆盖 Maven 测试、Maven 打包、前端依赖安装、前端 lint 和前端构建。
 
@@ -41,6 +41,8 @@ mvn spring-boot:run
 
 后端默认读取 `backend/src/main/resources/application.yml` 中的数据库和服务配置。需要连接 MySQL 时，请先确认本地数据库、账号和密码与配置一致。
 
+数据库初始化只使用最新的 [`backend/sql/ability_schema.sql`](backend/sql/ability_schema.sql)。该脚本包含用户、存档、能力配置和用户能力表，并与当前后端实体字段保持一致；旧的部分初始化脚本已移除，避免误用不完整表结构。
+
 ### 前端
 
 ```bash
@@ -60,7 +62,7 @@ npm run build
 
 仓库已配置 GitHub Actions 工作流：
 
-- 后端：`mvn -B test`、`mvn -B package -DskipTests`
+- 后端：`mvn -B test`、`mvn -B package`
 - 前端：`npm ci`、`npm run lint`、`npm run build`
 - 产物：后端 jar 与前端 `dist`
 
@@ -75,14 +77,14 @@ PR 目标分支为 `master` 或 `feature` 时也会触发 CI。
 
 当前课程验收阶段采用如下分支角色：
 
-- `master`：最终稳定发布分支，当前通过发布快照同步最新可验收项目版本。
+- `master`：最终稳定发布分支，当前已包含可验收项目版本。
 - `feature`：课程协作和集成过程分支，保留用于展示开发、PR、测试和集成历史。
 - `feat/*`：功能开发分支，从 `feature` 新建，完成后 PR 回 `feature`。
 - `fix/*`：缺陷修复分支，从 `feature` 新建，完成后 PR 回 `feature`。
 - `test/*`：测试补充分支，从 `feature` 新建，完成后 PR 回 `feature`。
 - `docs/*`：文档维护分支，从 `feature` 新建，完成后 PR 回 `feature`。
 
-`master` 通过发布快照方式集成稳定项目版本。课程验收结束前不建议删除 `feature` 或历史工作分支，用于保留协同开发过程证据；验收结束后再统一清理临时分支。
+`master` 已通过发布快照方式集成当前稳定项目版本。课程验收结束前不建议删除 `feature` 或历史工作分支，用于保留协同开发过程证据；验收结束后再统一清理临时分支。
 
 当前历史分支处理清单见 [docs/branch-governance.md](docs/branch-governance.md)。
 

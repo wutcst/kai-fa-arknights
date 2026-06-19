@@ -1,6 +1,7 @@
 package cn.edu.whut.sept.zuul.controller;
 
 import cn.edu.whut.sept.zuul.model.Item;
+import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Room;
 import cn.edu.whut.sept.zuul.model.User;
 import cn.edu.whut.sept.zuul.repository.UserRepository;
@@ -73,10 +74,20 @@ public class SaveController {
         Room currentRoom = game.getCurrentRoom();
         List<Room> history = game.getRoomHistory();
         Map<String, List<Item>> roomItems = game.getAllRoomItems();
+        Map<String, Map<String, GridPosition>> roomItemPositions = game.getAllRoomItemPositions();
 
         double playerGridRow = getGridCoordinate(request.get("playerGridRow"));
         double playerGridCol = getGridCoordinate(request.get("playerGridCol"));
-        saveService.saveGame(userId, currentRoom, game.getPlayer(), history, roomItems, playerGridRow, playerGridCol);
+        saveService.saveGame(
+            userId,
+            currentRoom,
+            game.getPlayer(),
+            history,
+            roomItems,
+            roomItemPositions,
+            playerGridRow,
+            playerGridCol
+        );
 
         return Map.of("success", true, "message", "游戏已保存");
     }
@@ -116,6 +127,9 @@ public class SaveController {
         List<Room> history = (List<Room>) loadResult.get("roomHistory");
         @SuppressWarnings("unchecked")
         Map<String, List<Item>> roomItems = (Map<String, List<Item>>) loadResult.get("roomItems");
+        @SuppressWarnings("unchecked")
+        Map<String, Map<String, GridPosition>> roomItemPositions =
+            (Map<String, Map<String, GridPosition>>) loadResult.get("roomItemPositions");
 
         // 设置游戏状态
         game.setCurrentRoom(savedRoom);
@@ -123,10 +137,8 @@ public class SaveController {
         game.setMaxWeight(playerMaxWeight);
         game.setRoomHistory(history);
         game.setAllRoomItems(roomItems);
+        game.setAllRoomItemPositions(roomItemPositions);
         game.setCurrentUserId(userId);
-
-        int currentMaxWeight = abilityService.getMaxWeight(userId);
-        game.setMaxWeight(currentMaxWeight);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("success", true);
@@ -138,7 +150,7 @@ public class SaveController {
         response.put("items", getRoomItems(savedRoom));
         response.put("inventory", getPlayerInventory());
         response.put("playerWeight", playerWeight);
-        response.put("playerMaxWeight", currentMaxWeight);
+        response.put("playerMaxWeight", playerMaxWeight);
         response.put("playerGridRow", loadResult.get("playerGridRow"));
         response.put("playerGridCol", loadResult.get("playerGridCol"));
         return response;
@@ -215,7 +227,8 @@ public class SaveController {
         int totalGold = (int) settleResult.get("totalGold");
 
         game.getPlayer().getInventory().clear();
-        game.setMaxWeight(abilityService.getMaxWeight(userId));
+        int baseMaxWeight = abilityService.getMaxWeight(userId);
+        game.setMaxWeight(baseMaxWeight);
 
         return Map.of(
             "success", true,
@@ -224,20 +237,25 @@ public class SaveController {
             "totalGold", totalGold,
             "inventory", new ArrayList<>(),
             "playerWeight", 0,
-            "playerMaxWeight", abilityService.getMaxWeight(userId)
+            "playerMaxWeight", baseMaxWeight
         );
     }
 
     private List<Map<String, Object>> getRoomItems(Room room) {
         List<Map<String, Object>> items = new ArrayList<>();
         for (Item item : room.getItems()) {
-            items.add(Map.of(
-                "id", item.getId(),
-                "name", item.getName(),
-                "description", item.getDescription(),
-                "weight", item.getWeight(),
-                "value", item.getValue()
-            ));
+            Map<String, Object> itemInfo = new LinkedHashMap<>();
+            itemInfo.put("id", item.getId());
+            itemInfo.put("name", item.getName());
+            itemInfo.put("description", item.getDescription());
+            itemInfo.put("weight", item.getWeight());
+            itemInfo.put("value", item.getValue());
+            GridPosition position = room.getItemPosition(item.getId());
+            if (position != null) {
+                itemInfo.put("row", position.getRow());
+                itemInfo.put("col", position.getCol());
+            }
+            items.add(itemInfo);
         }
         return items;
     }

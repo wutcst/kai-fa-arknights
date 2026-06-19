@@ -1,9 +1,9 @@
 package cn.edu.whut.sept.zuul.controller;
 
 import cn.edu.whut.sept.zuul.model.Room;
+import cn.edu.whut.sept.zuul.model.GridPosition;
 import cn.edu.whut.sept.zuul.model.Item;
 import cn.edu.whut.sept.zuul.model.Player;
-import cn.edu.whut.sept.zuul.service.AbilityService;
 import cn.edu.whut.sept.zuul.service.Game;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -21,18 +21,12 @@ import java.util.ArrayList;
 public class GameController {
 
     private final Game game;
-    private final AbilityService abilityService;
 
-    public GameController(Game game, AbilityService abilityService) {
+    public GameController(Game game) {
         this.game = game;
-        this.abilityService = abilityService;
     }
 
     private int getPlayerMaxWeight() {
-        Long userId = game.getCurrentUserId();
-        if (userId != null) {
-            return abilityService.getMaxWeight(userId);
-        }
         return game.getPlayer().getMaxWeight();
     }
 
@@ -216,26 +210,21 @@ public class GameController {
      * @return 拾取结果及当前状态
      */
     @PostMapping("/take")
-    public Map<String, Object> take(@RequestBody Map<String, String> request) {
-        String itemId = request.get("itemId");
-        Map<String, Object> result = new HashMap<>();
+    public Map<String, Object> take(@RequestBody Map<String, Object> request) {
+        String itemId = (String) request.get("itemId");
+        Double playerGridRow = parseRequiredGridCoordinate(request.get("playerGridRow"));
+        Double playerGridCol = parseRequiredGridCoordinate(request.get("playerGridCol"));
         Room currentRoom = getCurrentRoom();
 
-        String message = game.takeItem(itemId);
-        result.put("message", message);
-        result.put("description", currentRoom.getZhName());
-        result.put("descriptionEn", currentRoom.getShortDescription());
-        result.put("longDescription", getZhLongDescription(currentRoom));
-        result.put("exits", currentRoom.getExits());
-        result.put("roomId", currentRoom.getId());
-        result.put("items", getRoomItems(currentRoom));
-        result.put("inventory", getPlayerInventory());
-        result.put("playerWeight", game.getPlayer().getTotalWeight());
-        result.put("playerMaxWeight", getPlayerMaxWeight());
+        if (itemId == null || itemId.trim().isEmpty()) {
+            return buildGameStateResponse(currentRoom, "物品ID不能为空", false);
+        }
+        if (playerGridRow == null || playerGridCol == null) {
+            return buildGameStateResponse(currentRoom, "缺少有效的玩家位置，无法拾取物品", false);
+        }
 
-        // 检查是否拾取成功
-        result.put("success", message.contains("拾取了"));
-        return result;
+        String message = game.takeItemAtCell(itemId, playerGridRow, playerGridCol);
+        return buildGameStateResponse(currentRoom, message, message.contains("拾取了"));
     }
 
     /**
@@ -245,25 +234,21 @@ public class GameController {
      * @return 丢弃结果及当前状态
      */
     @PostMapping("/drop")
-    public Map<String, Object> drop(@RequestBody Map<String, String> request) {
-        String itemId = request.get("itemId");
-        Map<String, Object> result = new HashMap<>();
+    public Map<String, Object> drop(@RequestBody Map<String, Object> request) {
+        String itemId = (String) request.get("itemId");
+        Double playerGridRow = parseRequiredGridCoordinate(request.get("playerGridRow"));
+        Double playerGridCol = parseRequiredGridCoordinate(request.get("playerGridCol"));
         Room currentRoom = getCurrentRoom();
 
-        String message = game.dropItem(itemId);
-        result.put("message", message);
-        result.put("description", currentRoom.getZhName());
-        result.put("descriptionEn", currentRoom.getShortDescription());
-        result.put("longDescription", getZhLongDescription(currentRoom));
-        result.put("exits", currentRoom.getExits());
-        result.put("roomId", currentRoom.getId());
-        result.put("items", getRoomItems(currentRoom));
-        result.put("inventory", getPlayerInventory());
-        result.put("playerWeight", game.getPlayer().getTotalWeight());
-        result.put("playerMaxWeight", getPlayerMaxWeight());
+        if (itemId == null || itemId.trim().isEmpty()) {
+            return buildGameStateResponse(currentRoom, "物品ID不能为空", false);
+        }
+        if (playerGridRow == null || playerGridCol == null) {
+            return buildGameStateResponse(currentRoom, "缺少有效的玩家位置，无法丢弃物品", false);
+        }
 
-        result.put("success", !message.contains("没有"));
-        return result;
+        String message = game.dropItemAtCell(itemId, playerGridRow, playerGridCol);
+        return buildGameStateResponse(currentRoom, message, message.contains("丢弃了"));
     }
 
     /**
@@ -289,7 +274,7 @@ public class GameController {
     }
 
     /**
-     * 吃魔法饼干（eat cookie命令）.
+     * 吃理智增强剂（eat cookie命令）.
      *
      * @return 吃饼干结果及当前状态
      */
@@ -350,9 +335,58 @@ public class GameController {
             itemInfo.put("description", item.getDescription());
             itemInfo.put("weight", item.getWeight());
             itemInfo.put("value", item.getValue());
+            GridPosition position = room.getItemPosition(item.getId());
+            if (position != null) {
+                itemInfo.put("row", position.getRow());
+                itemInfo.put("col", position.getCol());
+            }
             items.add(itemInfo);
         }
         return items;
+    }
+
+    private Map<String, Object> buildGameStateResponse(Room room, String message, boolean success) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", success);
+        result.put("message", message);
+        result.put("description", room.getZhName());
+        result.put("descriptionEn", room.getShortDescription());
+        result.put("longDescription", getZhLongDescription(room));
+        result.put("exits", room.getExits());
+        result.put("roomId", room.getId());
+        result.put("items", getRoomItems(room));
+        result.put("inventory", getPlayerInventory());
+        result.put("playerWeight", game.getPlayer().getTotalWeight());
+        result.put("playerMaxWeight", getPlayerMaxWeight());
+        return result;
+    }
+
+    private Double parseRequiredGridCoordinate(Object value) {
+        if (value instanceof Number number) {
+            double coordinate = number.doubleValue();
+            if (Double.isNaN(coordinate) || Double.isInfinite(coordinate)) {
+                return null;
+            }
+            if (coordinate < 0 || coordinate > 8) {
+                return null;
+            }
+            return coordinate;
+        }
+        if (value instanceof String text) {
+            try {
+                double coordinate = Double.parseDouble(text);
+                if (Double.isNaN(coordinate) || Double.isInfinite(coordinate)) {
+                    return null;
+                }
+                if (coordinate < 0 || coordinate > 8) {
+                    return null;
+                }
+                return coordinate;
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
     }
 
     /**

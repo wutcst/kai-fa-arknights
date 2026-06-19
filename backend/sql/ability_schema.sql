@@ -27,9 +27,12 @@ CREATE TABLE IF NOT EXISTS game_saves (
     current_room_id VARCHAR(50) NOT NULL,
     player_inventory JSON,
     player_weight INT DEFAULT 0,
-    player_max_weight INT DEFAULT 20,
+    player_max_weight INT DEFAULT 5,
+    player_grid_row INT DEFAULT 4,
+    player_grid_col INT DEFAULT 4,
     room_history JSON,
     room_items JSON,
+    room_item_positions JSON,
     saved_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY uk_user_id (user_id)
@@ -51,9 +54,9 @@ CREATE TABLE IF NOT EXISTS ability_config (
 
 -- 插入默认能力配置
 INSERT INTO ability_config (ability_code, ability_name, base_value, increment_per_level, base_cost, cost_multiplier, max_level, description) VALUES
-('max_weight', '负重上限', 20, 5, 50, 1.8, 10, '背包最大负重，每级增加5'),
-('gold_bonus', '金币加成', 0, 10, 80, 2.0, 10, '结算时额外获得金币百分比，每级增加10%'),
-('move_speed', '移动速度', 5, 1, 100, 2.2, 5, '房间内移动速度，每级增加1')
+('max_weight', '负重上限', 5, 3, 50, 1.8, 10, '背包最大负重，每级增加3'),
+('gold_bonus', '龙门币加成', 0, 5, 80, 2.0, 10, '结算时额外获得龙门币百分比，每级增加5%'),
+('move_speed', '移动速度', 2, 1, 100, 2.2, 5, '房间内移动速度，每级增加1')
 ON DUPLICATE KEY UPDATE ability_name = ability_name;
 
 -- 创建用户能力表 - 存储用户各能力等级和金币
