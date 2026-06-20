@@ -67,7 +67,10 @@ class MySqlSchemaVerificationTest {
                 "world_random_spawn_candidates",
                 "world_portal_targets",
                 "world_game_config",
-                "game_saves"
+                "game_saves",
+                "users",
+                "ability_config",
+                "user_abilities"
         )));
 
         Set<String> constraints = queryStringSet("""
@@ -101,7 +104,9 @@ class MySqlSchemaVerificationTest {
                 "chk_world_portal_targets_not_self",
                 "fk_world_game_config_start_room",
                 "ck_world_game_config_id",
+                "fk_game_saves_user",
                 "fk_game_saves_current_room",
+                "fk_user_abilities_user",
                 "ck_world_items_weight",
                 "ck_world_items_value",
                 "ck_world_game_config_grid"
@@ -124,6 +129,34 @@ class MySqlSchemaVerificationTest {
         assertEquals(2, queryInt("SELECT COUNT(*) FROM world_map_views"));
         assertEquals(25, queryInt("SELECT COUNT(*) FROM world_room_layouts"));
         assertEquals(15, queryInt("SELECT COUNT(*) FROM world_portal_targets WHERE portal_room_id = 'portal'"));
+        assertEquals(3, queryInt("SELECT COUNT(*) FROM ability_config"));
+        assertEquals(1, queryInt("""
+                SELECT COUNT(*)
+                FROM ability_config
+                WHERE ability_code = 'max_weight'
+                  AND base_value = 5
+                  AND increment_per_level = 3
+                  AND base_cost = 50
+                  AND max_level = 10
+                """));
+        assertEquals(1, queryInt("""
+                SELECT COUNT(*)
+                FROM ability_config
+                WHERE ability_code = 'gold_bonus'
+                  AND base_value = 0
+                  AND increment_per_level = 5
+                  AND base_cost = 80
+                  AND max_level = 10
+                """));
+        assertEquals(1, queryInt("""
+                SELECT COUNT(*)
+                FROM ability_config
+                WHERE ability_code = 'move_speed'
+                  AND base_value = 2
+                  AND increment_per_level = 1
+                  AND base_cost = 100
+                  AND max_level = 5
+                """));
     }
 
     @Test
@@ -155,7 +188,9 @@ class MySqlSchemaVerificationTest {
                 INSERT INTO world_items (item_id, item_name, description, weight, item_value, item_category, usable)
                 VALUES ('bad_item', '坏物品', 'bad', -1, 0, 'material', false)
                 """);
+        assertStatementFails("INSERT INTO game_saves (user_id, current_room_id) VALUES (999999, 'outside')");
         assertStatementFails("INSERT INTO game_saves (user_id, current_room_id) VALUES (1, 'missing_room')");
+        assertStatementFails("INSERT INTO user_abilities (user_id) VALUES (999999)");
         assertStatementFails("""
                 INSERT INTO world_game_config (
                     id,
