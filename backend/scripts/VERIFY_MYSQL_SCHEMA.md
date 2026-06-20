@@ -12,6 +12,10 @@ mysql -h 127.0.0.1 -u root -p123456 < backend/sql/ability_schema.sql
 
 ## 结构检查
 
+MySQL schema 验证已经接入后端 `mvn test`。本机或 CI 环境可用 Docker 时，`MySqlSchemaVerificationTest` 会通过 Testcontainers 启动 MySQL 8 并执行 `backend/sql/ability_schema.sql`，自动检查表结构、种子数据和关键约束。
+
+以下命令仍保留为手工验收和演示用：
+
 ```bash
 mysql -h 127.0.0.1 -u root -p123456 arknights_db < backend/scripts/verify-mysql-schema.sql
 ```
