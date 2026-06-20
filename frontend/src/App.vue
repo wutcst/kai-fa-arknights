@@ -169,6 +169,7 @@ const handleBackgroundMessageForMusic = (event) => {
   if (
     type === 'ARKNIGHTS_BG_PICKER_OPEN' ||
     type === 'ARKNIGHTS_BG_PICKER_CLOSE' ||
+    type === 'ARKNIGHTS_LOGIN_AUDIO_UNLOCK' ||
     type === 'ARKNIGHTS_LOGIN_INTERACTION'
   ) {
     tryPlayCurrentMusic();

@@ -1,7 +1,8 @@
 let width = window.innerWidth, height = window.innerHeight;
 let squares = [], squareSize = 1920 / (1920 * 0.05), squareLength = squareSize * squareSize;
 let crosses = [], crossSize = 1920 / (1920 * 0.05), crossLength = crossSize * crossSize;
-let interactionReported = false;
+let audioUnlockReported = false;
+let loginRevealReported = false;
 let rect = {
     pos: [],
     array: [],
@@ -19,21 +20,31 @@ const shouldIgnoreLoginReveal = (event) => {
         target.closest('#overlay')
     );
 };
-const reportInteraction = (event) => {
+const reportAudioUnlock = () => {
+    if(audioUnlockReported) return;
+    audioUnlockReported = true;
+    window.parent.postMessage(
+        { type: 'ARKNIGHTS_LOGIN_AUDIO_UNLOCK' },
+        window.location.origin
+    );
+    window.removeEventListener('pointerdown', reportAudioUnlock);
+    window.removeEventListener('click', reportAudioUnlock);
+};
+const reportLoginReveal = (event) => {
     if(shouldIgnoreLoginReveal(event)) return;
-    if(interactionReported) return;
-    interactionReported = true;
+    if(loginRevealReported) return;
+    loginRevealReported = true;
     window.parent.postMessage(
         { type: 'ARKNIGHTS_LOGIN_INTERACTION' },
         window.location.origin
     );
-    window.removeEventListener('pointerdown', reportInteraction);
-    window.removeEventListener('click', reportInteraction);
-    window.removeEventListener('keydown', reportInteraction);
+    window.removeEventListener('dblclick', reportLoginReveal);
+    window.removeEventListener('keydown', reportLoginReveal);
 };
-window.addEventListener('pointerdown', reportInteraction);
-window.addEventListener('click', reportInteraction);
-window.addEventListener('keydown', reportInteraction);
+window.addEventListener('pointerdown', reportAudioUnlock);
+window.addEventListener('click', reportAudioUnlock);
+window.addEventListener('dblclick', reportLoginReveal);
+window.addEventListener('keydown', reportLoginReveal);
 let clock = {
     second: {
         num: 60,
