@@ -139,12 +139,10 @@ export default {
   mounted() {
     window.addEventListener('message', this.handleBackgroundMessage);
     window.addEventListener('keydown', this.revealAuthBox);
-    window.addEventListener('pointerdown', this.revealAuthBox);
   },
   beforeUnmount() {
     window.removeEventListener('message', this.handleBackgroundMessage);
     window.removeEventListener('keydown', this.revealAuthBox);
-    window.removeEventListener('pointerdown', this.revealAuthBox);
   },
   methods: {
     revealAuthBox() {
