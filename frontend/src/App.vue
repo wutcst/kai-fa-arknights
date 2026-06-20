@@ -139,6 +139,7 @@ const getCurrentMusicKey = () => {
 
 const removeMusicUnlockListeners = () => {
   document.removeEventListener('pointerdown', handleFirstInteraction);
+  document.removeEventListener('click', handleFirstInteraction);
   document.removeEventListener('keydown', handleFirstInteraction);
   window.removeEventListener('message', handleBackgroundMessageForMusic);
 };
@@ -167,7 +168,8 @@ const handleBackgroundMessageForMusic = (event) => {
 
   if (
     type === 'ARKNIGHTS_BG_PICKER_OPEN' ||
-    type === 'ARKNIGHTS_BG_PICKER_CLOSE'
+    type === 'ARKNIGHTS_BG_PICKER_CLOSE' ||
+    type === 'ARKNIGHTS_LOGIN_INTERACTION'
   ) {
     tryPlayCurrentMusic();
   }
@@ -175,6 +177,7 @@ const handleBackgroundMessageForMusic = (event) => {
 
 const addMusicUnlockListeners = () => {
   document.addEventListener('pointerdown', handleFirstInteraction);
+  document.addEventListener('click', handleFirstInteraction);
   document.addEventListener('keydown', handleFirstInteraction);
   window.addEventListener('message', handleBackgroundMessageForMusic);
 };

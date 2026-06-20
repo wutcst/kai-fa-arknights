@@ -1,6 +1,7 @@
 let width = window.innerWidth, height = window.innerHeight;
 let squares = [], squareSize = 1920 / (1920 * 0.05), squareLength = squareSize * squareSize;
 let crosses = [], crossSize = 1920 / (1920 * 0.05), crossLength = crossSize * crossSize;
+let interactionReported = false;
 let rect = {
     pos: [],
     array: [],
@@ -9,6 +10,20 @@ let rect = {
     length: 9
 };
 let radian = Math.PI / 180;
+const reportInteraction = () => {
+    if(interactionReported) return;
+    interactionReported = true;
+    window.parent.postMessage(
+        { type: 'ARKNIGHTS_LOGIN_INTERACTION' },
+        window.location.origin
+    );
+    window.removeEventListener('pointerdown', reportInteraction);
+    window.removeEventListener('click', reportInteraction);
+    window.removeEventListener('keydown', reportInteraction);
+};
+window.addEventListener('pointerdown', reportInteraction);
+window.addEventListener('click', reportInteraction);
+window.addEventListener('keydown', reportInteraction);
 let clock = {
     second: {
         num: 60,
