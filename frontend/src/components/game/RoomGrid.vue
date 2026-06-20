@@ -39,6 +39,7 @@
 import { onBeforeUnmount, onMounted, toRefs, watch } from 'vue';
 import PlayerAvatar from '@/components/game/PlayerAvatar.vue';
 import RoomCell from '@/components/game/RoomCell.vue';
+import { useGameSounds } from '@/composables/useGameSounds';
 import { usePlayerAnimation } from '@/composables/usePlayerAnimation';
 import { usePlayerMovement } from '@/composables/usePlayerMovement';
 import { useRoomInteraction } from '@/composables/useRoomInteraction';
@@ -79,6 +80,7 @@ const emit = defineEmits([
 ]);
 
 const { exits, items, moveSpeed, playerGridPosition } = toRefs(props);
+const { startWalkingSound, stopWalkingSound } = useGameSounds();
 
 let movement;
 
@@ -108,8 +110,10 @@ movement = usePlayerMovement({
   onStartMoving: () => {
     clearMoveEndTimer();
     setPlayerAnimation('move');
+    startWalkingSound();
   },
   onStopMoving: () => {
+    stopWalkingSound();
     if (playerAnimation.value === 'move') {
       scheduleSitAfterMove();
     }
@@ -184,6 +188,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('keyup', stopMoveByKey, true);
+  stopWalkingSound();
   cleanupMovement();
   cleanupAnimationTimers();
 });
