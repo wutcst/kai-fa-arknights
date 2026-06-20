@@ -2,9 +2,11 @@ import { ref } from 'vue';
 import { getMap, getGameStatus, move as apiMove, look as apiLook, goBack as apiGoBack } from '@/api/gameApi';
 import { takeItem, dropItem, getItems, eatCookie as apiEatCookie } from '@/api/inventoryApi';
 import { saveGame, loadGame } from '@/api/saveApi';
+import { useGameSounds } from '@/composables/useGameSounds';
 
 export function useGameState(options) {
   const { appendLog, resetRoomPosition, fetchUserAbility } = options;
+  const { playPickupSound, playRoomSwitchSound } = useGameSounds();
 
   const message = ref('欢迎来到文字冒险世界！');
   const displayMessage = ref('');
@@ -127,6 +129,7 @@ export function useGameState(options) {
       items.value = [];
       isError.value = response.data.teleported;
       appendLog(displayMessage.value || `移动到 ${currentRoomName.value}`, isError.value);
+      playRoomSwitchSound();
       await fetchMap(currentRoomId.value);
     } catch (error) {
       displayMessage.value = '移动错误：' + (error.response?.data?.message || error.message);
@@ -169,6 +172,9 @@ export function useGameState(options) {
       items.value = [];
       isError.value = !response.data.success;
       appendLog(displayMessage.value || '返回上个房间', isError.value);
+      if (response.data.success !== false) {
+        playRoomSwitchSound();
+      }
       await fetchMap(currentRoomId.value);
     } catch (error) {
       displayMessage.value = '返回错误：' + error.message;
@@ -202,6 +208,9 @@ export function useGameState(options) {
       isError.value = !response.data.success;
       syncSelectedInventory();
       appendLog(displayMessage.value || '拾取物品', isError.value);
+      if (response.data.success !== false) {
+        playPickupSound();
+      }
     } catch (error) {
       displayMessage.value = '拾取失败：' + error.message;
       isError.value = true;
