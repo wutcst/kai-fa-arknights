@@ -23,20 +23,28 @@ const initAudio = () => {
 };
 
 // 播放指定音乐
-const playMusic = (musicKey) => {
+const playMusic = async (musicKey) => {
   initAudio();
   const musicPath = MUSIC[musicKey];
-  if (musicPath && audioElement.src !== musicPath) {
+  if (!musicPath) {
+    return false;
+  }
+  if (audioElement.src !== musicPath) {
     audioElement.src = musicPath;
     audioElement.load();
   }
-  audioElement.play().then(() => {
+
+  try {
+    await audioElement.play();
     isPlaying.value = true;
     currentMusic.value = musicKey;
     console.log('正在播放:', musicKey === 'LOBBY' ? '栖所架构' : '岁识气象');
-  }).catch(err => {
+    return true;
+  } catch (err) {
+    isPlaying.value = false;
     console.warn('音乐播放失败:', err);
-  });
+    return false;
+  }
 };
 
 // 停止音乐

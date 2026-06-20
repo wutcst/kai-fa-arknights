@@ -3,7 +3,7 @@
     <!-- 明日方舟风格背景 -->
     <ArknightsBackground />
 
-    <div class="game-start-box">
+    <div class="game-start-box" v-show="startBoxRevealed && !bgPickerVisible">
       <div class="logo-area">
         <img class="rhodes-logo" src="@/assets/Logo_rhodesOverride.png" alt="Rhodes Island" />
       </div>
@@ -52,7 +52,7 @@
       </div>
     </div>
 
-    <div class="footer-info">
+    <div class="footer-info" v-show="startBoxRevealed && !bgPickerVisible">
       <p>罗德岛设施探险记</p>
     </div>
   </div>
@@ -77,13 +77,40 @@ export default {
     return {
       hasSave: false,
       loading: false,
-      error: ''
+      error: '',
+      startBoxRevealed: false,
+      bgPickerVisible: false
     };
   },
   mounted() {
     this.checkSaveStatus();
+    window.addEventListener('message', this.handleBackgroundMessage);
+    window.addEventListener('keydown', this.revealStartBox);
+  },
+  beforeUnmount() {
+    window.removeEventListener('message', this.handleBackgroundMessage);
+    window.removeEventListener('keydown', this.revealStartBox);
   },
   methods: {
+    revealStartBox() {
+      this.startBoxRevealed = true;
+    },
+    handleBackgroundMessage(event) {
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+
+      const data = event.data || {};
+      if (data.type === 'ARKNIGHTS_BG_PICKER_OPEN') {
+        this.bgPickerVisible = true;
+      }
+      if (data.type === 'ARKNIGHTS_BG_PICKER_CLOSE') {
+        this.bgPickerVisible = false;
+      }
+      if (data.type === 'ARKNIGHTS_LOGIN_INTERACTION') {
+        this.startBoxRevealed = true;
+      }
+    },
     async checkSaveStatus() {
       try {
         const response = await checkSave(this.username);

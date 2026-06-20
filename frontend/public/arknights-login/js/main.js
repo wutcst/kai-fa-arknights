@@ -1,6 +1,8 @@
 let width = window.innerWidth, height = window.innerHeight;
 let squares = [], squareSize = 1920 / (1920 * 0.05), squareLength = squareSize * squareSize;
 let crosses = [], crossSize = 1920 / (1920 * 0.05), crossLength = crossSize * crossSize;
+let audioUnlockReported = false;
+let loginRevealReported = false;
 let rect = {
     pos: [],
     array: [],
@@ -9,6 +11,40 @@ let rect = {
     length: 9
 };
 let radian = Math.PI / 180;
+const shouldIgnoreLoginReveal = (event) => {
+    const target = event.target;
+    if(!target || !target.closest) return false;
+
+    return Boolean(
+        target.closest('#change-bg') ||
+        target.closest('#overlay')
+    );
+};
+const reportAudioUnlock = () => {
+    if(audioUnlockReported) return;
+    audioUnlockReported = true;
+    window.parent.postMessage(
+        { type: 'ARKNIGHTS_LOGIN_AUDIO_UNLOCK' },
+        window.location.origin
+    );
+    window.removeEventListener('pointerdown', reportAudioUnlock);
+    window.removeEventListener('click', reportAudioUnlock);
+};
+const reportLoginReveal = (event) => {
+    if(shouldIgnoreLoginReveal(event)) return;
+    if(loginRevealReported) return;
+    loginRevealReported = true;
+    window.parent.postMessage(
+        { type: 'ARKNIGHTS_LOGIN_INTERACTION' },
+        window.location.origin
+    );
+    window.removeEventListener('dblclick', reportLoginReveal);
+    window.removeEventListener('keydown', reportLoginReveal);
+};
+window.addEventListener('pointerdown', reportAudioUnlock);
+window.addEventListener('click', reportAudioUnlock);
+window.addEventListener('dblclick', reportLoginReveal);
+window.addEventListener('keydown', reportLoginReveal);
 let clock = {
     second: {
         num: 60,
@@ -301,9 +337,17 @@ const init = () => {
             },
             displayOverlay(){
                 this.shows.overlay = true;
+                window.parent.postMessage(
+                    { type: 'ARKNIGHTS_BG_PICKER_OPEN' },
+                    window.location.origin
+                );
             },
             hideOverlay(){
                 this.shows.overlay = false;
+                window.parent.postMessage(
+                    { type: 'ARKNIGHTS_BG_PICKER_CLOSE' },
+                    window.location.origin
+                );
             },
             watchRect(){
                 if(this.time.sec % 10 == 0){
