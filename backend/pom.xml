@@ -13,7 +13,7 @@
 
     <groupId>cn.edu.whut.sept</groupId>
     <artifactId>zuul</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>zuul-backend</name>
 
     <properties>

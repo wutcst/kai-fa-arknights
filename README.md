@@ -115,3 +115,32 @@ PR 目标分支为 `master` 或 `feature` 时也会触发 CI。
 - 在项目根目录提交实训报告文件，并完成课程答辩展示。
 
 允许使用 AI 辅助开发和设计，但需在报告中说明使用的模型和辅助完成的工作内容。
+
+
+## Release 信息
+
+### 当前稳定版本：v1.0
+
+- **发布分支**：`master`（通过 `release/v1.0` 快照合入）
+- **保留分支**：`feature` 分支保留用于展示课程协作和集成历史，不删除
+
+### 发布产物
+
+| 产物 | 文件名 | 说明 |
+|------|--------|------|
+| 后端 | `kai-fa-arknights-backend-v1.0.jar` | Spring Boot 可执行 jar |
+| 前端 | `kai-fa-arknights-frontend-v1.0.zip` | Vue 生产构建 dist 压缩包 |
+| 数据库 | `ability_schema-v1.0.sql` | MySQL 初始化脚本 |
+
+### 运行顺序
+
+1. 使用 `ability_schema-v1.0.sql` 初始化 MySQL 数据库。
+2. 检查 `backend/src/main/resources/application.yml` 中的数据库连接配置。
+3. 启动后端 jar：`java -jar kai-fa-arknights-backend-v1.0.jar`。
+4. 部署前端 dist 产物（解压 zip 并通过 Nginx 或其他静态服务器托管）。
+
+### 已知限制
+
+- 前后端仍需分别部署，不提供一体化安装器。
+- 数据库连接配置依赖本地 MySQL 环境，需根据实际情况修改 `application.yml`。
+- 本版本面向课程验收，不具备商业化部署能力。
