@@ -104,7 +104,7 @@
  * 游戏主应用组件.
  * 整合地图、控制和状态显示组件.
  */
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthState } from '@/composables/useAuthState';
 import { useMessageLog } from '@/composables/useMessageLog';
 import { useGameState } from '@/composables/useGameState';
@@ -126,34 +126,63 @@ const showAbilityPanel = ref(false);
 const showSettleConfirm = ref(false);
 const showInventoryDetail = ref(false);
 const isInGame = ref(false); // 是否正在游戏中
-const userInteracted = ref(false); // 用户是否已交互
+const musicUnlocked = ref(false);
 
 const { messageLog, appendLog, clearLog } = useMessageLog();
 
 // 背景音乐控制
 const { playMusic } = useBackgroundMusic();
 
-// 用户首次交互后播放音乐
+const getCurrentMusicKey = () => {
+  return isInGame.value ? 'GAME' : 'LOBBY';
+};
+
+const removeMusicUnlockListeners = () => {
+  document.removeEventListener('pointerdown', handleFirstInteraction);
+  document.removeEventListener('keydown', handleFirstInteraction);
+  window.removeEventListener('message', handleBackgroundMessageForMusic);
+};
+
+const tryPlayCurrentMusic = async () => {
+  const success = await playMusic(getCurrentMusicKey());
+
+  if (success) {
+    musicUnlocked.value = true;
+    removeMusicUnlockListeners();
+  }
+
+  return success;
+};
+
 const handleFirstInteraction = () => {
-  if (!userInteracted.value) {
-    userInteracted.value = true;
-    if (!isInGame.value) {
-      playMusic('LOBBY');
-    }
-    // 移除监听器
-    document.removeEventListener('click', handleFirstInteraction);
-    document.removeEventListener('keydown', handleFirstInteraction);
+  tryPlayCurrentMusic();
+};
+
+const handleBackgroundMessageForMusic = (event) => {
+  if (event.origin !== window.location.origin) {
+    return;
+  }
+
+  const type = event.data && event.data.type;
+
+  if (
+    type === 'ARKNIGHTS_BG_PICKER_OPEN' ||
+    type === 'ARKNIGHTS_BG_PICKER_CLOSE'
+  ) {
+    tryPlayCurrentMusic();
   }
 };
 
+const addMusicUnlockListeners = () => {
+  document.addEventListener('pointerdown', handleFirstInteraction);
+  document.addEventListener('keydown', handleFirstInteraction);
+  window.addEventListener('message', handleBackgroundMessageForMusic);
+};
+
 // 监听游戏状态切换音乐
-watch(isInGame, (inGame) => {
-  if (inGame && userInteracted.value) {
-    // 进入游戏，播放游戏背景音乐
-    playMusic('GAME');
-  } else if (!inGame && userInteracted.value) {
-    // 退出游戏，播放大厅背景音乐
-    playMusic('LOBBY');
+watch(isInGame, () => {
+  if (musicUnlocked.value) {
+    tryPlayCurrentMusic();
   }
 });
 
@@ -293,9 +322,12 @@ useKeyboardControls({
 
 onMounted(() => {
   initAuthFromStorage();
-  // 添加用户交互监听器，等待用户首次交互后播放音乐
-  document.addEventListener('click', handleFirstInteraction);
-  document.addEventListener('keydown', handleFirstInteraction);
+  addMusicUnlockListeners();
+  tryPlayCurrentMusic();
+});
+
+onBeforeUnmount(() => {
+  removeMusicUnlockListeners();
 });
 
 const handleStartGame = (gameData) => {
@@ -356,6 +388,7 @@ const handleSettle = async () => {
       isError.value = false;
       await fetchUserAbility();
       await newGame(username.value);
+      isInGame.value = false;
       showGameStart.value = true;
       appendLog(displayMessage.value);
     } else {
