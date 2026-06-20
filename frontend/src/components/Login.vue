@@ -3,7 +3,7 @@
     <!-- 明日方舟风格背景 -->
     <ArknightsBackground />
 
-    <div class="auth-box" v-show="!bgPickerVisible">
+    <div class="auth-box" v-show="authBoxRevealed && !bgPickerVisible">
       <div class="logo-area">
         <img class="rhodes-logo" src="@/assets/Logo_rhodesOverride.png" alt="Rhodes Island" />
       </div>
@@ -124,6 +124,7 @@ export default {
       authError: '',
       authSuccess: '',
       authLoading: false,
+      authBoxRevealed: false,
       bgPickerVisible: false
     };
   },
@@ -137,11 +138,18 @@ export default {
   },
   mounted() {
     window.addEventListener('message', this.handleBackgroundMessage);
+    window.addEventListener('keydown', this.revealAuthBox);
+    window.addEventListener('pointerdown', this.revealAuthBox);
   },
   beforeUnmount() {
     window.removeEventListener('message', this.handleBackgroundMessage);
+    window.removeEventListener('keydown', this.revealAuthBox);
+    window.removeEventListener('pointerdown', this.revealAuthBox);
   },
   methods: {
+    revealAuthBox() {
+      this.authBoxRevealed = true;
+    },
     handleBackgroundMessage(event) {
       if (event.origin !== window.location.origin) {
         return;
@@ -153,6 +161,9 @@ export default {
       }
       if (data.type === 'ARKNIGHTS_BG_PICKER_CLOSE') {
         this.bgPickerVisible = false;
+      }
+      if (data.type === 'ARKNIGHTS_LOGIN_INTERACTION') {
+        this.authBoxRevealed = true;
       }
     },
     switchMode(mode) {

@@ -10,7 +10,17 @@ let rect = {
     length: 9
 };
 let radian = Math.PI / 180;
-const reportInteraction = () => {
+const shouldIgnoreLoginReveal = (event) => {
+    const target = event.target;
+    if(!target || !target.closest) return false;
+
+    return Boolean(
+        target.closest('#change-bg') ||
+        target.closest('#overlay')
+    );
+};
+const reportInteraction = (event) => {
+    if(shouldIgnoreLoginReveal(event)) return;
     if(interactionReported) return;
     interactionReported = true;
     window.parent.postMessage(
