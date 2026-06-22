@@ -9,7 +9,7 @@
       <div class="confirm-body">
         <p class="confirm-message">{{ message }}</p>
         <div v-if="goldAmount !== null" class="gold-info">
-          <span class="gold-label">将获得龙门币</span>
+          <span class="gold-label">将获得金币</span>
           <span class="gold-amount">
             <img src="@/assets/items/Lungmen_Dollars.png" class="gold-icon" alt="金币" />
             {{ goldAmount }}
