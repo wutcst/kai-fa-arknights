@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { getUserByUsername } from '@/api/authApi';
-import { getUserAbility, getAbilityConfigs, upgradeAbility, getUserStats } from '@/api/abilityApi';
+import { getUserAbility, getAbilityConfigs, upgradeAbility } from '@/api/abilityApi';
 
 export function useAbilityState(options) {
   const { appendLog, onMaxWeightUpdated } = options;
@@ -60,10 +60,9 @@ export function useAbilityState(options) {
         }
         userGold.value = response.data.remainingGold;
         await fetchUserAbility(username);
-        if (abilityCode === 'max_weight') {
-          const statsResp = await getUserStats(userId);
+        if (abilityCode === 'max_weight' && response.data.newValue !== undefined) {
           if (onMaxWeightUpdated) {
-            onMaxWeightUpdated(statsResp.data.maxWeight);
+            onMaxWeightUpdated(response.data.newValue);
           }
         }
         if (appendLog) {

@@ -125,24 +125,13 @@ export default {
 
 .hotbar-items {
   display: flex;
-  gap: 10px;
-  justify-content: center;
-  overflow-x: auto;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
   padding: 2px 4px 4px;
   scrollbar-color: rgba(247, 214, 123, 0.36) rgba(255, 255, 255, 0.06);
   scrollbar-width: thin;
-}
-
-.hotbar-items::before,
-.hotbar-items::after {
-  content: '';
-  flex: 0 0 0;
-}
-
-@supports selector(:has(*)) {
-  .hotbar-items:has(.hotbar-item:nth-child(7)) {
-    justify-content: flex-start;
-  }
 }
 
 .hotbar-item {
@@ -153,10 +142,8 @@ export default {
   color: #f6ead2;
   cursor: pointer;
   display: flex;
-  flex: 0 0 116px;
   flex-direction: column;
   gap: 6px;
-  min-height: 66px;
   padding: 10px 12px;
   text-align: left;
   transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
