@@ -221,7 +221,10 @@ const {
   fetchUserAbility: _fetchUserAbility,
   handleUpgrade: _handleUpgrade
 } = useAbilityState({
-  appendLog
+  appendLog,
+  onMaxWeightUpdated: (newMaxWeight) => {
+    playerMaxWeight.value = newMaxWeight;
+  }
 });
 
 const fetchUserAbility = () => _fetchUserAbility(username.value);
@@ -371,7 +374,7 @@ const inventoryTotalValue = computed(() => {
 const expectedSettleGold = computed(() => {
   const baseGold = inventoryTotalValue.value;
   const bonusLevel = abilityLevels.value?.goldBonusLevel || 1;
-  const bonusPercent = (bonusLevel - 1) * 10;
+  const bonusPercent = (bonusLevel - 1) * 5;
   const bonus = Math.floor(baseGold * bonusPercent / 100);
   return baseGold + bonus;
 });

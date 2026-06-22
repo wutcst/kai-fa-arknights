@@ -25,7 +25,6 @@
       <button :disabled="busy" @click="$emit('back')">返回上个房间</button>
       <button :disabled="busy" @click="$emit('toggle-map')">查看地图</button>
       <button :disabled="busy" @click="$emit('help')">帮助</button>
-      <button :disabled="busy" @click="$emit('open-ability')">升级能力</button>
       <button :disabled="busy" class="settle" @click="$emit('settle')">结算探索</button>
     </div>
   </section>

@@ -40,6 +40,16 @@
           <span class="btn-text">{{ hasSave ? '重新开始' : '开始任务' }}</span>
           <span class="btn-desc">{{ hasSave ? '将覆盖当前存档' : '全新任务开始' }}</span>
         </button>
+
+        <button
+          class="btn-option btn-ability"
+          @click="showAbilityPanel = true; fetchUserAbility(username)"
+          :disabled="loading"
+        >
+          <span class="btn-icon">⬆️</span>
+          <span class="btn-text">升级能力</span>
+          <span class="btn-desc">强化角色属性</span>
+        </button>
       </div>
 
       <div v-if="loading" class="loading">
@@ -50,6 +60,16 @@
       <div v-if="error" class="error-message">
         {{ error }}
       </div>
+
+      <!-- 悬浮能力面板 -->
+      <AbilityPanel
+        v-if="showAbilityPanel"
+        :gold="userGold"
+        :configs="abilityConfigs"
+        :ability="userAbility"
+        @close="showAbilityPanel = false"
+        @upgrade="onAbilityUpgrade"
+      />
     </div>
 
     <div class="footer-info" v-show="startBoxRevealed && !bgPickerVisible">
@@ -60,7 +80,9 @@
 
 <script>
 import { checkSave, loadGame, saveGame, newGame } from '@/api/saveApi';
+import { useAbilityState } from '@/composables/useAbilityState';
 import ArknightsBackground from '@/components/ArknightsBackground.vue';
+import AbilityPanel from '@/components/AbilityPanel.vue';
 
 export default {
   name: 'GameStart',
@@ -71,7 +93,8 @@ export default {
     }
   },
   components: {
-    ArknightsBackground
+    ArknightsBackground,
+    AbilityPanel
   },
   data() {
     return {
@@ -79,13 +102,42 @@ export default {
       loading: false,
       error: '',
       startBoxRevealed: false,
-      bgPickerVisible: false
+      bgPickerVisible: false,
+      showAbilityPanel: false
+    };
+  },
+  setup(props) {
+    const noopAppendLog = () => {};
+    const {
+      userGold,
+      userAbility,
+      abilityConfigs,
+      abilityLevels,
+      fetchUserAbility,
+      handleUpgrade
+    } = useAbilityState({
+      appendLog: noopAppendLog
+    });
+
+    const onAbilityUpgrade = async (abilityCode) => {
+      await handleUpgrade(props.username, abilityCode);
+      await fetchUserAbility(props.username);
+    };
+
+    return {
+      userGold,
+      userAbility,
+      abilityConfigs,
+      abilityLevels,
+      fetchUserAbility,
+      onAbilityUpgrade
     };
   },
   mounted() {
     this.checkSaveStatus();
     window.addEventListener('message', this.handleBackgroundMessage);
     window.addEventListener('keydown', this.revealStartBox);
+    this.fetchUserAbility(this.username);
   },
   beforeUnmount() {
     window.removeEventListener('message', this.handleBackgroundMessage);
@@ -293,6 +345,17 @@ export default {
   background: rgba(0, 191, 255, 0.2);
   border-color: rgba(0, 191, 255, 0.7);
   box-shadow: 0 5px 20px rgba(0, 191, 255, 0.3);
+}
+
+.btn-ability {
+  border-color: rgba(215, 168, 77, 0.5);
+  background: rgba(215, 168, 77, 0.1);
+}
+
+.btn-ability:hover:not(:disabled) {
+  background: rgba(215, 168, 77, 0.2);
+  border-color: rgba(215, 168, 77, 0.7);
+  box-shadow: 0 5px 20px rgba(215, 168, 77, 0.3);
 }
 
 .btn-icon {

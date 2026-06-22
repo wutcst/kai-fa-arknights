@@ -187,7 +187,10 @@ export function useGameState(options) {
     try {
       const response = await getItems();
       inventory.value = response.data.inventory || [];
-      syncWeightFromPayload(response.data, 'showInventory');
+      // 只同步当前负重，不更新最大负重（最大负重由能力系统管理）
+      if (response.data.playerWeight !== undefined && response.data.playerWeight !== null) {
+        playerWeight.value = Number(response.data.playerWeight) || 0;
+      }
       syncSelectedInventory();
       displayMessage.value = response.data.message;
       appendLog(displayMessage.value || `查看背包，共 ${inventory.value.length} 个物品`);
@@ -204,7 +207,10 @@ export function useGameState(options) {
       displayMessage.value = response.data.message;
       items.value = response.data.items || [];
       inventory.value = response.data.inventory || [];
-      syncWeightFromPayload(response.data, 'handleTake');
+      // 只同步当前负重，不更新最大负重
+      if (response.data.playerWeight !== undefined && response.data.playerWeight !== null) {
+        playerWeight.value = Number(response.data.playerWeight) || 0;
+      }
       isError.value = !response.data.success;
       syncSelectedInventory();
       appendLog(displayMessage.value || '拾取物品', isError.value);
@@ -224,7 +230,10 @@ export function useGameState(options) {
       displayMessage.value = response.data.message;
       items.value = response.data.items || [];
       inventory.value = response.data.inventory || [];
-      syncWeightFromPayload(response.data, 'handleDrop');
+      // 只同步当前负重，不更新最大负重
+      if (response.data.playerWeight !== undefined && response.data.playerWeight !== null) {
+        playerWeight.value = Number(response.data.playerWeight) || 0;
+      }
       isError.value = !response.data.success;
       syncSelectedInventory();
       appendLog(displayMessage.value || '丢弃物品', isError.value);
@@ -240,14 +249,22 @@ export function useGameState(options) {
       const response = await apiEatCookie();
       displayMessage.value = response.data.message;
       inventory.value = response.data.inventory || [];
-      syncWeightFromPayload(response.data, 'handleEatCookie');
+      // 吃物品可能改变最大负重，需要同步
+      if (response.data.playerMaxWeight !== undefined && response.data.playerMaxWeight !== null) {
+        playerMaxWeight.value = Number(response.data.playerMaxWeight) || playerMaxWeight.value;
+      }
+      if (response.data.playerWeight !== undefined && response.data.playerWeight !== null) {
+        playerWeight.value = Number(response.data.playerWeight) || 0;
+      }
       isError.value = !response.data.success;
       syncSelectedInventory();
 
       if (response.data.success) {
         const inventoryResponse = await getItems();
         inventory.value = inventoryResponse.data.inventory || inventory.value;
-        syncWeightFromPayload(inventoryResponse.data, 'afterEatCookie:getItems');
+        if (inventoryResponse.data.playerWeight !== undefined && inventoryResponse.data.playerWeight !== null) {
+          playerWeight.value = Number(inventoryResponse.data.playerWeight) || 0;
+        }
         syncSelectedInventory();
       }
 

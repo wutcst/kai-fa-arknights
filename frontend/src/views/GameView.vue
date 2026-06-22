@@ -23,6 +23,16 @@
     />
 
     <div class="game-layout">
+      <aside class="left-rail">
+        <InventoryHotbar
+          :inventory="inventory"
+          :selected-id="selectedInventoryId"
+          :player-weight="playerWeight"
+          :player-max-weight="playerMaxWeight"
+          @select="$emit('select-inventory', $event)"
+        />
+      </aside>
+
       <section class="main-play-area">
         <RoomGrid
           ref="roomGrid"
@@ -37,15 +47,6 @@
           @active-item-name-change="activeRoomItemName = $event"
           @active-vertical-exit-change="activeVerticalExit = $event"
           @player-position-change="$emit('player-position-change', $event)"
-        />
-
-        <InventoryHotbar
-          class="bottom-hotbar"
-          :inventory="inventory"
-          :selected-id="selectedInventoryId"
-          :player-weight="playerWeight"
-          :player-max-weight="playerMaxWeight"
-          @select="$emit('select-inventory', $event)"
         />
       </section>
 
@@ -316,21 +317,21 @@ button:hover {
 
 .game-layout {
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) 360px;
+  grid-template-columns: 280px minmax(360px, 1fr) 360px;
   gap: 16px;
   margin: 16px auto;
   max-width: 1480px;
+}
+
+.left-rail {
+  display: flex;
+  flex-direction: column;
 }
 
 .main-play-area {
   display: grid;
   gap: 14px;
   min-width: 0;
-}
-
-.bottom-hotbar {
-  justify-self: center;
-  width: min(100%, 760px);
 }
 
 .right-rail {
@@ -343,6 +344,16 @@ button:hover {
   margin-left: auto;
   margin-right: auto;
   max-width: 1480px;
+}
+
+@media (max-width: 1200px) {
+  .game-layout {
+    grid-template-columns: 1fr 360px;
+  }
+
+  .left-rail {
+    display: none;
+  }
 }
 
 @media (max-width: 1050px) {
